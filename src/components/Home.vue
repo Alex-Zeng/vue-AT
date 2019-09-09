@@ -5,7 +5,7 @@
     </el-header>
     <el-container>
       <el-aside width="200px">
-        <v-menu></v-menu>
+        <project ></project>
       </el-aside>
       <el-main>
         <keep-alive>
@@ -19,7 +19,7 @@
 
 <script>
   import vHead from '@/components/common/Head'
-  import vMenu from '@/components/common/Menu'
+  import Project from './project/Project'
   import {getProjectList} from '../api/api'
 
   export default {
@@ -27,14 +27,14 @@
     name: "Home",
     components: {
       vHead,
-      vMenu,
+      Project,
     },
     mounted: function () {
       getProjectList().then((res) => {
         console.log(res.data.project_list)
         if (res.data.project_list.length > 0){
           let project_id = res.data.project_list[0].id
-          this.$router.push('/home/projects/'+project_id)
+          // this.$router.push('/home/projects/'+project_id)
         }
       })
     }

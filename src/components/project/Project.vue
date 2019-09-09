@@ -37,10 +37,10 @@
 
 <script>
   import {getPageList, postPage, putPage, deletePage} from "../../api/api";
-  import pageOperation from '../menu/page/pageOperation';
+  import pageOperation from './page/pageOperation';
 
   export default {
-    name: 'Menu',
+    name: 'Project',
     data() {
       return{}
     },

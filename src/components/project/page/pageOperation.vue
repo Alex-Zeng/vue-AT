@@ -147,7 +147,6 @@
         getPageList(this.project_id).then(
           res => {
             this.page_list = res.data.page_list;
-            console.log(this.page_list)
           },
           err => {
             console.log(err)

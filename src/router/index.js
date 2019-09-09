@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
 import Function from '@/components/Function'
-import Pages from '@/components/Menu/Pages'
+import Pages from '@/components/project/Pages'
 import Cookies from 'js-cookie'
 import {get} from '@/api/index.js'
 
@@ -35,7 +35,7 @@ const router = new Router({
       children: [
         {
           path: 'projects/:id',
-          component: resolve => require(['@/components/menu/projectList'], resolve),
+          component: resolve => require(['@/components/project/projectList'], resolve),
           name: 'project',
           children: [{
             path: 'pages',
