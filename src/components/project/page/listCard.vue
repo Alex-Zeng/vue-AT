@@ -1,26 +1,16 @@
 <template>
-  <div> <el-submenu index="1">
-            <template slot="title">
-              <i class="el-icon-menu"></i>
-              <router-link :to="{ name: 'pages', params: {}}">PageObject</router-link>
-            </template>
-            <div class="add-btn">
-              <el-button type="primary" @click="operationDialog(2,'')">添加页面</el-button>
-            </div>
-            <el-divider></el-divider>
-            <el-menu-item v-for="page in page_list" :key="page.id" :index="'1-'+page.id" @click="selectPage(page.id)">
-              <div>
-                <span>
-                  {{page.title}}
-                </span>
-                <span class="pg_i">                <i class="el-icon-edit" @click="operationDialog(1,page.title)">
-                </i>
-                <i class="el-icon-delete" @click="operationDialog(3,page.title)">
-                </i></span>
-              </div>
-            </el-menu-item>
-          </el-submenu>
-    <!--    添加-->
+<el-card class="box-card">
+  <div slot="header" class="clearfix" >
+    <el-button  size="mini" type="primary" icon="el-icon-plus" circle @click="operationDialog(2,'')"></el-button>
+    <el-button  size="mini" type="primary" icon="el-icon-edit" circle @click="operationDialog(1,current_page)"></el-button>
+    <el-button  size="mini" type="primary" icon="el-icon-delete" circle @click="operationDialog(3,current_page)"></el-button>
+  </div>
+  <div v-for="data in listData" :key="data.id" class="text item">
+<!--    <el-link :underline="false" @click="router_to(data.id);current_page=data.title;" >{{data.title}}</el-link>-->
+    <el-button round size="mini" :underline="false" @click="router_to(data.id);current_page=data.title;" >{{data.title}}</el-button>
+  </div>
+
+  <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addFormVisible">
       <el-form :model="form">
@@ -60,7 +50,9 @@
     <el-button @click="deleteDialogVisible = false">取 消</el-button>
     <el-button type="primary" @click="delPage">确 定</el-button>
   </span>
-    </el-dialog></div>
+    </el-dialog>
+</el-card>
+
 
 </template>
 
@@ -68,9 +60,11 @@
   import {getPageList, postPage, putPage, deletePage} from "@/api/api";
 
   export default {
-    name: 'pageOperation',
+    name: 'listCard',
+    props: ['listData','to_name','to_params'],
     data() {
       return {
+        current_page:'页面',
         project_id: '',
         page_list: [],
         addFormVisible: false,
@@ -84,7 +78,13 @@
 
       }
     },
+
     methods: {
+      router_to(id){
+
+        this.$emit('toPath',id)
+      },
+
       addPage() {
         postPage(this.project_id, this.form).then(res => {
           if (res.status == 1) {
@@ -155,60 +155,43 @@
       },
     },
     mounted() {
-      this.getPageData();
+      if (this.$route.params.page_id) {
+         this.getPageData();
+
+      }
     },
     watch: {
       '$route'(to, from) { //监听路由是否变化
-        if (to.params.id != from.params.id) {
-          this.getPageData();
+        if (to.params.page_id) {// 判断条件1  判断传递值的变化
+          this.getPageData()
         }
       }
     }
   }
 </script>
 
-<style lang='less' scoped>
-  .menu_bg {
-    height: 60px;
-    background-color: #3899cc;
+<style>
+  .text {
+    font-size: 14px;
   }
 
-  .el-submenu {
+  .item {
+    margin-bottom: 18px;
+  }
+  .clearfix{
+    text-align: center;
+  }
+  .clearfix:before,
+  .clearfix:after {
+    display: table;
+    content: "";
+  }
+  .clearfix:after {
+    clear: both
+  }
+
+  .box-card {
+    width: 180px;
     text-align: left;
-
-    .add-btn {
-      text-align: center;
-    }
-  }
-
-  .el-menu-item {
-    height: 30px;
-    line-height: 30px;
-    text-align: right;
-
-    .pg_i {
-      text-align: right;
-      padding-left: 40px;
-    }
-
-    i:hover {
-      color: red;
-    }
-  }
-
-
-  .menu_container {
-    background: #fff;
-    position: relative;
-    left: 0;
-
-    .tac {
-      height: 100%;
-
-      .el-menu-vertical-demo {
-        border: none;
-        min-width: 200px;
-      }
-    }
   }
 </style>

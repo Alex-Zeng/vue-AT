@@ -4,8 +4,9 @@
       <v-head></v-head>
     </el-header>
     <el-container>
-      <el-aside width="200px">
-        <project ></project>
+      <el-aside style="width: 201px">
+<!--        <project ></project>-->
+        <AsideNav :projects = "projects"></AsideNav>
       </el-aside>
       <el-main>
         <keep-alive>
@@ -19,21 +20,25 @@
 
 <script>
   import vHead from '@/components/common/Head'
-  import Project from './project/Project'
+  import AsideNav from '@/components/common/AsideNav'
   import {getProjectList} from '../api/api'
 
   export default {
 
     name: "Home",
     components: {
+      AsideNav,
       vHead,
-      Project,
+    },
+    data(){
+      return{
+        projects: [],
+      }
     },
     mounted: function () {
       getProjectList().then((res) => {
-        console.log(res.data.project_list)
         if (res.data.project_list.length > 0){
-          let project_id = res.data.project_list[0].id
+          this.projects = res.data.project_list
           // this.$router.push('/home/projects/'+project_id)
         }
       })
@@ -53,11 +58,14 @@
   .el-aside {
     color: #333;
     padding-top: 20px;
+        width: 201px;
+    text-align: left;
   }
 
   .el-main {
     color: #333;
     text-align: center;
+
 
   }
 

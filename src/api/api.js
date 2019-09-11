@@ -76,15 +76,15 @@ export const deleteAction = (projectId, pageId,actId) => {
 export const postFunction = (formData) => {
   return post(`/uitest/functions`,formData).then(res => res);
 };
-//获取Action列表
+//获取Function列表
 export const getFunctionList = () => {
   return get(`/uitest/functions`).then(res => res);
 };
-// 更新Action
+// 更新Function
 export const editFunction = (function_id, formData ) => {
   return put(`/uitest/functions/${function_id}`,formData).then(res => res);
 };
-// 删除Action
+// 删除Function
 export const deleteFunction = (function_id) => {
   return remove(`/uitest/functions/${function_id}`).then(res => res);
 };

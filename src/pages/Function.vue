@@ -1,11 +1,8 @@
 <template>
   <el-container class="root_container">
-    <el-header>
-      <v-head></v-head>
-    </el-header>
     <div class="app-container">
       <el-table v-loading="listLoading"
-                :data="list.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+                :data="dataList.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
                 fit highlight-current-row style="width: 100%">
 
         <el-table-column align="center" label="ID" width="80">
@@ -58,7 +55,7 @@
                 icon="el-icon-circle-check-outline"
                 @click="confirmEdit(row)"
               >
-                Ok
+                确定
               </el-button>
               <el-button
                 class="cancel-btn"
@@ -67,7 +64,7 @@
                 type="warning"
                 @click="cancelEdit(row)"
               >
-                cancel
+                取消编辑
               </el-button>
             </div>
 
@@ -78,13 +75,13 @@
                 icon="el-icon-edit"
                 @click="row.edit=!row.edit"
               >
-                Edit
+                编辑
               </el-button>
               <el-button
                 type="primary"
                 size="small"
                 icon="el-icon-edit"
-                @click="row.edit=!row.edit"
+                @click="deleteRow(row.id)"
               >
                 删除
               </el-button>
@@ -95,23 +92,23 @@
 
       <!--    添加-->
 
-          <el-dialog title="添加" :visible.sync="addForm">
-            <el-form :model="form">
-              <el-form-item label="方法名：" :label-width="formLabelWidth">
-                <el-input v-model="form.title" autocomplete="off"></el-input>
-              </el-form-item>
-              <el-form-item label="适用设备：" :label-width="formLabelWidth">
-                <el-input v-model="form.type" autocomplete="off"></el-input>
-              </el-form-item>
-              <el-form-item label="方法描述：" :label-width="formLabelWidth">
-                <el-input v-model="form.description" autocomplete="off"></el-input>
-              </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-              <el-button @click="addForm = false">取 消</el-button>
-              <el-button type="primary" @click="addFunction">确 定</el-button>
-            </div>
-          </el-dialog>
+      <el-dialog title="添加" :visible.sync="addForm">
+        <el-form :model="form">
+          <el-form-item label="方法名：" :label-width="formLabelWidth">
+            <el-input v-model="form.title" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="适用设备：" :label-width="formLabelWidth">
+            <el-input v-model="form.type" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="方法描述：" :label-width="formLabelWidth">
+            <el-input v-model="form.description" autocomplete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="addForm = false">取 消</el-button>
+          <el-button type="primary" @click="addFunction">确 定</el-button>
+        </div>
+      </el-dialog>
     </div>
   </el-container>
 
@@ -119,7 +116,7 @@
 
 <script>
   import vHead from '@/components/common/Head'
-  import {getProjectList, getFunctionList ,postFunction} from '../api/api'
+  import {getProjectList, getFunctionList, postFunction, editFunction, deleteFunction} from '../api/api'
 
   export default {
 
@@ -130,8 +127,8 @@
     data() {
       return {
         search: "",
-        addForm:false,
-        list: null,
+        addForm: false,
+        dataList: '',
         listLoading: true,
         formLabelWidth: '100px',
         form: {
@@ -141,35 +138,30 @@
         }
       }
     },
-    created: function () {
-      getProjectList().then((res) => {
-        if (res.data.project_list.length > 0) {
-          let project_id = res.data.project_list[0].id
-          // this.$router.push('/home/projects/'+project_id)
-        }
-      })
+    beforeMount: function () {
       this.getList()
     },
     methods: {
       getList() {
         this.listLoading = true
         getFunctionList().then(res => {
-          if (res.status == 1) {
-            this.list = res.data.data_list.map(v => {
+          if (res.status == 1 && res.data.data_list.length>0) {
+            this.dataList = res.data.data_list.map(v => {
               this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
               v.originalTitle = v.title //  will be used when user click the cancel botton
+              v.originalType = v.type //  will be used when user click the cancel botton
+              v.originalDescription = v.description //  will be used when user click the cancel botton
               return v
             })
-            console.log(this.list)
           }
         })
         this.listLoading = false
       },
-      addFunction(){
-        postFunction(this.form).then(res=>{
+      addFunction() {
+        postFunction(this.form).then(res => {
           if (res.status == 1) {
             this.search = ''
-            this.addForm=false
+            this.addForm = false
             this.getList()
             this.$message(res.msg)
           }
@@ -178,21 +170,52 @@
       },
       cancelEdit(row) {
         row.title = row.originalTitle
+        row.type = row.originalType
+        row.description = row.originalDescription
         row.edit = false
+
         this.$message({
-          message: 'The title has been restored to the original value',
+          message: '放弃编辑',
           type: 'warning'
         })
       },
       confirmEdit(row) {
         row.edit = false
         row.originalTitle = row.title
-        this.$message({
-          message: 'The title has been edited',
-          type: 'success'
+        editFunction(row.id, row).then(res => {
+          if (res.status == 1) {
+            this.$message({
+              message: '编辑成功',
+              type: 'success'
+            })
+            this.getList()
+          } else {
+            this.$message({
+              message: res.msg,
+              type: 'error'
+            })
+          }
         })
+      },
+      deleteRow(rowId) {
+        this.$alert('确定删除?', '删除', {
+          confirmButtonText: '确定',
+        }).then(()=>{
+            deleteFunction(rowId).then(res => {
+              if (res.status == 1) {
+                this.getList()
+                this.search = ''
+                this.$message({
+                  type: 'info',
+                  message: res.msg
+                });
+              } else {
+                this.$alert(res.msg)
+              }
+            })
+          });
       }
-    }
+    },
   }
 </script>
 

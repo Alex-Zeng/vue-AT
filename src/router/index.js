@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Login from '@/components/Login'
-import Home from '@/components/Home'
-import Function from '@/components/Function'
+import Login from '@/pages/Login'
+import Home from '@/pages/Home'
+import Function from '@/pages/Function'
 import Pages from '@/components/project/Pages'
 import Cookies from 'js-cookie'
 import {get} from '@/api/index.js'
@@ -34,29 +34,41 @@ const router = new Router({
       },
       children: [
         {
-          path: 'projects/:id',
-          component: resolve => require(['@/components/project/projectList'], resolve),
-          name: 'project',
+          path: 'projects/:id/pages',
+          component: Pages,
+          name: 'pages',
+          props: true,
           children: [{
-            path: 'pages',
-            component: Pages,
-            name: 'pages',
-            props: true,
-          }, {
             path: 'pages/:page_id',
             component: Pages,
             name: 'page',
             props: true,
-          },]
+          },
+          ]
         },
-
+        {
+          path: 'projects/:id/test_cases',
+          component: Pages,
+          name: 'test_cases',
+          props: true,
+          children: [{
+            path: 'test_cases/:test_case_id',
+            component: Pages,
+            name: 'test_case',
+            props: true,
+          },
+          ]
+        },
+        {
+          path: '/function',
+          component: Function,
+          name: 'function',
+          props: true,
+          // children: []
+        },
       ]
     },
-    {
-      path: '/function',
-      component: Function,
-      name: 'function'
-    },
+
   ]
 })
 
