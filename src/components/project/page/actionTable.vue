@@ -6,6 +6,7 @@
       :data="actsData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       style="width: 100%"
+      size="mini"
     >
       <el-table-column
         label="ID"
@@ -18,7 +19,7 @@
       <el-table-column width="150px" label="操作名">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.title" class="edit-input" size="small"/>
+            <el-input v-model="row.title" class="edit-input" size="mini"/>
           </template>
           <span v-else>{{ row.title }}</span>
         </template>
@@ -26,8 +27,8 @@
       <el-table-column width="150px" label="操作方法">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-<!--            <el-input v-model="row.fun_title" class="edit-input" size="small"/>-->
-                        <el-select v-model="row.fun_id" placeholder="请选择方法">
+            <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
+            <el-select v-model="row.fun_id" placeholder="请选择方法" size="mini">
               <el-option v-for="fun in funsData" :label="fun.title" :value="fun.id" :key="fun.id"></el-option>
             </el-select>
           </template>
@@ -38,8 +39,7 @@
       <el-table-column width="200px" label="操作元素">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <!--            <el-input v-model="row.ele_title" class="edit-input" size="small"/>-->
-            <el-select v-model="row.ele_id" placeholder="请选择元素">
+            <el-select v-model="row.ele_id" placeholder="请选择元素" size="mini">
               <el-option v-for="ele in elesData" :label="ele.title" :value="ele.id" :key="ele.id"></el-option>
             </el-select>
           </template>
@@ -50,7 +50,7 @@
         prop="update_datetime"
         label="更新时间">
       </el-table-column>
-      <el-table-column align="center" label="操作" width="300">
+      <el-table-column align="center" label="操作">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
@@ -63,27 +63,24 @@
           <div v-if="row.edit">
             <el-button
               type="success"
-              size="small"
-              icon="el-icon-circle-check-outline"
+              size="mini"
               @click="confirmEdit(row)"
             >
               确定
             </el-button>
             <el-button
-              class="cancel-btn"
-              size="small"
-              icon="el-icon-refresh"
+              size="mini"
               type="warning"
               @click="cancelEdit(row)"
             >
-              取消编辑
+              取消
             </el-button>
           </div>
 
           <div v-else>
             <el-button
               type="primary"
-              size="small"
+              size="mini"
               icon="el-icon-edit"
               @click="row.edit=!row.edit"
             >
@@ -91,7 +88,7 @@
             </el-button>
             <el-button
               type="primary"
-              size="small"
+              size="mini"
               icon="el-icon-edit"
               @click="deleteRow(row.id)"
             >
@@ -159,21 +156,11 @@
 
         postAction(this.$route.params.id, this.$route.params.page_id, this.form).then(res => {
           if (res.status == 1) {
-            this.addFormVisible = false
-            this.$alert(res.msg)
-            this.getActionData()
-            this.search = ''
-          } else {
-            this.$alert(res.msg)
-          }
-        })
-      },
-      editAction() {
-
-        editAction(this.$route.params.id, this.$route.params.page_id, this.currentActionId, this.form).then(res => {
-          if (res.status == 1) {
-            this.editFormVisible = false
-            this.$alert(res.msg)
+            this.addForm = false
+            this.$message({
+              message: '添加成功',
+              type: 'success'
+            })
             this.getActionData()
             this.search = ''
           } else {
@@ -234,9 +221,9 @@
         })
       },
       getActionData() {
-        let project_id = this.$route.params.id
+        let projectId = this.$route.params.id
         let pa_id = this.$route.params.page_id
-        getActionList(project_id, pa_id).then(
+        getActionList(projectId, pa_id).then(
           res => {
             if (res.data.data_list.length > 0) {
               this.actsData = res.data.data_list.map(v => {
@@ -246,6 +233,8 @@
                 v.originalElementTitle = v.elementTitle //  will be used when user click the cancel botton
                 return v
               })
+            } else {
+              this.actsData = res.data.data_list
             }
 
           },
@@ -255,9 +244,9 @@
         )
       },
       getElementData() {
-        let project_id = this.$route.params.id
+        let projectId = this.$route.params.id
         let pa_id = this.$route.params.page_id
-        getElementList(project_id, pa_id).then(
+        getElementList(projectId, pa_id).then(
           res => {
             this.elesData = res.data.data_list;
           },
@@ -289,6 +278,8 @@
       '$route'(to, from) { //监听路由是否变化
         if (to.params.page_id) {// 判断条件1  判断传递值的变化
           this.getActionData()
+          this.getElementData()
+          this.getFunctionData()
         }
       }
     }

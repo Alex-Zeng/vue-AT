@@ -6,6 +6,8 @@
       :data="elesData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       style="width: 100%"
+      max-height="600"
+      size="mini"
     >
       <el-table-column
         label="ID"
@@ -18,7 +20,7 @@
       <el-table-column width="150px" label="元素名称">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.title" class="edit-input" size="small"/>
+            <el-input v-model="row.title" class="edit-input" size="mini"/>
           </template>
           <span v-else>{{ row.title }}</span>
         </template>
@@ -26,7 +28,7 @@
       <el-table-column width="150px" label="查找方式">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.type" class="edit-input" size="small"/>
+            <el-input v-model="row.type" class="edit-input" size="mini"/>
           </template>
           <span v-else>{{ row.type }}</span>
         </template>
@@ -35,7 +37,7 @@
       <el-table-column width="200px" label="元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.loc" class="edit-input" size="small"/>
+            <el-input v-model="row.loc" class="edit-input" size="mini"/>
           </template>
           <span v-else>{{ row.loc }}</span>
         </template>
@@ -44,7 +46,7 @@
         prop="update_datetime"
         label="更新时间">
       </el-table-column>
-      <el-table-column align="center" label="操作" width="300">
+      <el-table-column align="center" label="操作">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
@@ -57,27 +59,24 @@
           <div v-if="row.edit">
             <el-button
               type="success"
-              size="small"
-              icon="el-icon-circle-check-outline"
+              size="mini"
               @click="confirmEdit(row)"
             >
               确定
             </el-button>
             <el-button
-              class="cancel-btn"
-              size="small"
-              icon="el-icon-refresh"
+              size="mini"
               type="warning"
               @click="cancelEdit(row)"
             >
-              取消编辑
+              取消
             </el-button>
           </div>
 
           <div v-else>
             <el-button
               type="primary"
-              size="small"
+              size="mini"
               icon="el-icon-edit"
               @click="row.edit=!row.edit"
             >
@@ -85,7 +84,7 @@
             </el-button>
             <el-button
               type="primary"
-              size="small"
+              size="mini"
               icon="el-icon-edit"
               @click="deleteRow(row.id)"
             >
@@ -147,7 +146,10 @@
         postElement(this.$route.params.id, this.$route.params.page_id, this.form).then(res => {
           if (res.status == 1) {
             this.addForm = false
-            this.$alert(res.msg)
+            this.$message({
+              message: '添加成功',
+              type: 'success'
+            })
             this.getElementData()
             this.search = ''
           } else {
@@ -208,9 +210,9 @@
         })
       },
       getElementData() {
-        let project_id = this.$route.params.id
+        let projectId = this.$route.params.id
         let pa_id = this.$route.params.page_id
-        getElementList(project_id, pa_id).then(
+        getElementList(projectId, pa_id).then(
           res => {
             if (res.data.data_list.length > 0) {
               this.elesData = res.data.data_list.map(v => {

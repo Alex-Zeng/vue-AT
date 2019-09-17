@@ -39,7 +39,7 @@
       getProjectList().then((res) => {
         if (res.data.project_list.length > 0){
           this.projects = res.data.project_list
-          // this.$router.push('/home/projects/'+project_id)
+          // this.$router.push('/home/projects/'+projectId)
         }
       })
     }

@@ -1,25 +1,45 @@
 <template>
-<el-card class="box-card">
-  <div slot="header" class="clearfix" >
-    <el-button  size="mini" type="primary" icon="el-icon-plus" circle @click="operationDialog(2,'')"></el-button>
-    <el-button  size="mini" type="primary" icon="el-icon-edit" circle @click="operationDialog(1,current_page)"></el-button>
-    <el-button  size="mini" type="primary" icon="el-icon-delete" circle @click="operationDialog(3,current_page)"></el-button>
-  </div>
-  <div v-for="data in listData" :key="data.id" class="text item">
-<!--    <el-link :underline="false" @click="router_to(data.id);current_page=data.title;" >{{data.title}}</el-link>-->
-    <el-button round size="mini" :underline="false" @click="router_to(data.id);current_page=data.title;" >{{data.title}}</el-button>
-  </div>
+  <div>
+    <el-table
+      ref="multipleTable"
+      :data="pageList.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+      fit highlight-current-row
+      style="width: 100%"
+      max-height="600"
+      size="mini"
+      border
+      @current-change="selectPage"
+    >
+      <el-table-column align="center" label="页面">
+        <template slot="header" slot-scope="scope">
+          <div slot="header" class="clearfix">
+            <el-button size="mini" type="primary" icon="el-icon-plus" circle @click="operationDialog(2,'')"></el-button>
+            <el-button size="mini" type="primary" icon="el-icon-edit" circle
+                       @click="operationDialog(1,currentPage)"></el-button>
+            <el-button size="mini" type="primary" icon="el-icon-delete" circle
+                       @click="operationDialog(3,currentPage)"></el-button>
+          </div>
+          <el-input
+            v-model="search"
+            size="mini"
+            placeholder="输入名称搜索"/>
+        </template>
+        <template slot-scope="{row}">
+          <span>{{ row.title }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
 
-  <!--    添加-->
+    <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addFormVisible">
+    <el-dialog title="添加" :visible.sync="addForm">
       <el-form :model="form">
         <el-form-item label="页面名称：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="addFormVisible = false">取 消</el-button>
+        <el-button @click="addForm = false">取 消</el-button>
         <el-button type="primary" @click="addPage">确 定</el-button>
       </div>
     </el-dialog>
@@ -45,15 +65,13 @@
       :visible.sync="deleteDialogVisible"
       width="30%"
       center>
-      <span>删除此页面的同时，也会删除element和action，确定删除吗？</span>
+      <span>删除此页面的同时，也会删除元素信息和元素操作，确定删除吗？</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="deleteDialogVisible = false">取 消</el-button>
     <el-button type="primary" @click="delPage">确 定</el-button>
   </span>
     </el-dialog>
-</el-card>
-
-
+  </div>
 </template>
 
 <script>
@@ -61,13 +79,14 @@
 
   export default {
     name: 'listCard',
-    props: ['listData','to_name','to_params'],
     data() {
       return {
-        current_page:'页面',
-        project_id: '',
-        page_list: [],
-        addFormVisible: false,
+        search: '',
+        currentPage: '页面',
+        projectId: '',
+        pageList:[],
+        defaultPageId: '',
+        addForm: false,
         editFormVisible: false,
         deleteDialogVisible: false,
         dialogTitle: '',
@@ -80,17 +99,16 @@
     },
 
     methods: {
-      router_to(id){
-
-        this.$emit('toPath',id)
-      },
 
       addPage() {
-        postPage(this.project_id, this.form).then(res => {
+        postPage(this.projectId, this.form).then(res => {
           if (res.status == 1) {
-            this.addFormVisible = false
-            this.$alert(res.msg)
+            this.addForm = false
             this.getPageData()
+            this.$message({
+              message: '添加成功',
+              type: 'success'
+            })
             this.$router.push({name: 'pages'})
           } else {
             this.$alert(res.msg)
@@ -99,7 +117,7 @@
       },
       editPage() {
         let page_id = this.$route.params.page_id
-        putPage(this.project_id, page_id, this.form).then(res => {
+        putPage(this.projectId, page_id, this.form).then(res => {
           if (res.status == 1) {
             this.editFormVisible = false
             this.$alert(res.msg)
@@ -112,7 +130,7 @@
       },
       delPage() {
         let page_id = this.$route.params.page_id
-        deletePage(this.project_id, page_id).then(res => {
+        deletePage(this.projectId, page_id).then(res => {
           if (res.status == 1) {
             this.deleteDialogVisible = false
             this.$alert(res.msg)
@@ -123,17 +141,18 @@
           }
         })
       },
-      selectPage(page_id) {
-        this.$router.push({name: 'page', params: {page_id: page_id}})
+      selectPage(data) {
+        this.currentPage = data.title
+        this.$router.push({name: 'page', params: {page_id: data.id}})
       },
-      operationDialog(ope,pagetitle) {
+      operationDialog(ope, pagetitle) {
         switch (ope) {
           case 1:
             this.editFormVisible = true
             this.form.title = pagetitle
             break
           case 2:
-            this.addFormVisible = true
+            this.addForm = true
             this.dialogTitle = '添加Page'
             this.form.title = ''
             break
@@ -143,10 +162,14 @@
         }
       },
       getPageData() {
-        this.project_id = this.$route.params.id
-        getPageList(this.project_id).then(
+        this.projectId = this.$route.params.id
+        getPageList(this.projectId).then(
           res => {
-            this.page_list = res.data.page_list;
+            this.pageList = res.data.page_list
+            if (res.data.page_list.length > 0){
+               this.defaultPageId = res.data.page_list[0].id
+            }
+
           },
           err => {
             console.log(err)
@@ -155,15 +178,27 @@
       },
     },
     mounted() {
-      if (this.$route.params.page_id) {
-         this.getPageData();
-
-      }
+      this.getPageData();
     },
     watch: {
+
       '$route'(to, from) { //监听路由是否变化
-        if (to.params.page_id) {// 判断条件1  判断传递值的变化
-          this.getPageData()
+        if (to.params.id != from.params.id) {// 判断条件1  判断传递值的变化
+                  getPageList(to.params.id).then(
+          res => {
+            this.pageList = res.data.page_list
+            if (res.data.page_list.length > 0){
+
+              this.defaultPageId = res.data.page_list[0].id
+              this.$router.push({name: 'page', params: {page_id: this.defaultPageId}})
+              console.log(this.defaultPageId)
+            }
+
+          },
+          err => {
+            console.log(err)
+          }
+        )
         }
       }
     }
@@ -171,27 +206,20 @@
 </script>
 
 <style>
-  .text {
-    font-size: 14px;
-  }
 
-  .item {
-    margin-bottom: 18px;
-  }
-  .clearfix{
+
+  .clearfix {
     text-align: center;
   }
+
   .clearfix:before,
   .clearfix:after {
     display: table;
     content: "";
   }
+
   .clearfix:after {
     clear: both
   }
 
-  .box-card {
-    width: 180px;
-    text-align: left;
-  }
 </style>

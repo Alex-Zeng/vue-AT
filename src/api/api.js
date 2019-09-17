@@ -40,11 +40,11 @@ export const getElementList = (projectId, pageId) => {
   return get(`/uitest/projects/${projectId}/pages/${pageId}/elements`).then(res => res);
 };
 // 更新Element
-export const editElement = (projectId, pageId , element_id, formData) => {
+export const editElement = (projectId, pageId , elementId, formData) => {
   return put(`/uitest/projects/${projectId}/pages/${pageId}/elements/${elementId}`,formData).then(res => res);
 };
 // 删除Element
-export const deleteElement = (projectId, pageId, element_id) => {
+export const deleteElement = (projectId, pageId, elementId) => {
   return remove(`/uitest/projects/${projectId}/pages/${pageId}/elements/${elementId}`).then(res => res);
 };
 
@@ -87,4 +87,23 @@ export const editFunction = (function_id, formData ) => {
 // 删除Function
 export const deleteFunction = (function_id) => {
   return remove(`/uitest/functions/${function_id}`).then(res => res);
+};
+
+// ----------------用例操作-----------------
+//添加用例
+
+export const postCase = (projectId, formData) => {
+  return post(`/uitest/projects/${projectId}/cases`,formData).then(res => res);
+};
+//获取用例列表
+export const getCase = (projectId) => {
+  return get(`/uitest/projects/${projectId}/cases`).then(res => res);
+};
+// 更新用例
+export const editCase = (projectId, caseId, formData ) => {
+  return put(`/uitest/projects/${projectId}/cases/${caseId}`,formData).then(res => res);
+};
+// 删除用例
+export const deleteCase = (projectId, caseId) => {
+  return remove(`/uitest/projects/${projectId}/cases/${caseId}`).then(res => res);
 };

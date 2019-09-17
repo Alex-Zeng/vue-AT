@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/views/Login'
 import Home from '@/views/Home'
-import Function from '@/views/Function'
+import Function from '@/components/function/Function'
 import Pages from '@/components/project/Pages'
 import Cookies from 'js-cookie'
 import {get} from '@/api/index.js'
@@ -34,12 +34,12 @@ const router = new Router({
       },
       children: [
         {
-          path: 'projects/:id/views',
+          path: 'projects/:id/pages',
           component: Pages,
           name: 'pages',
           props: true,
           children: [{
-            path: 'views/:page_id',
+            path: ':page_id',
             component: Pages,
             name: 'page',
             props: true,

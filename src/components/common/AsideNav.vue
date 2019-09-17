@@ -16,7 +16,7 @@
           <el-menu-item :index="'1-' + pro.id + '-3'">用例集</el-menu-item>
         </el-submenu>
       </el-submenu>
-      <el-menu-item index="2" @click="handleSelect()">
+      <el-menu-item index="2" @click="toFunction()">
         <i class="el-icon-menu"></i>
         <span>操作方法</span>
       </el-menu-item>
@@ -39,11 +39,11 @@
     },
     methods: {
       handleSelect(pro_id) {
-        if (pro_id) {
-          this.$router.push({name: 'pages', params: {id: pro_id}})
-        } else {
-          this.$router.push({ name: 'function'})
-        }
+        this.$router.push({name: 'pages', params: {id: pro_id}})
+
+      },
+      toFunction() {
+        this.$router.push({name: 'function'})
       }
     }
   }
