@@ -23,8 +23,8 @@ export const deletePage = (projectId, pageId) => {
   return remove(`/uitest/projects/${projectId}/pages/${pageId}`).then(res => res);
 };
 // 获取PageObject操作
-export const getPageList = params => {
-  return get(`/uitest/projects/${params}/pages`).then(res => res);
+export const getPageList = (projectId) => {
+  return get(`/uitest/projects/${projectId}/pages`).then(res => res);
 };
 
 
@@ -96,14 +96,72 @@ export const postCase = (projectId, formData) => {
   return post(`/uitest/projects/${projectId}/cases`,formData).then(res => res);
 };
 //获取用例列表
-export const getCase = (projectId) => {
+export const getCaseList = (projectId) => {
   return get(`/uitest/projects/${projectId}/cases`).then(res => res);
 };
 // 更新用例
-export const editCase = (projectId, caseId, formData ) => {
+export const putCase = (projectId, caseId, formData ) => {
   return put(`/uitest/projects/${projectId}/cases/${caseId}`,formData).then(res => res);
 };
 // 删除用例
 export const deleteCase = (projectId, caseId) => {
   return remove(`/uitest/projects/${projectId}/cases/${caseId}`).then(res => res);
+};
+
+// ----------------用例步骤操作-----------------
+//添加步骤
+
+export const postStep = (projectId, caseId,formData) => {
+  return post(`/uitest/projects/${projectId}/cases/${caseId}/steps`,formData).then(res => res);
+};
+//获取步骤列表
+export const getStepList = (projectId, caseId) => {
+  return get(`/uitest/projects/${projectId}/cases/${caseId}/steps`).then(res => res);
+};
+// 更新步骤
+export const putStep = (projectId, caseId, stepId , formData ) => {
+  return put(`/uitest/projects/${projectId}/cases/${caseId}/steps/${stepId}`,formData).then(res => res);
+};
+// 删除步骤
+export const deleteStep = (projectId, caseId, stepId ,) => {
+  return remove(`/uitest/projects/${projectId}/cases/${caseId}/steps/${stepId}`).then(res => res);
+};
+
+
+// ----------------用例集操作-----------------
+//添加用例集
+
+export const postSuit = (projectId, formData) => {
+  return post(`/uitest/projects/${projectId}/case_suit`,formData).then(res => res);
+};
+//获取用例集列表
+export const getSuitList = (projectId) => {
+  return get(`/uitest/projects/${projectId}/case_suit`).then(res => res);
+};
+// 更新用例集
+export const putSuit = (projectId, suitId, formData ) => {
+  return put(`/uitest/projects/${projectId}/case_suit/${suitId}`,formData).then(res => res);
+};
+// 删除用例集
+export const deleteSuit = (projectId, suitId) => {
+  return remove(`/uitest/projects/${projectId}/case_suit/${suitId}`).then(res => res);
+};
+
+// ----------------用例集步骤操作-----------------
+//添加用例集步骤
+
+export const postSuitStep = (projectId, suitId,formData) => {
+  return post(`/uitest/projects/${projectId}/case_suit/${suitId}/steps`,formData).then(res => res);
+};
+//获取用例集步骤列表
+export const getSuitStepList = (projectId, suitId) => {
+  return get(`/uitest/projects/${projectId}/case_suit/${suitId}/steps`).then(res => res);
+};
+// 更新用例集步骤
+export const putSuitStep = (projectId, suitId, stepId , formData ) => {
+  return put(`/uitest/projects/${projectId}/case_suit/${suitId}/steps/${stepId}`,formData).then(res => res);
+};
+// 删除用例集步骤
+export const deleteSuitStep = (projectId, suitId, stepId ,) => {
+  return remove(`/uitest/projects/${projectId}/case_suit/${suitId}/steps/${stepId}`).then(res => res);
 };

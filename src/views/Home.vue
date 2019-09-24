@@ -1,13 +1,12 @@
 <template>
   <el-container class="root_container">
-    <el-header>
-      <v-head></v-head>
-    </el-header>
-    <el-container>
-      <el-aside style="width: 201px">
+
+          <el-aside >
 <!--        <project ></project>-->
-        <AsideNav :projects = "projects"></AsideNav>
+        <aside-nav></aside-nav>
       </el-aside>
+    <el-container>
+
       <el-main>
         <keep-alive>
           <router-view></router-view>
@@ -19,57 +18,43 @@
 </template>
 
 <script>
-  import vHead from '@/components/common/Head'
+
   import AsideNav from '@/components/common/AsideNav'
-  import {getProjectList} from '../api/api'
 
   export default {
 
     name: "Home",
     components: {
       AsideNav,
-      vHead,
-    },
-    data(){
-      return{
-        projects: [],
-      }
-    },
-    mounted: function () {
-      getProjectList().then((res) => {
-        if (res.data.project_list.length > 0){
-          this.projects = res.data.project_list
-          // this.$router.push('/home/projects/'+projectId)
-        }
-      })
     }
   }
 </script>
 
 <style scoped lang="less">
   .el-header {
-    padding: 0 !important;
+    padding: 0 5px!important;
   }
 
   .root_container {
-    min-width: 1200px;
+    min-width: 1220px;
   }
 
   .el-aside {
     color: #333;
-    padding-top: 20px;
-        width: 201px;
+    padding: 5px;
     text-align: left;
+
   }
 
   .el-main {
     color: #333;
     text-align: center;
-
+    padding: 5px;
 
   }
 
   body > .el-container {
     margin-bottom: 40px;
+    width: 100%;
   }
 </style>

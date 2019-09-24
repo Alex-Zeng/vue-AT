@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as api from './api';
+import Vue from 'vue'
 
 axios.defaults.timeout = 5000
 axios.defaults.baseURL = 'http://localhost:5002'
@@ -28,11 +29,10 @@ axios.interceptors.request.use(
 //http response 拦截器
 axios.interceptors.response.use(
   response => {
-    if (response.data.errCode == 2) {
-      router.push({
-        path: "/login",
-        querry: {redirect: router.currentRoute.fullPath}//从哪个页面跳转
-      })
+
+    if (response.data.status == 2) {
+
+      window.location.href = '#/login'
     }
     return response;
   },

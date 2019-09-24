@@ -3,10 +3,10 @@
 
     <el-table
       ref="multipleTable"
-      :data="actsData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+      :data="$store.state.tableData.actionData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
-      style="width: 100%"
-      size="mini"
+      size="small"
+      border
     >
       <el-table-column
         label="ID"
@@ -29,7 +29,8 @@
           <template v-if="row.edit">
             <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
             <el-select v-model="row.fun_id" placeholder="请选择方法" size="mini">
-              <el-option v-for="fun in funsData" :label="fun.title" :value="fun.id" :key="fun.id"></el-option>
+              <el-option v-for="fun in $store.state.tableData.functionData" :label="fun.title" :value="fun.id"
+                         :key="fun.id"></el-option>
             </el-select>
           </template>
           <span v-else>{{ row.fun_title }}</span>
@@ -40,7 +41,8 @@
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-select v-model="row.ele_id" placeholder="请选择元素" size="mini">
-              <el-option v-for="ele in elesData" :label="ele.title" :value="ele.id" :key="ele.id"></el-option>
+              <el-option v-for="ele in $store.state.tableData.elementData" :label="ele.title" :value="ele.id"
+                         :key="ele.id"></el-option>
             </el-select>
           </template>
           <span v-else>{{ row.ele_title }}</span>
@@ -52,7 +54,8 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
+          <el-button type="primary" @click="addForm=true;getElementData;getFunctionData">新增<i
+            class="el-icon-plus el-icon--right"></i>
           </el-button>
           <el-input
             v-model="search"
@@ -107,18 +110,20 @@
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-select v-model="form.fun_id" placeholder="请选择方法">
-            <el-option v-for="fun in funsData" :label="fun.title" :value="fun.id" :key="fun.id"></el-option>
+            <el-option v-for="fun in $store.state.tableData.functionData" :label="fun.title" :value="fun.id"
+                       :key="fun.id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="操作元素：" :label-width="formLabelWidth">
           <el-select v-model="form.ele_id" placeholder="请选择元素">
-            <el-option v-for="ele in elesData" :label="ele.title" :value="ele.id" :key="ele.id"></el-option>
+            <el-option v-for="ele in $store.state.tableData.elementData" :label="ele.title" :value="ele.id"
+                       :key="ele.id"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addForm = false;">取 消</el-button>
-        <el-button type="primary" @click="addAction">确 定</el-button>
+        <el-button type="primary" @click="addData">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -126,7 +131,7 @@
 </template>
 
 <script>
-  import {getActionList, getElementList, getFunctionList, postAction, editAction, deleteAction} from '@/api/api'
+  import {postAction, editAction, deleteAction} from '@/api/api'
 
   export default {
     name: 'actionTable',
@@ -152,7 +157,7 @@
 
     methods: {
 
-      addAction() {
+      addData() {
 
         postAction(this.$route.params.id, this.$route.params.page_id, this.form).then(res => {
           if (res.status == 1) {
@@ -161,7 +166,7 @@
               message: '添加成功',
               type: 'success'
             })
-            this.getActionData()
+            this.getData()
             this.search = ''
           } else {
             this.$alert(res.msg)
@@ -179,7 +184,7 @@
               message: '编辑成功',
               type: 'success'
             })
-            this.getActionData()
+            this.getData()
           } else {
             this.$message({
               message: res.msg,
@@ -206,7 +211,7 @@
         }).then(() => {
             deleteAction(this.$route.params.id, this.$route.params.page_id, rowId).then(res => {
               if (res.status == 1) {
-                this.getActionData()
+                this.getData()
                 this.search = ''
                 this.$message({
                   type: 'info',
@@ -220,66 +225,35 @@
         ).catch(() => {
         })
       },
-      getActionData() {
-        let projectId = this.$route.params.id
-        let pa_id = this.$route.params.page_id
-        getActionList(projectId, pa_id).then(
-          res => {
-            if (res.data.data_list.length > 0) {
-              this.actsData = res.data.data_list.map(v => {
-                this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-                v.originalTitle = v.title //  will be used when user click the cancel botton
-                v.originalFunctionTitle = v.functionTitle //  will be used when user click the cancel botton
-                v.originalElementTitle = v.elementTitle //  will be used when user click the cancel botton
-                return v
-              })
-            } else {
-              this.actsData = res.data.data_list
-            }
-
-          },
-          err => {
-            console.log(err);
-          }
-        )
+      getData() {
+        this.$store.dispatch('tableData/getData', {
+          "projectId": this.$route.params.id,
+          "pageId": this.$route.params.page_id
+        })
       },
       getElementData() {
-        let projectId = this.$route.params.id
-        let pa_id = this.$route.params.page_id
-        getElementList(projectId, pa_id).then(
-          res => {
-            this.elesData = res.data.data_list;
-          },
-          err => {
-            console.log(err);
-          }
-        )
+
+        this.$store.dispatch('tableData/getElementData', {
+          "projectId": this.$route.params.id,
+          "pageId": this.$route.params.page_id
+        })
       },
       getFunctionData() {
-        getFunctionList().then(
-          res => {
-            this.funsData = res.data.data_list;
-          },
-          err => {
-            console.log(err);
-          }
-        )
+        this.$store.dispatch('tableData/getFunctionData')
       },
     },
     mounted() {
       if (this.$route.params.page_id) {
-        this.getActionData()
-        this.getElementData()
+        this.getData()
         this.getFunctionData()
-
+        this.getElementData()
       }
     },
     watch: {
       '$route'(to, from) { //监听路由是否变化
         if (to.params.page_id) {// 判断条件1  判断传递值的变化
-          this.getActionData()
+          this.getData()
           this.getElementData()
-          this.getFunctionData()
         }
       }
     }
@@ -287,20 +261,5 @@
 </script>
 
 <style>
-  .el-dropdown-link {
-    cursor: pointer;
-    color: #409EFF;
-  }
 
-  .el-icon-arrow-down {
-    font-size: 12px;
-  }
-
-  .el-dropdown-menu__item {
-    padding: 0
-  }
-
-  .pg {
-    padding: 0 20px
-  }
 </style>

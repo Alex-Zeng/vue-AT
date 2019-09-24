@@ -4,25 +4,26 @@
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus" @click="operationDialog(2,'')"></el-button>
         <el-button size="mini" type="primary" icon="el-icon-edit"
-                   @click="operationDialog(1,currentPage)"></el-button>
+                   @click="operationDialog(1,currentData)"></el-button>
         <el-button size="mini" type="primary" icon="el-icon-delete"
-                   @click="operationDialog(3,currentPage)"></el-button>
+                   @click="operationDialog(3,currentData)"></el-button>
       </el-button-group>
     </div>
-    <el-menu-item v-for="page in pageList" :index="'1-'+proId+'-1-'+page.id" :key="page.id" @click="selectPage(page)">
-      {{page.title}}
+    <el-menu-item v-for="item in suitList" :index="'1-' + proId + '-3' + item.id"  :key="item.id" @click="selectData(item)">
+      {{item.title}}
     </el-menu-item>
+
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
       <el-form :model="form">
-        <el-form-item label="页面名称：" :label-width="formLabelWidth">
+        <el-form-item label="用例集名称：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addForm = false">取 消</el-button>
-        <el-button type="primary" @click="addPage">确 定</el-button>
+        <el-button type="primary" @click="addData">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -30,13 +31,13 @@
 
     <el-dialog title="编辑" :visible.sync="editFormVisible">
       <el-form :model="form">
-        <el-form-item label="页面名称：" :label-width="formLabelWidth">
+        <el-form-item label="用例集名称：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editPage">确 定</el-button>
+        <el-button type="primary" @click="editData">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -47,27 +48,27 @@
       :visible.sync="deleteDialogVisible"
       width="30%"
       center>
-      <span>删除此页面的同时，也会删除元素信息和元素操作，确定删除吗？</span>
+      <span>确定删除{{currentData}}用例集吗？</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="deleteDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="delPage">确 定</el-button>
+    <el-button type="primary" @click="delData">确 定</el-button>
   </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import {getPageList, postPage, putPage, deletePage} from "@/api/api";
+  import {getSuitList, postSuit, putSuit, deleteSuit} from "@/api/api";
 
   export default {
-    name: 'listCard',
+    name: 'caseSuitList',
     props: ['proId'],
     data() {
       return {
         search: '',
-        currentPage: '页面',
-        pageList: [],
-        defaultPageId: '',
+        currentData: '用例集',
+        suitList: [],
+        defaultDataId: '',
         addForm: false,
         editFormVisible: false,
         deleteDialogVisible: false,
@@ -81,73 +82,61 @@
     },
 
     methods: {
-      getPageData() {
-        getPageList(this.proId).then(res => {
-          if (res.status == 1) {
-            this.pageList = res.data.page_list
-          } else {
-            Vue.$message({
-              message: res.msg,
-              type: 'error'
-            })
-          }
-        })
-      },
 
-      addPage() {
-        postPage(this.proId, this.form).then(res => {
+      addData() {
+        postSuit(this.proId, this.form).then(res => {
           if (res.status == 1) {
             this.addForm = false
-            this.getPageData()
+            this.getSuitData()
             this.$message({
               message: '添加成功',
               type: 'success'
             })
-            this.$router.push({name: 'page'})
+            this.$router.push({name: 'case'})
           } else {
             this.$alert(res.msg)
           }
         })
       },
-      editPage() {
-        let page_id = this.$route.params.page_id
-        putPage(this.proId, page_id, this.form).then(res => {
+      editData() {
+        let data_id = this.$route.params.suit_id
+        putSuit(this.proId, data_id, this.form).then(res => {
           if (res.status == 1) {
             this.editFormVisible = false
             this.$alert(res.msg)
-            this.getPageData()
-            this.$router.push({name: 'page'})
+            this.getSuitData()
+            this.$router.push({name: 'suit'})
           } else {
             this.$alert(res.msg)
           }
         })
       },
-      delPage() {
-        let page_id = this.$route.params.page_id
-        deletePage(this.proId, page_id).then(res => {
+      delData() {
+        let data_id = this.$route.params.suit_id
+        deleteSuit(this.proId,data_id).then(res => {
           if (res.status == 1) {
             this.deleteDialogVisible = false
             this.$alert(res.msg)
-            this.getPageData()
-            this.$router.push({name: 'page'})
+            this.getSuitData()
+            this.$router.push({name: 'suit'})
           } else {
             this.$alert(res.msg)
           }
         })
       },
-      selectPage(data) {
-        this.currentPage = data.title
-        this.$router.push({name: 'page', params: {id: this.proId, page_id: data.id}})
+      selectData(data) {
+        this.currentData = data.title
+        this.$router.push({name: 'suit', params: {id: this.proId, suit_id: data.id}})
       },
-      operationDialog(ope, pagetitle) {
+      operationDialog(ope, datatitle) {
         switch (ope) {
           case 1:
             this.editFormVisible = true
-            this.form.title = pagetitle
+            this.form.title = datatitle
             break
           case 2:
             this.addForm = true
-            this.dialogTitle = '添加Page'
+            this.dialogTitle = '添加用例集'
             this.form.title = ''
             break
           case 3:
@@ -155,15 +144,28 @@
             break
         }
       },
+      getSuitData() {
+        getSuitList(this.proId).then(
+          res => {
+            this.suitList = res.data.data_list
+            if (res.data.data_list.length > 0) {
+              this.defaultDataId = res.data.data_list[0].id
+            }
+
+          },
+          err => {
+            console.log(err)
+          }
+        )
+      },
     },
     mounted() {
-      this.getPageData()
+      this.getSuitData();
     }
   }
 </script>
 
 <style>
-
 
   .clearfix {
     text-align: center;

@@ -4,6 +4,8 @@ import Login from '@/views/Login'
 import Home from '@/views/Home'
 import Function from '@/components/function/Function'
 import Pages from '@/components/project/Pages'
+import Case from '@/components/project/Case'
+import caseSuit from '@/components/project/caseSuit'
 import Cookies from 'js-cookie'
 import {get} from '@/api/index.js'
 
@@ -34,30 +36,22 @@ const router = new Router({
       },
       children: [
         {
-          path: 'projects/:id/pages',
+          path: 'projects/:id/pages/:page_id',
           component: Pages,
-          name: 'pages',
+          name: 'page',
           props: true,
-          children: [{
-            path: ':page_id',
-            component: Pages,
-            name: 'page',
-            props: true,
-          },
-          ]
         },
         {
-          path: 'projects/:id/test_cases',
-          component: Pages,
-          name: 'test_cases',
+          path: 'projects/:id/cases/:case_id',
+          component: Case,
+          name: 'case',
           props: true,
-          children: [{
-            path: 'test_cases/:test_case_id',
-            component: Pages,
-            name: 'test_case',
-            props: true,
-          },
-          ]
+        },
+                {
+          path: 'projects/:id/suit/:suit_id',
+          component: caseSuit,
+          name: 'suit',
+          props: true,
         },
         {
           path: '/function',
@@ -72,32 +66,5 @@ const router = new Router({
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  /* 页面title */
-  if (to.meta.title) {
-    document.title = to.meta.title
-  }
-  /* 判断该路由是否需要登录权限 */
-  if (to.matched.some(record => record.meta.requireAuth)) {
-    //是否登录
-    get('/admin/islogin')
-      .then(function (response) {
-        //未登录
-        if (response.status == 2) {
-          next({
-            path: '/login',
-          })
-        } else {
-          //已登录
-          next()
-        }
-      })
-      .catch(function (error) {
-        // Toast(error.data.msg);
-      });
-
-  }
-  next();
-})
 
 export default router

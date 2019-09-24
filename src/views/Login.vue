@@ -51,11 +51,11 @@
 
                 if (res.status == 1) {
                   let data = res.data
-                  sessionStorage.setItem("islogin",res.status)
+                  sessionStorage.setItem("islogin", res.status)
                   sessionStorage.setItem("username", data.userdata.username)
                   sessionStorage.setItem("user_id", data.userdata.id)
                   sessionStorage.setItem("userstatus", data.userdata.userstatus)
-                  this.$router.push('/home')
+                  window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/home')
                 } else {
                   alert('登录失败')
                 }
@@ -66,6 +66,11 @@
             return false
           }
         })
+      }
+    },
+    created() {
+      if (window.history.length > 1) {
+        window.alert("登录失效,请重新登录")
       }
     }
   }

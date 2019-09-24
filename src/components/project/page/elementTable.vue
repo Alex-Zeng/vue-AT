@@ -3,11 +3,10 @@
   <div>
     <el-table
       ref="multipleTable"
-      :data="elesData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+      :data="$store.state.tableData.elementData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
-      style="width: 100%"
-      max-height="600"
-      size="mini"
+      size="small"
+      border
     >
       <el-table-column
         label="ID"
@@ -17,7 +16,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" label="元素名称">
+      <el-table-column width="150px" label="元素名称" >
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -34,7 +33,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="200px" label="元素位置">
+      <el-table-column width="200px" label="元素位置" >
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.loc" class="edit-input" size="mini"/>
@@ -111,7 +110,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addForm = false">取 消</el-button>
-        <el-button type="primary" @click="addElement">确 定</el-button>
+        <el-button type="primary" @click="addData">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -141,16 +140,22 @@
     },
 
     methods: {
-      addElement() {
+      getElementData() {
+        this.$store.dispatch('tableData/getElementData', {
+          "projectId": this.$route.params.id,
+          "pageId": this.$route.params.page_id
+        })
+      },
+      addData() {
 
         postElement(this.$route.params.id, this.$route.params.page_id, this.form).then(res => {
           if (res.status == 1) {
+            this.getElementData()
             this.addForm = false
             this.$message({
               message: '添加成功',
               type: 'success'
             })
-            this.getElementData()
             this.search = ''
           } else {
             this.$alert(res.msg)
@@ -164,11 +169,11 @@
         row.originalType = row.type
         editElement(this.$route.params.id, this.$route.params.page_id, row.id, row).then(res => {
           if (res.status == 1) {
+            this.getElementData()
             this.$message({
               message: '编辑成功',
               type: 'success'
             })
-            this.getElementData()
           } else {
             this.$message({
               message: res.msg,
@@ -181,8 +186,7 @@
         row.title = row.originalTitle
         row.loc = row.originalLoc
         row.type = row.originalType
-        row.edit = false
-
+        row.edit = !row.edit
         this.$message({
           message: '放弃编辑',
           type: 'warning'
@@ -209,60 +213,13 @@
         ).catch(() => {
         })
       },
-      getElementData() {
-        let projectId = this.$route.params.id
-        let pa_id = this.$route.params.page_id
-        getElementList(projectId, pa_id).then(
-          res => {
-            if (res.data.data_list.length > 0) {
-              this.elesData = res.data.data_list.map(v => {
-                this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-                v.originalTitle = v.title //  will be used when user click the cancel botton
-                v.originalType = v.type //  will be used when user click the cancel botton
-                v.originalLoc = v.loc //  will be used when user click the cancel botton
-                return v
-              })
-            } else {
-              this.elesData = res.data.data_list
-            }
-          },
-          err => {
-            console.log(err);
-          }
-        )
-      },
     },
-    mounted() {
-      if (this.$route.params.page_id) {
-        this.getElementData()
-
-      }
-    },
-    watch: {
-      '$route'(to, from) { //监听路由是否变化
-        if (to.params.page_id) {// 判断条件1  判断传递值的变化
-          this.getElementData()
-        }
-      }
+    created() {
+      this.getElementData()
     }
   }
 </script>
 
 <style>
-  .el-dropdown-link {
-    cursor: pointer;
-    color: #409EFF;
-  }
 
-  .el-icon-arrow-down {
-    font-size: 12px;
-  }
-
-  .el-dropdown-menu__item {
-    padding: 0
-  }
-
-  .pg {
-    padding: 0 20px
-  }
 </style>
