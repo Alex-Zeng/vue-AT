@@ -6,7 +6,6 @@
       :data="$store.state.tableData.actionData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
-      border
     >
       <el-table-column
         label="ID"
@@ -169,7 +168,7 @@
             this.getData()
             this.search = ''
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -187,7 +186,7 @@
             this.getData()
           } else {
             this.$message({
-              message: res.msg,
+              message: res.message,
               type: 'error'
             })
           }
@@ -215,10 +214,10 @@
                 this.search = ''
                 this.$message({
                   type: 'info',
-                  message: res.msg
+                  message: res.message
                 });
               } else {
-                this.$alert(res.msg)
+                this.$alert(res.message)
               }
             })
           }

@@ -69,26 +69,6 @@ export const deleteAction = (projectId, pageId,actId) => {
 };
 
 
-
-// ----------------Function操作-----------------
-//添加Function
-
-export const postFunction = (formData) => {
-  return post(`/uitest/functions`,formData).then(res => res);
-};
-//获取Function列表
-export const getFunctionList = () => {
-  return get(`/uitest/functions`).then(res => res);
-};
-// 更新Function
-export const editFunction = (function_id, formData ) => {
-  return put(`/uitest/functions/${function_id}`,formData).then(res => res);
-};
-// 删除Function
-export const deleteFunction = (function_id) => {
-  return remove(`/uitest/functions/${function_id}`).then(res => res);
-};
-
 // ----------------用例操作-----------------
 //添加用例
 
@@ -164,4 +144,42 @@ export const putSuitStep = (projectId, suitId, stepId , formData ) => {
 // 删除用例集步骤
 export const deleteSuitStep = (projectId, suitId, stepId ,) => {
   return remove(`/uitest/projects/${projectId}/case_suit/${suitId}/steps/${stepId}`).then(res => res);
+};
+
+// ----------------Function操作-----------------
+//添加Function
+
+export const postFunction = (formData) => {
+  return post(`/uitest/functions`,formData).then(res => res);
+};
+//获取Function列表
+export const getFunctionList = () => {
+  return get(`/uitest/functions`).then(res => res);
+};
+// 更新Function
+export const editFunction = (function_id, formData ) => {
+  return put(`/uitest/functions/${function_id}`,formData).then(res => res);
+};
+// 删除Function
+export const deleteFunction = (function_id) => {
+  return remove(`/uitest/functions/${function_id}`).then(res => res);
+};
+
+// -----------------设备信息----------------
+//添加Function
+
+export const postEquipment = (formData) => {
+  return post(`/runtest/equipment`,formData).then(res => res);
+};
+//获取Function列表
+export const getEquipmentList = () => {
+  return get(`/runtest/equipment`).then(res => res);
+};
+// 更新Function
+export const editEquipment = (e_id, formData ) => {
+  return put(`/runtest/equipment/${e_id}`,formData).then(res => res);
+};
+// 删除Function
+export const deleteEquipment = (e_id) => {
+  return remove(`/runtest/equipment/${e_id}`).then(res => res);
 };

@@ -1,19 +1,36 @@
 <template>
   <div class="app-container">
     <el-table v-loading="listLoading"
-              :data="$store.state.tableData.functionData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+              :data="$store.state.tableData.equipmentData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
               fit highlight-current-row style="width: 100%"
               size="small"
-              border
+              expand-row-keys
     >
-
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="参数">
+              <template v-if="props.row.edit">
+                <el-input
+                  class="text-input"
+                  type="textarea"
+                  :autosize="{ minRows: 14, maxRows: 15}"
+                  placeholder="请输入参数 kye=value"
+                  v-model="props.row.setting_args">
+                </el-input>
+              </template>
+              <span v-else>{{ props.row.setting_args }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="ID" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="方法名">
+      <el-table-column label="设备名">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -21,33 +38,28 @@
           <span v-else>{{ row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="对应的代码方法名">
+
+      <el-table-column label="Appium地址">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>
+            <el-input v-model="row.remoteHost" class="edit-input" size="mini"/>
           </template>
-          <span v-else>{{ row.fun_title }}</span>
+          <span v-else>{{ row.remoteHost}}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="适用设备" width="100">
+      <el-table-column label="Appium端口">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-select v-model="row.type" placeholder="请选择设备" size="mini">
-              <el-option v-for="(v,k) in typeData" :label="v" :value="k" :key="k"></el-option>
-            </el-select>
+            <el-input v-model="row.remotePort" class="edit-input" size="mini"/>
           </template>
-          <span v-else>{{ typeData[row.type]}}</span>
+          <span v-else>{{ row.remotePort }}</span>
         </template>
       </el-table-column>
 
-
-      <el-table-column label="方法描述" show-overflow-tooltip>
+            <el-table-column label="状态">
         <template slot-scope="{row}">
-          <template v-if="row.edit">
-            <el-input v-model="row.description" class="edit-input" size="mini"/>
-          </template>
-          <span v-else>{{ row.description }}</span>
+          <span >{{ row.status == 0 ? "停止":"运行中"}}</span>
         </template>
       </el-table-column>
 
@@ -61,7 +73,7 @@
             placeholder="输入操作搜索"/>
         </template>
         <template slot-scope="{row}">
-          <div v-if="row.edit">
+          <div v-if="row.edit ">
             <el-button
               type="success"
               size="mini"
@@ -78,7 +90,7 @@
             </el-button>
           </div>
 
-          <div v-else>
+          <div v-else-if="row.status == 0">
             <el-button
               type="primary"
               size="mini"
@@ -103,50 +115,53 @@
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
-      <el-form :model="form">
-        <el-form-item label="方法名：" :label-width="formLabelWidth">
+      <el-form :model="form" :inline="true" class="demo-form-inline" size="mini" label-position="top">
+        <el-form-item label="设备名：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="对应代码的方法：" :label-width="formLabelWidth">
-          <el-input v-model="form.fun_title" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="适用设备：" :label-width="formLabelWidth">
-          <el-select v-model="form.type" placeholder="请选择设备">
-            <el-option v-for="(v,k) in typeData" :label="v" :value="k" :key="k"></el-option>
-          </el-select>
-        </el-form-item>
 
-        <el-form-item label="方法描述：" :label-width="formLabelWidth">
-          <el-input v-model="form.description" autocomplete="off"></el-input>
+        <el-form-item label="remoteHost：" :label-width="formLabelWidth">
+          <el-input v-model="form.remoteHost" autocomplete="off" placeholder="连接的appium地址"></el-input>
+        </el-form-item>
+        <el-form-item label="remotePort：" :label-width="formLabelWidth">
+          <el-input v-model="form.remotePort" autocomplete="off" placeholder="连接的appium端口"></el-input>
+        </el-form-item>
+        <el-form-item label="setting_args：" :label-width="formLabelWidth">
+          <el-input
+            class="text-input"
+            type="textarea"
+            :autosize="{ minRows: 14, maxRows: 15}"
+            placeholder="请输入参数 kye=value"
+            v-model="form.setting_args">
+          </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addForm = false">取 消</el-button>
-        <el-button type="primary" @click="addFunction">确 定</el-button>
+        <el-button type="primary" @click="addData">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import {postFunction, editFunction, deleteFunction} from '../../api/api'
+  import {postEquipment, editEquipment, deleteEquipment} from '../../api/api'
 
   export default {
-    name: "Function",
-
+    name: "Equipment",
     data() {
       return {
         search: "",
         addForm: false,
         dataList: [],
         listLoading: true,
-        formLabelWidth: '100px',
-        typeData: {"0": "通用", "1": "ADNROID", "2": "IOS", "3": "PC",},
+        formLabelWidth: '140px',
+        textareaWidth: '520px',
         form: {
           title: "",
-          type: "",
-          fun_title: "",
-          description: "",
+          setting_args: "",
+          remoteHost: "",
+          remotePort: ""
         }
       }
     },
@@ -156,11 +171,11 @@
     methods: {
       getList() {
         this.listLoading = true
-        this.$store.dispatch('tableData/getFunctionData')
+        this.$store.dispatch('tableData/getEquipmentData')
         this.listLoading = false
       },
-      addFunction() {
-        postFunction(this.form).then(res => {
+      addData() {
+        postEquipment(this.form).then(res => {
           if (res.status == 1) {
             this.search = ''
             this.addForm = false
@@ -171,11 +186,12 @@
 
       },
       cancelEdit(row) {
-        console.log(row)
         row.edit = false
         row.title = row.originalTitle
-        row.type = row.originalType
-        row.description = row.originalDescription
+        row.setting_args = row.originalSetting_args
+
+        row.remoteHost = row.originalRemoteHost
+        row.remotePort = row.originalRemotePort
 
 
         this.$message({
@@ -185,10 +201,11 @@
       },
       confirmEdit(row) {
         row.edit = false
-        row.originalType = row.type
-        row.originalDescription = row.description
         row.originalTitle = row.title
-        editFunction(row.id, row).then(res => {
+        row.originalSetting_args = row.setting_args
+        row.originalRemoteHost = row.remoteHost
+        row.originalRemotePort = row.remotePort
+        editEquipment(row.id, row).then(res => {
           if (res.status == 1) {
             this.$message({
               message: '编辑成功',
@@ -207,7 +224,7 @@
         this.$alert('确定删除?', '删除', {
           confirmButtonText: '确定',
         }).then(() => {
-          deleteFunction(rowId).then(res => {
+          deleteEquipment(rowId).then(res => {
             if (res.status == 1) {
               this.getList()
               this.search = ''
@@ -226,5 +243,26 @@
 </script>
 
 <style>
+  .demo-table-expand {
+    font-size: 0;
+  }
 
+  .demo-table-expand label {
+    width: 150px;
+    color: #99a9bf;
+  }
+
+  .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
+  }
+
+  .el-dialog input {
+    color: red;
+  }
+
+  .text-input {
+    width: 360px;
+  }
 </style>

@@ -6,15 +6,14 @@
       :data="tableData.filter(data => !search || data.action_title.toLowerCase().includes(search.toLowerCase())|| data.rank.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
-      border
       :default-sort="{prop: 'rank', order: 'ascending'}"
 
     >
 
-      <el-table-column label="步骤" align="center" prop="rank">
+      <el-table-column label="步骤" align="center" prop="rank" width="80">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.rank" class="edit-input" size="mini"/>
+            <el-input v-model.number="row.rank" class="edit-input" size="mini"/>
           </template>
           <span v-else>{{ row.rank }}</span>
         </template>
@@ -44,7 +43,22 @@
           <span v-else>{{ row.action_title }}</span>
         </template>
       </el-table-column>
-
+      <el-table-column label="输入参数" align="center">
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-input v-model="row.input_key" class="edit-input" size="mini"/>
+          </template>
+          <span v-else>{{ row.input_key }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="输出参数" align="center">
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-input v-model="row.output_key" class="edit-input" size="mini"/>
+          </template>
+          <span v-else>{{ row.output_key }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="update_datetime"
         label="更新时间"
@@ -84,15 +98,15 @@
               icon="el-icon-edit"
               @click="row.edit=!row.edit;getActionData(row.page_id)"
             >
-              编辑
+
             </el-button>
             <el-button
               type="primary"
               size="mini"
-              icon="el-icon-edit"
+              icon="el-icon-delete"
               @click="deleteRow(row.id)"
             >
-              删除
+
             </el-button>
           </div>
         </template>
@@ -101,9 +115,9 @@
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
-      <el-form :model="form">
+      <el-form :model="form" >
         <el-form-item label="步骤：" :label-width="formLabelWidth">
-          <el-input v-model="form.rank" autocomplete="off"></el-input>
+          <el-input v-model.number="form.rank"  placeholder="请输入 正整数且不重复"></el-input>
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-select v-model="form.page_id" placeholder="请选择页面" size="mini"
@@ -142,12 +156,30 @@
           page_id: '',
           action_id: '',
         },
-        formLabelWidth: '120px'
+        formLabelWidth: '120px',
       }
+
     },
 
     methods: {
+      isRealNum(val) {
+        // 先判定是否为number
+        if (typeof val !== 'number') {
+          return false;
+        }
+        if (!isNaN(val)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
       addData() {
+        if (this.isRealNum(this.form.rank) != true) {
+          this.$message({
+            message: '步骤必须为正整数且不能重复',
+            type: 'error'
+          })
+        }
         postStep(this.$route.params.id, this.$route.params.case_id, this.form).then(res => {
           if (res.status == 1) {
             this.addForm = false
@@ -158,7 +190,7 @@
             this.getTableData()
             this.search = ''
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -177,7 +209,7 @@
             this.getTableData()
           } else {
             this.$message({
-              message: res.msg,
+              message: res.message,
               type: 'error'
             })
           }
@@ -189,7 +221,6 @@
         row.page_id = row.originalPageId
 
         row.edit = false
-
         this.$message({
           message: '放弃编辑',
           type: 'warning'
@@ -206,17 +237,17 @@
                 this.search = ''
                 this.$message({
                   type: 'info',
-                  message: res.msg
+                  message: res.message
                 });
               } else {
-                this.$alert(res.msg)
+                this.$alert(res.message)
               }
             })
           }
         ).catch(() => {
         })
       },
-      getData(pageId) {
+      getActionData(pageId) {
         let projectId = this.$route.params.id
         getActionList(projectId, pageId).then(
           res => {

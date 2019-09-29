@@ -6,7 +6,6 @@
       :data="$store.state.tableData.elementData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
-      border
     >
       <el-table-column
         label="ID"
@@ -158,7 +157,7 @@
             })
             this.search = ''
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -176,7 +175,7 @@
             })
           } else {
             this.$message({
-              message: res.msg,
+              message: res.message,
               type: 'error'
             })
           }
@@ -203,10 +202,10 @@
                 this.search = ''
                 this.$message({
                   type: 'info',
-                  message: res.msg
+                  message: res.message
                 });
               } else {
-                this.$alert(res.msg)
+                this.$alert(res.message)
               }
             })
           }

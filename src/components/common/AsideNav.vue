@@ -32,11 +32,16 @@
       </el-submenu>
       <el-menu-item index="2" @click="toFunction()">
         <h6>
-          <i class="el-icon-menu"></i>
+          <i class="el-icon-star-on"></i>
           <span>操作方法</span>
         </h6>
       </el-menu-item>
-
+      <el-menu-item index="3" @click="toEquipment()">
+        <h6>
+          <i class="el-icon-s-platform"></i>
+          <span>设备列表</span>
+        </h6>
+      </el-menu-item>
     </el-menu>
   </div>
 </template>
@@ -58,6 +63,9 @@
     methods: {
       toFunction() {
         this.$router.push({name: 'function'})
+      },
+      toEquipment() {
+        this.$router.push({name: 'equipment'})
       }
     },
     created() {

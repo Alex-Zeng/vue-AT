@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Login from '@/views/Login'
 import Home from '@/views/Home'
 import Function from '@/components/function/Function'
+import Equipment from '@/components/equipment/Equipment'
 import Pages from '@/components/project/Pages'
 import Case from '@/components/project/Case'
 import caseSuit from '@/components/project/caseSuit'
@@ -47,7 +48,7 @@ const router = new Router({
           name: 'case',
           props: true,
         },
-                {
+        {
           path: 'projects/:id/suit/:suit_id',
           component: caseSuit,
           name: 'suit',
@@ -58,7 +59,12 @@ const router = new Router({
           component: Function,
           name: 'function',
           props: true,
-          // children: []
+        },
+        {
+          path: '/equipment',
+          component: Equipment,
+          name: 'equipment',
+          props: true,
         },
       ]
     },

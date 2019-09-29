@@ -17,7 +17,7 @@
 
     <el-dialog title="添加" :visible.sync="addForm">
       <el-form :model="form">
-        <el-form-item label="页面名称：" :label-width="formLabelWidth">
+        <el-form-item label="用例名称：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>

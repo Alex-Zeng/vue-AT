@@ -1,5 +1,5 @@
 // 如果在模块化构建系统中，请确保在开头调用了 Vue.use(Vuex)
-import {getElementList, getActionList, getFunctionList, getProjectList, } from '@/api/api'
+import {getElementList, getActionList, getFunctionList, getProjectList, getEquipmentList} from '@/api/api'
 import Vue from 'vue'
 
 const state = {
@@ -8,6 +8,7 @@ const state = {
   actionData: [],
   functionData: [],
   projectData: [],
+  equipmentData: [],
 }
 const getters = {}
 
@@ -25,7 +26,9 @@ const mutations = {
   SET_PROJECTDATA: (state, argsList) => {
     state.projectData = argsList
   },
-
+  SET_EQUIPMENTDATA: (state, argsList) => {
+    state.equipmentData = argsList
+  },
 }
 
 const actions = {
@@ -36,7 +39,6 @@ const actions = {
     })
 
   },
-
 
 
   getElementData({commit}, args) {
@@ -52,7 +54,7 @@ const actions = {
         commit('SET_ELEMENTDATA', datas)
       } else {
         Vue.$message({
-          message: res.msg,
+          message: res.message,
           type: 'error'
         })
       }
@@ -71,7 +73,7 @@ const actions = {
           commit('SET_ACTIONDATA', datas)
         } else {
           Vue.$message({
-            message: res.msg,
+            message: res.message,
             type: 'error'
           })
         }
@@ -91,7 +93,29 @@ const actions = {
           commit('SET_FUNCTIONDATA', datas)
         } else {
           Vue.$message({
-            message: res.msg,
+            message: res.message,
+            type: 'error'
+          })
+        }
+
+      }
+    )
+  },
+  getEquipmentData({commit}) {
+    getEquipmentList().then(res => {
+        if (res.status == 1) {
+          let datas = res.data.data_list.map(v => {
+            Vue.set(v, 'edit', false)
+            v.originalTitle = v.title
+            v.originalSetting_args = v.setting_args
+            v.originalRemoteHost = v.remoteHost
+            v.originalRemotePort = v.remotePort
+            return v
+          })
+          commit('SET_EQUIPMENTDATA', datas)
+        } else {
+          Vue.$message({
+            message: res.message,
             type: 'error'
           })
         }
