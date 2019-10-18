@@ -1,6 +1,7 @@
 <template>
   <div>
     <div align="center">
+      <h5>用例</h5>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus" @click="operationDialog(2,'')"></el-button>
         <el-button size="mini" type="primary" icon="el-icon-edit"
@@ -9,10 +10,16 @@
                    @click="operationDialog(3,currentCase)"></el-button>
       </el-button-group>
     </div>
-    <el-menu-item v-for="item in caseList" :index="'1-' + proId + '-2' + item.id"  :key="item.id" @click="selectData(item)">
-      {{item.title}}
-    </el-menu-item>
 
+    <el-menu
+      default-active="2"
+      class="el-menu-vertical-demo"
+    >
+      <el-menu-item v-for="item in caseList" :index="'1-' + proId + '-2' + item.id" :key="item.id"
+                    @click="selectData(item)">
+        <span slot="title">{{item.title}}</span>
+      </el-menu-item>
+    </el-menu>
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
@@ -62,7 +69,6 @@
 
   export default {
     name: 'caseList',
-    props: ['proId'],
     data() {
       return {
         search: '',
@@ -72,7 +78,7 @@
         addForm: false,
         editFormVisible: false,
         deleteDialogVisible: false,
-        defaultCaseId:'',
+        defaultCaseId: '',
         dialogTitle: '',
         form: {
           title: '',
@@ -95,7 +101,7 @@
             })
             this.$router.push({name: 'case'})
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -104,11 +110,11 @@
         putCase(this.proId, case_id, this.form).then(res => {
           if (res.status == 1) {
             this.editFormVisible = false
-            this.$alert(res.msg)
+            this.$alert(res.message)
             this.getCaseData()
             this.$router.push({name: 'case'})
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -117,17 +123,18 @@
         deleteCase(this.proId, case_id).then(res => {
           if (res.status == 1) {
             this.deleteDialogVisible = false
-            this.$alert(res.msg)
+            this.$alert(res.message)
             this.getCaseData()
             this.$router.push({name: 'case'})
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
       selectData(data) {
         this.currentCase = data.title
         this.$router.push({name: 'case', params: {id: this.proId, case_id: data.id}})
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + data.title})
       },
       operationDialog(ope, casetitle) {
         switch (ope) {
@@ -161,7 +168,17 @@
       },
     },
     mounted() {
-      this.getCaseData();
+      this.getCaseData()
+    },
+    computed: {
+      proId() {
+        return this.$store.state.tableData.curreentPro.id
+      }
+    },
+    watch: {
+      proId() {
+        this.getCaseData()
+      }
     }
   }
 </script>

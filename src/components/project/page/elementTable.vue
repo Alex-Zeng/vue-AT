@@ -7,6 +7,7 @@
       fit highlight-current-row
       size="small"
     >
+
       <el-table-column
         label="ID"
         width="60">

@@ -1,38 +1,42 @@
 <template>
-  <el-container class="root_container">
-
-          <el-aside >
-<!--        <project ></project>-->
+  <el-container >
+    <el-header>
+      <Header></Header>
+    </el-header>
+    <el-container>
+      <el-aside width="200px">
         <aside-nav></aside-nav>
       </el-aside>
-    <el-container>
-
       <el-main>
-        <keep-alive>
-          <router-view></router-view>
-        </keep-alive>
+        <tab-views ></tab-views>
       </el-main>
     </el-container>
   </el-container>
-
 </template>
 
 <script>
 
-  import AsideNav from '@/components/common/AsideNav'
+  import Header from '@/components/common/Header'
+  import tabViews from '@/components/common/tabViews'
+  import asideNav from '@/components/common/asideNav'
 
   export default {
 
     name: "Home",
     components: {
-      AsideNav,
+      Header,
+      tabViews,
+      asideNav,
     }
   }
 </script>
 
 <style scoped lang="less">
   .el-header {
-    padding: 0 5px!important;
+    height: 60px;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
   }
 
   .root_container {

@@ -4,7 +4,7 @@
               :data="$store.state.tableData.equipmentData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
               fit highlight-current-row style="width: 100%"
               size="small"
-              expand-row-keys
+              default-expand-all
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -57,9 +57,9 @@
         </template>
       </el-table-column>
 
-            <el-table-column label="状态">
+      <el-table-column label="状态">
         <template slot-scope="{row}">
-          <span >{{ row.status == 0 ? "停止":"运行中"}}</span>
+          <span>{{ row.status == 0 ? "停止":"运行中"}}</span>
         </template>
       </el-table-column>
 
@@ -146,6 +146,7 @@
 
 <script>
   import {postEquipment, editEquipment, deleteEquipment} from '../../api/api'
+  import {checkJson} from '@/utils/tableDate'
 
   export default {
     name: "Equipment",
@@ -175,50 +176,50 @@
         this.listLoading = false
       },
       addData() {
-        postEquipment(this.form).then(res => {
-          if (res.status == 1) {
-            this.search = ''
-            this.addForm = false
-            this.getList()
-            this.$message(res.message)
-          }
-        })
-
+        if (checkJson(this.form.setting_args) == true) {
+          postEquipment(this.form).then(res => {
+            if (res.status == 1) {
+              this.search = ''
+              this.addForm = false
+              this.getList()
+              this.$message(res.message)
+            }
+          })
+        }
       },
       cancelEdit(row) {
         row.edit = false
         row.title = row.originalTitle
         row.setting_args = row.originalSetting_args
-
         row.remoteHost = row.originalRemoteHost
         row.remotePort = row.originalRemotePort
-
-
         this.$message({
           message: '放弃编辑',
           type: 'warning'
         })
       },
       confirmEdit(row) {
-        row.edit = false
-        row.originalTitle = row.title
-        row.originalSetting_args = row.setting_args
-        row.originalRemoteHost = row.remoteHost
-        row.originalRemotePort = row.remotePort
-        editEquipment(row.id, row).then(res => {
-          if (res.status == 1) {
-            this.$message({
-              message: '编辑成功',
-              type: 'success'
-            })
-            this.getList()
-          } else {
-            this.$message({
-              message: res.message,
-              type: 'error'
-            })
-          }
-        })
+        if (checkJson(row.setting_args)) {
+          row.edit = false
+          row.originalTitle = row.title
+          row.originalSetting_args = row.setting_args
+          row.originalRemoteHost = row.remoteHost
+          row.originalRemotePort = row.remotePort
+          editEquipment(row.id, row).then(res => {
+            if (res.status == 1) {
+              this.$message({
+                message: '编辑成功',
+                type: 'success'
+              })
+              this.getList()
+            } else {
+              this.$message({
+                message: res.message,
+                type: 'error'
+              })
+            }
+          })
+        }
       },
       deleteRow(rowId) {
         this.$alert('确定删除?', '删除', {

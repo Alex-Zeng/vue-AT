@@ -1,15 +1,7 @@
 <template>
   <div>
-    <!--    <div style="margin-bottom: 20px;">-->
-    <!--      <el-button-->
-    <!--        size="small"-->
-    <!--        @click="addTab(editableTabsValue)"-->
-    <!--      >-->
-
-    <!--      </el-button>-->
-    <!--    </div>-->
     <el-tabs v-model="$store.state.tabViews.editableTabsValue+''" type="card" closable @tab-remove="removeTab"
-             @tab-click="handleClick">
+             @tab-click="handleClick" >
       <el-tab-pane
         v-for="(item, index) in $store.state.tabViews.visitedViews"
         :key="item.index"
@@ -38,6 +30,7 @@
       removeTab(targetName) {
         this.$store.dispatch('tabViews/delView', targetName)
         let toPath
+        // 还有tab,则循环列表,路由跳转到当前选中的tab页面
         if (this.$store.state.tabViews.visitedViews) {
           for (const item of this.$store.state.tabViews.visitedViews) {
             if (this.$store.state.tabViews.editableTabsValue == item.index) {

@@ -1,6 +1,7 @@
 <template>
   <div>
     <div align="center">
+      <h5>页面对象PO</h5>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus" @click="operationDialog(2,'')"></el-button>
         <el-button size="mini" type="primary" icon="el-icon-edit"
@@ -9,9 +10,13 @@
                    @click="operationDialog(3,currentPage)"></el-button>
       </el-button-group>
     </div>
-    <el-menu-item v-for="page in pageList" :index="'1-'+proId+'-1-'+page.id" :key="page.id" @click="selectPage(page)">
-      {{page.title}}
-    </el-menu-item>
+    <el-menu
+      default-active="2"
+      class="el-menu-vertical-demo">
+      <el-menu-item v-for="page in pageList" :index="'1-'+proId+'-1-'+page.id" :key="page.id" @click="selectPage(page)">
+        <span slot="title">{{page.title}}</span>
+      </el-menu-item>
+    </el-menu>
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
@@ -61,7 +66,6 @@
 
   export default {
     name: 'listCard',
-    props: ['proId'],
     data() {
       return {
         search: '',
@@ -138,6 +142,7 @@
       selectPage(data) {
         this.currentPage = data.title
         this.$router.push({name: 'page', params: {id: this.proId, page_id: data.id}})
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + data.title})
       },
       operationDialog(ope, pagetitle) {
         switch (ope) {
@@ -158,6 +163,16 @@
     },
     mounted() {
       this.getPageData()
+    },
+    computed: {
+      proId() {
+        return this.$store.state.tableData.curreentPro.id
+      }
+    },
+    watch: {
+      proId() {
+        this.getPageData()
+      }
     }
   }
 </script>

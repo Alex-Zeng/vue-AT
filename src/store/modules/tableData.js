@@ -4,6 +4,7 @@ import Vue from 'vue'
 
 const state = {
   deafultPageId: '',
+  curreentPro: '',
   elementData: [],
   actionData: [],
   functionData: [],
@@ -25,6 +26,12 @@ const mutations = {
   },
   SET_PROJECTDATA: (state, argsList) => {
     state.projectData = argsList
+    if (argsList.length > 0) {
+      state.curreentPro = argsList[0]
+    }
+  },
+  CHANGE_PROJECTDATA: (state, args) => {
+    state.curreentPro = args
   },
   SET_EQUIPMENTDATA: (state, argsList) => {
     state.equipmentData = argsList
@@ -37,10 +44,11 @@ const actions = {
       let datas = res.data.project_list
       commit('SET_PROJECTDATA', datas)
     })
-
   },
 
-
+  changeProjects({commit}, args) {
+    commit('CHANGE_PROJECTDATA', args)
+  },
   getElementData({commit}, args) {
     getElementList(args.projectId, args.pageId).then(res => {
       if (res.status == 1) {

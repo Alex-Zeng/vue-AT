@@ -18,6 +18,19 @@
           <span v-else>{{ row.rank }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="是否跳过" align="center" prop="rank" width="120">
+        <template slot-scope="{row}">
+          <el-switch
+            v-model="row.skip"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+            @change="confirmEdit(row)"
+          >
+          </el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="操作页面" align="center">
         <template slot-scope="{row}">
           <template v-if="row.edit">
@@ -66,7 +79,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
+          <el-button type="primary" @click="addNew">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
           <el-input
             v-model="search"
@@ -114,10 +127,10 @@
     </el-table>
     <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addForm">
-      <el-form :model="form" >
+    <el-dialog title="添加" :visible.sync="addForm" style="text-align: left;">
+      <el-form :model="form">
         <el-form-item label="步骤：" :label-width="formLabelWidth">
-          <el-input v-model.number="form.rank"  placeholder="请输入 正整数且不重复"></el-input>
+          <el-input v-model.number="form.rank" placeholder="请输入 正整数且不重复"></el-input>
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-select v-model="form.page_id" placeholder="请选择页面" size="mini"
@@ -127,6 +140,12 @@
           <el-select v-model="form.action_id" placeholder="请选择方法" size="mini">
             <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
           </el-select>
+        </el-form-item>
+                <el-form-item label="输入参数：" :label-width="formLabelWidth">
+          <el-input v-model="form.input_key" placeholder="输入参数名,每个用例只允许一个输出参数名"></el-input>
+        </el-form-item>
+                <el-form-item label="输出参数：" :label-width="formLabelWidth">
+          <el-input v-model="form.output_key" placeholder="输出参数名,每个用例只允许一个输出参数名"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -155,6 +174,8 @@
           rank: '',
           page_id: '',
           action_id: '',
+          input_key: '',
+          output_key: '',
         },
         formLabelWidth: '120px',
       }
@@ -172,6 +193,14 @@
         } else {
           return false;
         }
+      },
+      addNew() {
+        this.addForm = true
+        this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
+        this.form.page_id = ''
+        this.form.action_id = ''
+        this.form.input_key = ''
+        this.form.output_key = ''
       },
       addData() {
         if (this.isRealNum(this.form.rank) != true) {
@@ -199,6 +228,7 @@
         row.originalRank = row.rank
         row.originalActionId = row.action_id
         row.originalPageId = row.page_id
+        row.originalSkip = row.skip
 
         putStep(this.$route.params.id, this.$route.params.case_id, row.id, row).then(res => {
           if (res.status == 1) {
@@ -219,6 +249,7 @@
         row.rank = row.originalRank
         row.action_id = row.originalActionId
         row.page_id = row.originalPageId
+        row.skip = row.originalSkip
 
         row.edit = false
         this.$message({
@@ -280,6 +311,7 @@
                 v.originalRank = v.rank //  will be used when user click the cancel botton
                 v.originalActionId = v.action_id
                 v.originalPageId = v.page_id
+                v.originalSkip = v.skip
                 return v
               })
             } else {

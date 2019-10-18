@@ -102,7 +102,7 @@
     </el-table>
     <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addForm">
+    <el-dialog title="添加" :visible.sync="addForm" style="text-align: left;">
       <el-form :model="form">
         <el-form-item label="标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>

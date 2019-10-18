@@ -6,12 +6,40 @@
       :data="tableData.filter(data => !search || data.case_title.toLowerCase().includes(search.toLowerCase())|| data.rank.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
-      border
+      :row-key="getRowKeys"
+      :expand-row-keys="expands"
       :default-sort="{prop: 'rank', order: 'ascending'}"
-
     >
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="输入参数:">
+              <template v-if="props.row.edit">
+                <el-input
+                  styel="width: 600px"
+                  class="text-input"
+                  type="textarea"
+                  :autosize="{ minRows: 6, maxRows: 8}"
+                  placeholder='请输入参数 json形式,如
+                {
+                "username":["test001","test002"],
+                "password":["123456","abcdef"]
+                }'
+                  v-model="props.row.input_args">
+                </el-input>
+              </template>
+              <div v-else>
+                <div v-for="(v,k) in JSON.parse(props.row.input_args)">
+                  <h5>{{k}}:</h5>
+                  <div v-for="item  in v">{{item}}</div>
+                </div>
+              </div>
 
-      <el-table-column label="执行顺序" align="center" prop="rank">
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
+      <el-table-column label="执行顺序" align="center" prop="rank" width="80">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.rank" class="edit-input" size="mini"/>
@@ -19,7 +47,20 @@
           <span v-else>{{ row.rank }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="用例" align="center" prop="case_title">
+      <el-table-column label="是否跳过" align="center" prop="rank" width="120">
+        <template slot-scope="{row}">
+          <el-switch
+            v-model="row.skip"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+            @change="confirmEdit(row)"
+          >
+          </el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="用例" align="center" prop="case_title" width="200">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
@@ -33,15 +74,25 @@
           <span v-else>{{ row.case_title }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="输入参数" align="center">
+        <template slot-scope="{row}">
+          <span v-for="item in row.input_keys">{{ item }}, </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="输出参数" align="center">
+        <template slot-scope="{row}">
 
+          <span v-for="item in row.output_keys">{{ item }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="update_datetime"
         label="更新时间"
         align="center">
       </el-table-column>
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="操作" fixed="right" width="200">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
+          <el-button type="primary" @click="addNew">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
           <el-input
             v-model="search"
@@ -71,7 +122,7 @@
               type="primary"
               size="mini"
               icon="el-icon-edit"
-              @click="row.edit=!row.edit;getCaseData()"
+              @click="row.edit=!row.edit;expands.push(row.id);getCaseData()"
             >
               编辑
             </el-button>
@@ -89,16 +140,37 @@
     </el-table>
     <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addForm">
+    <el-dialog title="添加" :visible.sync="addForm" class="dialog-add">
       <el-form :model="form">
         <el-form-item label="执行顺序：" :label-width="formLabelWidth">
           <el-input v-model="form.rank" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="用例：" :label-width="formLabelWidth">
-          <el-select v-model="form.case_id" placeholder="请选择用例" size="mini"
-                     @change="getCaseData();">
-            <el-option v-for="item in caseData" :label="item.title" :value="item.id" :key="item.id"></el-option>
-          </el-select>
+          <template slot-scope="scope">
+            <el-select v-model="form.case_id" placeholder="请选择用例" size="mini" @change="selectOption($event,scope)">
+              <el-option v-for="item in caseData" :label="item.title" :value="item.id" :key="item.id"></el-option>
+            </el-select>
+          </template>
+        </el-form-item>
+        <el-form-item label="输入参数：" :label-width="formLabelWidth">
+          <span>{{inputK}}</span>
+        </el-form-item>
+        <el-form-item label="输出参数：" :label-width="formLabelWidth">
+          <span>{{outputK}}</span>
+        </el-form-item>
+        <el-form-item label="输入参数:" :label-width="formLabelWidth">
+          <el-input
+            styel="width: 500px"
+            class="text-input"
+            type="textarea"
+            :autosize="{ minRows: 6, maxRows: 8}"
+            placeholder='请输入参数 json形式,如
+                {
+                "username":["test001","test002"],
+                "password":["123456","abcdef"]
+                }'
+            v-model="form.input_args">
+          </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -112,6 +184,7 @@
 
 <script>
   import {postSuitStep, getSuitStepList, putSuitStep, deleteSuitStep, getCaseList} from '@/api/api'
+  import {formatArgs, checkJson} from '@/utils/tableDate'
 
   export default {
     name: 'suitStepTable',
@@ -122,51 +195,85 @@
         caseData: [],
         defaultDataId: '',
         addForm: false,
+        inputK: '',
+        outputK: '',
+        getRowKeys(row) {
+          return row.id;
+        },
+        expands: [],
         form: {
           rank: '',
           case_id: '',
+          input_args: '',
         },
-        formLabelWidth: '120px'
+        formLabelWidth: '120px',
       }
     },
 
     methods: {
+      addNew() {
+        this.addForm = true
+        this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
+        this.form.case_id = ''
+        this.form.input_args = ''
+        this.inputK = ''
+        this.outputK = ''
+      },
+      selectOption(e, s) {
+        this.form.input_args = ''
+        for (let i = 0; i < this.caseData.length; i++) {
+          if (this.caseData[i].id == e)
+            this.inputK = this.caseData[i].input_keys
+          this.outputK = this.caseData[i].output_keys
+        }
+        this.form.input_args = formatArgs(this.inputK)
+      },
       addData() {
-        postSuitStep(this.$route.params.id, this.$route.params.suit_id, this.form).then(res => {
-          if (res.status == 1) {
-            this.addForm = false
-            this.$message({
-              message: '添加成功',
-              type: 'success'
-            })
-            this.getTableData()
-            this.search = ''
-          } else {
-            this.$alert(res.message)
-          }
-        })
+        if (checkJson(this.form.input_args)) {
+          postSuitStep(this.$route.params.id, this.$route.params.suit_id, this.form).then(res => {
+            if (res.status == 1) {
+              this.addForm = false
+              this.$message({
+                message: '添加成功',
+                type: 'success'
+              })
+              this.getTableData()
+              this.search = ''
+            } else {
+              this.$alert(res.message)
+            }
+          })
+        }
+
       },
       confirmEdit(row) {
-        row.edit = false
-        row.originalRank = row.rank
-        row.originalCaseTitle = row.case_title
-        putSuitStep(this.$route.params.id, this.$route.params.suit_id, row.id, row).then(res => {
-          if (res.status == 1) {
-            this.$message({
-              message: '编辑成功',
-              type: 'success'
-            })
-            this.getTableData()
-          } else {
+        if (checkJson(row.input_args)) {
+          row.edit = false
+          row.originalRank = row.rank
+          row.originalCaseTitle = row.case_title
+          row.originalSkip = row.skip
+          row.originalInputArgs = row.input_args
+          putSuitStep(this.$route.params.id, this.$route.params.suit_id, row.id, row).then(res => {
+            if (res.status == 1) {
+              this.$message({
+                message: '编辑成功',
+                type: 'success'
+              })
+              this.getTableData()
+            } else {
 
-          }
-        })
-
+            }
+          })
+        }
       },
       cancelEdit(row) {
         row.rank = row.originalRank
         row.case_title = row.originalCaseTitle
         row.edit = false
+        row.skip = row.originalSkip
+        row.input_args = row.originalInputArgs
+        let index = this.expands.indexOf(row.id)
+        delete this.expands[index]
         this.$message({
           message: '放弃编辑',
           type: 'warning'
@@ -212,6 +319,8 @@
                 this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
                 v.originalRank = v.rank //  will be used when user click the cancel botton
                 v.originalCaseTitle = v.case_title
+                v.originalSkip = v.skip
+                v.originalInputArgs = v.input_args
                 return v
               })
             } else {
@@ -223,15 +332,17 @@
             console.log(err);
           }
         )
-      }
-    },
+      },
+    }
+    ,
     mounted() {
       if (this.$route.name == 'suit') {
         this.getTableData()
         this.getCaseData()
 
       }
-    },
+    }
+    ,
     watch: {
       '$route'(to, from) { //监听路由是否变化
         if (to.name == 'suit') {// 判断条件1  判断传递值的变化
@@ -244,5 +355,8 @@
 </script>
 
 <style>
+  .dialog-add {
+    text-align: left;
+  }
 
 </style>

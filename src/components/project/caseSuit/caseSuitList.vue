@@ -1,6 +1,8 @@
 <template>
   <div>
+
     <div align="center">
+      <h5>用例集</h5>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus" @click="operationDialog(2,'')"></el-button>
         <el-button size="mini" type="primary" icon="el-icon-edit"
@@ -9,13 +11,20 @@
                    @click="operationDialog(3,currentData)"></el-button>
       </el-button-group>
     </div>
-    <el-menu-item v-for="item in suitList" :index="'1-' + proId + '-3' + item.id"  :key="item.id" @click="selectData(item)">
-      {{item.title}}
-    </el-menu-item>
 
+    <el-menu
+      default-active="2"
+      class="el-menu-vertical-demo"
+    >
+      <el-menu-item v-for="item in suitList" :index="'1-' + proId + '-3' + item.id" :key="item.id"
+                    @click="selectData(item)">
+        <span slot="title">{{item.title}}</span>
+      </el-menu-item>
+
+    </el-menu>
     <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addForm">
+    <el-dialog title="添加" :visible.sync="addForm" style="text-align: left;">
       <el-form :model="form">
         <el-form-item label="用例集名称：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
@@ -62,7 +71,6 @@
 
   export default {
     name: 'caseSuitList',
-    props: ['proId'],
     data() {
       return {
         search: '',
@@ -113,7 +121,7 @@
       },
       delData() {
         let data_id = this.$route.params.suit_id
-        deleteSuit(this.proId,data_id).then(res => {
+        deleteSuit(this.proId, data_id).then(res => {
           if (res.status == 1) {
             this.deleteDialogVisible = false
             this.$alert(res.msg)
@@ -127,6 +135,7 @@
       selectData(data) {
         this.currentData = data.title
         this.$router.push({name: 'suit', params: {id: this.proId, suit_id: data.id}})
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + data.title})
       },
       operationDialog(ope, datatitle) {
         switch (ope) {
@@ -160,7 +169,17 @@
       },
     },
     mounted() {
-      this.getSuitData();
+      this.getSuitData()
+    },
+    computed: {
+      proId() {
+        return this.$store.state.tableData.curreentPro.id
+      }
+    },
+    watch: {
+      proId() {
+        this.getSuitData()
+      }
     }
   }
 </script>
