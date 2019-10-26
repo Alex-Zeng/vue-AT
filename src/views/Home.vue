@@ -1,5 +1,5 @@
 <template>
-  <el-container >
+  <el-container  class="root_container">
     <el-header>
       <Header></Header>
     </el-header>
@@ -34,7 +34,7 @@
 <style scoped lang="less">
   .el-header {
     height: 60px;
-    color: #333;
+    color: #000000;
     text-align: center;
     line-height: 60px;
   }

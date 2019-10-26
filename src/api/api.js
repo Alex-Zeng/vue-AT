@@ -166,20 +166,28 @@ export const deleteFunction = (function_id) => {
 };
 
 // -----------------设备信息----------------
-//添加Function
+//添加设备
 
 export const postEquipment = (formData) => {
   return post(`/runtest/equipment`,formData).then(res => res);
 };
-//获取Function列表
+//获取设备列表
 export const getEquipmentList = () => {
   return get(`/runtest/equipment`).then(res => res);
 };
-// 更新Function
+// 更新设备
 export const editEquipment = (e_id, formData ) => {
   return put(`/runtest/equipment/${e_id}`,formData).then(res => res);
 };
-// 删除Function
+// 删除设备
 export const deleteEquipment = (e_id) => {
   return remove(`/runtest/equipment/${e_id}`).then(res => res);
+};
+//启动设备
+export const startEquipment = (e_id,) => {
+  return get(`/runtest/equipment/${e_id}/start`, {}, {timeout: 30000}).then(res => res);
+};
+//停止设备
+export const stopEquipment = (e_id,formData) => {
+  return post(`/runtest/equipment/${e_id}/stop`,formData).then(res => res);
 };

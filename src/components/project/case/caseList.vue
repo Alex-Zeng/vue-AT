@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div align="center">
+    <div align="center" >
       <h5>用例</h5>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus" @click="operationDialog(2,'')"></el-button>
@@ -14,6 +14,7 @@
     <el-menu
       default-active="2"
       class="el-menu-vertical-demo"
+
     >
       <el-menu-item v-for="item in caseList" :index="'1-' + proId + '-2' + item.id" :key="item.id"
                     @click="selectData(item)">

@@ -79,8 +79,12 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addNew">新增<i class="el-icon-plus el-icon--right"></i>
-          </el-button>
+          <el-button-group>
+            <el-button type="primary" @click="addNew" size="mini">新增<i class="el-icon-plus el-icon--right"></i>
+            </el-button>
+            <el-button type="primary" size="mini" @click="debugForm = true">调试</el-button>
+          </el-button-group>
+
           <el-input
             v-model="search"
             size="mini"
@@ -141,16 +145,40 @@
             <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
           </el-select>
         </el-form-item>
-                <el-form-item label="输入参数：" :label-width="formLabelWidth">
+        <el-form-item label="输入参数：" :label-width="formLabelWidth">
           <el-input v-model="form.input_key" placeholder="输入参数名,每个用例只允许一个输出参数名"></el-input>
         </el-form-item>
-                <el-form-item label="输出参数：" :label-width="formLabelWidth">
+        <el-form-item label="输出参数：" :label-width="formLabelWidth">
           <el-input v-model="form.output_key" placeholder="输出参数名,每个用例只允许一个输出参数名"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addForm = false;">取 消</el-button>
         <el-button type="primary" @click="addData">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!--    调试-->
+    <el-dialog title="添加" :visible.sync="debugForm" style="text-align: center;">
+      <div >
+        <el-select v-model="equipmentId" placeholder="请选择设备" size="mini"
+                   @change="form.action_id='';getActionData(form.page_id);">
+          <el-option v-for="item in $store.state.tableData.equipmentData" :label="item.title" :value="item.id"
+                     :key="item.id"></el-option>
+        </el-select>
+
+      </div>
+      <div v-for="item in $store.state.tableData.equipmentData" v-if="item.id == equipmentId" style="text-align: left;">
+        <h1>ID: {{item.id}}</h1>
+        <h1>设备: {{item.title}}</h1>
+        <h1>appium地址: {{item.remoteHost}}</h1>
+        <h1>appium端口: {{item.remotePort}}</h1>
+        <h1>运行状态: {{item.status== 0 ? "停止":"运行中"}}</h1>
+        <h1>参数: {{item.setting_args}}</h1>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="debugForm = false;">取 消</el-button>
+        <el-button type="primary" @click="confirmDebug">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -166,10 +194,13 @@
       return {
         search: '',
         tableData: [],
+        EquipmentData: [],
         actData: [],
         pageData: [],
         defaultDataId: '',
+        equipmentId: '',
         addForm: false,
+        debugForm: false,
         form: {
           rank: '',
           page_id: '',
@@ -201,6 +232,12 @@
         this.form.action_id = ''
         this.form.input_key = ''
         this.form.output_key = ''
+      },
+      confirmDebug() {
+        //调试
+
+        this.equipmentId
+
       },
       addData() {
         if (this.isRealNum(this.form.rank) != true) {

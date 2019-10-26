@@ -1,10 +1,12 @@
 <template>
   <div class="app-container">
-    <el-table v-loading="listLoading"
+    <el-table v-loading="listLoading "
               :data="$store.state.tableData.equipmentData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
               fit highlight-current-row style="width: 100%"
               size="small"
-              default-expand-all
+              :row-key="getRowKeys"
+              @row-click="rowClick"
+              :expand-row-keys="expands"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -30,7 +32,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="设备名">
+      <el-table-column label="设备名" width="200">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -39,7 +41,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Appium地址">
+      <el-table-column label="Appium地址" width="120">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.remoteHost" class="edit-input" size="mini"/>
@@ -48,7 +50,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Appium端口">
+      <el-table-column label="Appium端口" width="120">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.remotePort" class="edit-input" size="mini"/>
@@ -57,15 +59,21 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="状态">
+      <el-table-column label="状态" width="120">
         <template slot-scope="{row}">
           <span>{{ row.status == 0 ? "停止":"运行中"}}</span>
         </template>
       </el-table-column>
 
+      <el-table-column label="sessionID">
+        <template slot-scope="{row}">
+          <span>{{ row.session_id}}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" label="操作">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right" size="mini"></i>
+          <el-button type="primary" @click="addForm=true" icon="el-icon-plus" size="mini">新增
           </el-button>
           <el-input
             v-model="search"
@@ -90,23 +98,31 @@
             </el-button>
           </div>
 
-          <div v-else-if="row.status == 0">
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-edit"
-              @click="row.edit=!row.edit"
-            >
-              编辑
-            </el-button>
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-edit"
-              @click="deleteRow(row.id)"
-            >
-              删除
-            </el-button>
+          <div v-else>
+            <el-button-group>
+              <el-button v-if="row.status == 1" type="danger" icon="el-icon-video-pause" size="mini"
+                         @click="stopEt(row)">停止
+              </el-button>
+              <el-button v-else type="primary" icon="el-icon-video-play" size="mini" @click="startEt(row)">启动
+              </el-button>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-edit"
+                @click="row.edit=!row.edit"
+              >
+                编辑
+              </el-button>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-delete"
+                @click="deleteRow(row.id)"
+              >
+                删除
+              </el-button>
+            </el-button-group>
+
           </div>
         </template>
       </el-table-column>
@@ -145,7 +161,7 @@
 </template>
 
 <script>
-  import {postEquipment, editEquipment, deleteEquipment} from '../../api/api'
+  import {postEquipment, editEquipment, deleteEquipment, startEquipment, stopEquipment} from '../../api/api'
   import {checkJson} from '@/utils/tableDate'
 
   export default {
@@ -158,6 +174,10 @@
         listLoading: true,
         formLabelWidth: '140px',
         textareaWidth: '520px',
+        getRowKeys(row) {
+          return row.id;
+        },
+        expands: [],
         form: {
           title: "",
           setting_args: "",
@@ -170,6 +190,9 @@
       this.getList()
     },
     methods: {
+      rowClick(row, column, even) {
+        this.expands = [row.id]
+      },
       getList() {
         this.listLoading = true
         this.$store.dispatch('tableData/getEquipmentData')
@@ -238,7 +261,39 @@
             }
           })
         });
-      }
+      },
+
+       startEt(row) {
+         startEquipment(row.id).then( res => {
+          if (res.status == 1) {
+            this.search = ''
+            this.$message({
+              type: 'info',
+              message: res.message
+            })
+            row.status = 1
+            row.session_id = res.data
+          } else {
+            this.$alert(res.message)
+          }
+        })
+      },
+       stopEt(row) {
+         stopEquipment(row.id, {'session_id':row.session_id}).then(res => {
+          if (res.status == 1) {
+            this.search = ''
+            this.$message({
+              type: 'info',
+              message: res.message
+            });
+            row.status = 0
+            row.session_id = ''
+          } else {
+            row.status = 0
+            this.$alert(res.message)
+          }
+        })
+      },
     },
   }
 </script>

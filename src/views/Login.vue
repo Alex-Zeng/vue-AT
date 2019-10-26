@@ -37,8 +37,8 @@
     data() {
       return {
         numberValidateForm: {
-          username: '',
-          password: ''
+          username: 'test001',
+          password: '123456'
         }
       }
     },
