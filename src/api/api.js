@@ -87,6 +87,12 @@ export const putCase = (projectId, caseId, formData ) => {
 export const deleteCase = (projectId, caseId) => {
   return remove(`/uitest/projects/${projectId}/cases/${caseId}`).then(res => res);
 };
+//调试用例
+export const debugCase = (projectId, caseId, formData) => {
+  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`,formData).then(res => res);
+};
+
+
 
 // ----------------用例步骤操作-----------------
 //添加步骤
@@ -189,5 +195,5 @@ export const startEquipment = (e_id,) => {
 };
 //停止设备
 export const stopEquipment = (e_id,formData) => {
-  return post(`/runtest/equipment/${e_id}/stop`,formData).then(res => res);
+  return get(`/runtest/equipment/${e_id}/stop`,formData).then(res => res);
 };

@@ -18,7 +18,7 @@
           <span v-else>{{ row.rank }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否跳过" align="center" prop="rank" width="120">
+      <el-table-column label="是否跳过" align="center"  width="120">
         <template slot-scope="{row}">
           <el-switch
             v-model="row.skip"
@@ -29,6 +29,27 @@
             @change="confirmEdit(row)"
           >
           </el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否截图" align="center"  width="120">
+        <template slot-scope="{row}">
+          <el-switch
+            v-model="row.take_screen_shot"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+            @change="confirmEdit(row)"
+          >
+          </el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="延时" align="center"  width="80">
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-input v-model.number="row.wait_time" class="edit-input" size="mini"/>
+          </template>
+          <span v-else>{{ row.wait_time }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作页面" align="center">
@@ -75,16 +96,15 @@
       <el-table-column
         prop="update_datetime"
         label="更新时间"
-        align="center">
+        align="center"
+        width="160px">
       </el-table-column>
-      <el-table-column align="center" label="操作">
+      <el-table-column align="right" label="操作" fixed="right" width="160px">
         <template slot="header" slot-scope="scope">
           <el-button-group>
-            <el-button type="primary" @click="addNew" size="mini">新增<i class="el-icon-plus el-icon--right"></i>
-            </el-button>
+            <el-button type="primary" @click="addNew" size="mini">新增</el-button>
             <el-button type="primary" size="mini" @click="debugForm = true">调试</el-button>
           </el-button-group>
-
           <el-input
             v-model="search"
             size="mini"
@@ -145,6 +165,29 @@
             <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="是否跳过：" :label-width="formLabelWidth">
+          <el-switch
+            v-model="form.skip"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+          >
+          </el-switch>
+        </el-form-item>
+        <el-form-item label="是否截图：" :label-width="formLabelWidth">
+          <el-switch
+            v-model="form.take_screen_shot"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+          >
+          </el-switch>
+        </el-form-item>
+        <el-form-item label="延时：" :label-width="formLabelWidth">
+          <el-input v-model.number="form.wait_time" placeholder="操作完后延迟几秒截图"></el-input>
+        </el-form-item>
         <el-form-item label="输入参数：" :label-width="formLabelWidth">
           <el-input v-model="form.input_key" placeholder="输入参数名,每个用例只允许一个输出参数名"></el-input>
         </el-form-item>
@@ -159,8 +202,8 @@
     </el-dialog>
 
     <!--    调试-->
-    <el-dialog title="添加" :visible.sync="debugForm" style="text-align: center;">
-      <div >
+    <el-dialog title="调试" :visible.sync="debugForm" style="text-align: center;">
+      <div>
         <el-select v-model="equipmentId" placeholder="请选择设备" size="mini"
                    @change="form.action_id='';getActionData(form.page_id);">
           <el-option v-for="item in $store.state.tableData.equipmentData" :label="item.title" :value="item.id"
@@ -175,6 +218,20 @@
         <h1>appium端口: {{item.remotePort}}</h1>
         <h1>运行状态: {{item.status== 0 ? "停止":"运行中"}}</h1>
         <h1>参数: {{item.setting_args}}</h1>
+        <el-input
+          styel="width: 500px"
+          class="text-input"
+          type="textarea"
+          :autosize="{ minRows: 6, maxRows: 8}"
+          placeholder='请输入参数 json形式,如
+                {
+                "username":["test001","test002"],
+                "password":["123456","abcdef"]
+                }
+         如果后面的用例要使用之前用例输出的参数,则在前面是用 双$$符号即可:如 $$member_code'
+
+          v-model="debugInputArg">
+        </el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="debugForm = false;">取 消</el-button>
@@ -186,19 +243,22 @@
 </template>
 
 <script>
-  import {postStep, getStepList, putStep, deleteStep, getActionList, getPageList} from '@/api/api'
+  import {postStep, getStepList, putStep, deleteStep, getActionList, getPageList, debugCase} from '@/api/api'
 
   export default {
     name: 'stepTable',
     data() {
       return {
         search: '',
+        projectId: '',
+        caseId: '',
         tableData: [],
         EquipmentData: [],
         actData: [],
         pageData: [],
         defaultDataId: '',
         equipmentId: '',
+        debugInputArg: '',
         addForm: false,
         debugForm: false,
         form: {
@@ -207,6 +267,9 @@
           action_id: '',
           input_key: '',
           output_key: '',
+          take_screen_shot: 0,
+          wait_time: 0,
+          skip: 0,
         },
         formLabelWidth: '120px',
       }
@@ -230,14 +293,11 @@
         this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
         this.form.page_id = ''
         this.form.action_id = ''
+        this.form.take_screen_shot = 1
+        this.form.wait_time = 0
         this.form.input_key = ''
         this.form.output_key = ''
-      },
-      confirmDebug() {
-        //调试
-
-        this.equipmentId
-
+        this.form.skip = 0
       },
       addData() {
         if (this.isRealNum(this.form.rank) != true) {
@@ -266,8 +326,10 @@
         row.originalActionId = row.action_id
         row.originalPageId = row.page_id
         row.originalSkip = row.skip
+        row.originalTakeScreenShot = row.take_screen_shot
+        row.originalWaitTime = row.wait_time
 
-        putStep(this.$route.params.id, this.$route.params.case_id, row.id, row).then(res => {
+        putStep(this.projectId, this.caseId, row.id, row).then(res => {
           if (res.status == 1) {
             this.$message({
               message: '编辑成功',
@@ -287,7 +349,8 @@
         row.action_id = row.originalActionId
         row.page_id = row.originalPageId
         row.skip = row.originalSkip
-
+        row.wait_time = row.originalWaitTime
+        row.take_screen_shot = row.originalTakeScreenShot
         row.edit = false
         this.$message({
           message: '放弃编辑',
@@ -299,7 +362,7 @@
           confirmButtonText: '确定',
           cancelButtonText: '取消',
         }).then(() => {
-            deleteStep(this.$route.params.id, this.$route.params.case_id, rowId).then(res => {
+            deleteStep(this.projectId, this.caseId, rowId).then(res => {
               if (res.status == 1) {
                 this.getTableData()
                 this.search = ''
@@ -315,9 +378,15 @@
         ).catch(() => {
         })
       },
+      confirmDebug() {
+        let debugForm = {
+          e_id: this.equipmentId,
+          input_args: this.debugInputArg
+        }
+        debugCase(this.projectId, this.caseId, debugForm)
+      },
       getActionData(pageId) {
-        let projectId = this.$route.params.id
-        getActionList(projectId, pageId).then(
+        getActionList(this.projectId, pageId).then(
           res => {
             this.actData = res.data.data_list
           },
@@ -327,7 +396,6 @@
         )
       },
       getPageData() {
-        this.projectId = this.$route.params.id
         getPageList(this.projectId).then(
           res => {
             this.pageData = res.data.page_list
@@ -338,9 +406,7 @@
         )
       },
       getTableData() {
-        let projectId = this.$route.params.id
-        let caseId = this.$route.params.case_id
-        getStepList(projectId, caseId).then(
+        getStepList(this.projectId, this.caseId).then(
           res => {
             if (res.data.data_list.length > 0) {
               this.tableData = res.data.data_list.map(v => {
@@ -349,6 +415,8 @@
                 v.originalActionId = v.action_id
                 v.originalPageId = v.page_id
                 v.originalSkip = v.skip
+                v.originalWaitTime = v.wait_time
+                v.originalTakeScreenShot = v.take_screen_shot
                 return v
               })
             } else {
@@ -364,14 +432,19 @@
     },
     created() {
       if (this.$route.name == 'case') {
+        this.projectId = this.$route.params.id
+        this.caseId = this.$route.params.case_id
         this.getTableData()
         this.getPageData()
+        this.$store.dispatch('tableData/getEquipmentData')
 
       }
     },
     watch: {
       '$route'(to, from) { //监听路由是否变化
         if (to.name == 'case') {// 判断条件1  判断传递值的变化
+          this.projectId = this.$route.params.id
+          this.caseId = this.$route.params.case_id
           this.getTableData()
           this.getPageData()
         }

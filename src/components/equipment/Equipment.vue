@@ -100,7 +100,7 @@
 
           <div v-else>
             <el-button-group>
-              <el-button v-if="row.status == 1" type="danger" icon="el-icon-video-pause" size="mini"
+              <el-button v-if="row.session_id" type="danger" icon="el-icon-video-pause" size="mini"
                          @click="stopEt(row)">停止
               </el-button>
               <el-button v-else type="primary" icon="el-icon-video-play" size="mini" @click="startEt(row)">启动

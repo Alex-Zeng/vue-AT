@@ -168,7 +168,8 @@
                 {
                 "username":["test001","test002"],
                 "password":["123456","abcdef"]
-                }'
+                }
+如果后面的用例要使用之前用例输出的参数,则在前面是用 双$$符号即可:如 $$member_code'
             v-model="form.input_args">
           </el-input>
         </el-form-item>
@@ -222,9 +223,10 @@
       selectOption(e, s) {
         this.form.input_args = ''
         for (let i = 0; i < this.caseData.length; i++) {
-          if (this.caseData[i].id == e)
-            this.inputK = this.caseData[i].input_keys
-          this.outputK = this.caseData[i].output_keys
+          if (this.caseData[i].id == e){
+              this.inputK = this.caseData[i].input_keys
+              this.outputK = this.caseData[i].output_keys
+          }
         }
         this.form.input_args = formatArgs(this.inputK)
       },
