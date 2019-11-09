@@ -89,7 +89,7 @@ export const deleteCase = (projectId, caseId) => {
 };
 //调试用例
 export const debugCase = (projectId, caseId, formData) => {
-  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`,formData).then(res => res);
+  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`,formData,{timeout: 300000}).then(res => res);
 };
 
 

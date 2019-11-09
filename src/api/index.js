@@ -106,9 +106,9 @@ export function remove(url) {
  * @returns {Promise}
  */
 
-export function post(url, data = {}) {
+export function post(url, data = {},config) {
   return new Promise((resolve, reject) => {
-    axios.post(url, data)
+    axios.post(url, data,config)
       .then(response => {
         resolve(response.data);
       }, err => {
