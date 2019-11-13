@@ -53,13 +53,9 @@ const mutations = {
 }
 
 const actions = {
-  addView({dispatch}, view) {
-    dispatch('addVisitedView', view)
-  },
-  addVisitedView({commit}, view) {
+  addView({commit}, view) {
     commit('ADD_VISITED_VIEW', view)
   },
-
 
   delView({commit}, viewIndex) {
     commit('DEL_VISITED_VIEW', viewIndex)

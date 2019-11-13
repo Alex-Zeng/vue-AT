@@ -21,6 +21,7 @@ axios.interceptors.request.use(
     return config;
   },
   error => {
+
     return Promise.reject(err);
   }
 );
@@ -33,8 +34,12 @@ axios.interceptors.response.use(
     if (response.data.status == 2) {
 
       window.location.href = '#/login'
+    }if (response.data.status == 0) {
+      Vue.$alert(response.data.message)
+    }else {
+      return response;
     }
-    return response;
+
   },
   error => {
     return Promise.reject(error)

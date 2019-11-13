@@ -1,35 +1,47 @@
 <template>
   <div>
     <el-tabs v-model="$store.state.tabViews.editableTabsValue+''" type="card" closable @tab-remove="removeTab"
-             @tab-click="handleClick" >
+             @tab-click="handleClick">
       <el-tab-pane
-        v-for="(item, index) in $store.state.tabViews.visitedViews"
+        v-for="(item, index) in visitedViews"
         :key="item.index"
         :label="item.title"
         :name="item.index+''"
       >
-        <keep-alive>
-          <router-view></router-view>
-        </keep-alive>
+
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script>
+  import {mapGetters, mapState} from 'vuex';
 
   export default {
     name: 'tabViews',
     data() {
       return {}
     },
+    computed: {
+      ...mapState({
+        visitedViews: state => state.tabViews.visitedViews,
+      }),
+    },
     methods: {
-      handleClick(tab, event) {
-        this.$store.dispatch('tabViews/changeView', tab.name)
-        this.$router.push({path: this.$store.state.tabViews.visitedViews[tab.index].fullPath})
+      async handleClick(tab, event) {
+        if (this.$store.state.tabViews.editableTabsValue != tab.name) {
+          await this.$store.dispatch('tabViews/changeView', tab.name)
+          // console.log(this.$store.state.tabViews.visitedViews[tab.index])
+
+          this.$router.push({
+            name: this.$store.state.tabViews.visitedViews[tab.index].name,
+            params: this.$store.state.tabViews.visitedViews[tab.index].params
+          })
+        }
+
       },
       removeTab(targetName) {
         this.$store.dispatch('tabViews/delView', targetName)
-        let toPath
+        let toPath = '/home'
         // 还有tab,则循环列表,路由跳转到当前选中的tab页面
         if (this.$store.state.tabViews.visitedViews) {
           for (const item of this.$store.state.tabViews.visitedViews) {
@@ -39,7 +51,6 @@
           }
           this.$router.push({path: toPath})
         }
-
       }
     }
   }

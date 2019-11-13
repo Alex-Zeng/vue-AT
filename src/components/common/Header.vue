@@ -39,6 +39,10 @@
         <i class="el-icon-s-platform"></i>
         <span>设备列表</span>
       </el-menu-item>
+      <el-menu-item index="7" @click="showNav('execute')">
+        <i class="el-icon-s-platform"></i>
+        <span>测试执行</span>
+      </el-menu-item>
     </el-menu>
   </div>
 </template>
@@ -67,12 +71,13 @@
       toEquipment() {
         this.$router.push({name: 'equipment'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
-      }
+
+      },
     },
     created() {
       this.username = sessionStorage.getItem('username')
       this.$store.dispatch('tableData/getProjects')
-    }
+    },
 
   }
 </script>

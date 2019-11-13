@@ -33,7 +33,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="200px" label="元素位置" >
+      <el-table-column width="400px" label="元素位置" >
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.loc" class="edit-input" size="mini"/>

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
-    <el-table v-loading="listLoading "
-              :data="$store.state.tableData.equipmentData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+    <el-table
+              :data="dataList.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
               fit highlight-current-row style="width: 100%"
               size="small"
               :row-key="getRowKeys"
@@ -161,7 +161,7 @@
 </template>
 
 <script>
-  import {postEquipment, editEquipment, deleteEquipment, startEquipment, stopEquipment} from '../../api/api'
+  import {postEquipment, editEquipment, deleteEquipment, startEquipment, stopEquipment,getEquipmentList} from '../../api/api'
   import {checkJson} from '@/utils/tableDate'
 
   export default {
@@ -186,17 +186,38 @@
         }
       }
     },
-    mounted() {
-      this.getList()
+    created() {
+      this.getEquipmentDataList()
+    },
+    watch:{
+      $route(to,from){
+        if(to.name == 'equipment'){
+          this.getEquipmentDataList()
+        }
+      }
     },
     methods: {
       rowClick(row, column, even) {
         this.expands = [row.id]
       },
-      getList() {
-        this.listLoading = true
-        this.$store.dispatch('tableData/getEquipmentData')
-        this.listLoading = false
+      getEquipmentDataList() {
+            getEquipmentList().then(res => {
+        if (res.status == 1) {
+          this.dataList = res.data.data_list.map(v => {
+            this.$set(v, 'edit', false)
+            v.originalTitle = v.title
+            v.originalSetting_args = v.setting_args
+            v.originalRemoteHost = v.remoteHost
+            v.originalRemotePort = v.remotePort
+            return v
+          })
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
+        }
+      })
       },
       addData() {
         if (checkJson(this.form.setting_args) == true) {
@@ -204,7 +225,7 @@
             if (res.status == 1) {
               this.search = ''
               this.addForm = false
-              this.getList()
+              this.getEquipmentDataList()
               this.$message(res.message)
             }
           })
@@ -234,7 +255,7 @@
                 message: '编辑成功',
                 type: 'success'
               })
-              this.getList()
+              this.getEquipmentDataList()
             } else {
               this.$message({
                 message: res.message,
@@ -250,7 +271,7 @@
         }).then(() => {
           deleteEquipment(rowId).then(res => {
             if (res.status == 1) {
-              this.getList()
+              this.getEquipmentDataList()
               this.search = ''
               this.$message({
                 type: 'info',

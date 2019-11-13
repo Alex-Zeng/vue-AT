@@ -21,13 +21,13 @@ export function formatArgs (strP ) {
 export function checkJson (strP ) {
   // 检查字符串是否可以被解析,是否符合json格式要求
         try {
-          if (strP.length > 0) {
+          if (strP != null) {
             JSON.parse(strP)
             console.log(JSON.parse(strP))
           }
           return true
         } catch (e) {
-          window.alert( 'JSON格式错误,请重新检查',)
+          window.alert( 'JSON格式错误,请重新检查' + e,)
           return false
         }
 }

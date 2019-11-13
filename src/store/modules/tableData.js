@@ -1,5 +1,13 @@
 // 如果在模块化构建系统中，请确保在开头调用了 Vue.use(Vuex)
-import {getElementList, getActionList, getFunctionList, getProjectList, getEquipmentList} from '@/api/api'
+import {
+  getElementList,
+  getActionList,
+  getFunctionList,
+  getProjectList,
+  getEquipmentList,
+  getSuitStepList,
+  getSuitList
+} from '@/api/api'
 import Vue from 'vue'
 
 const state = {
@@ -10,6 +18,8 @@ const state = {
   functionData: [],
   projectData: [],
   equipmentData: [],
+  testCaseSuitData: [],
+  testCaseSuitStepData: [],
 }
 const getters = {}
 
@@ -36,6 +46,13 @@ const mutations = {
   SET_EQUIPMENTDATA: (state, argsList) => {
     state.equipmentData = argsList
   },
+  SET_TESTCASESUITDATA: (state, argsList) => {
+    state.testCaseSuitData = argsList
+  },
+  SET_TESTCASESUITSTEPDATA: (state, argsList) => {
+    state.testCaseSuitStepData = argsList
+  },
+
 }
 
 const actions = {
@@ -45,6 +62,7 @@ const actions = {
       commit('SET_PROJECTDATA', datas)
     })
   },
+
 
   changeProjects({commit}, args) {
     commit('CHANGE_PROJECTDATA', args)
@@ -106,6 +124,47 @@ const actions = {
           })
         }
 
+      }
+    )
+  },
+  getTestCaseSuitStepData({commit, state},) {
+    getSuitStepList(state.curreentPro.id).then(
+      res => {
+
+        if (res.data.data_list.length > 0) {
+          let data_list = res.data.data_list.map(v => {
+            Vue.set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
+            v.originalRank = v.rank //  will be used when user click the cancel botton
+            v.originalCaseTitle = v.case_title
+            v.originalSkip = v.skip
+            v.originalInputArgs = v.input_args
+            return v
+          })
+          commit('SET_TESTCASESUITSTEPDATA', data_list)
+        } else {
+          let data_list = res.data.data_list
+          commit('SET_TESTCASESUITSTEPDATA', data_list)
+        }
+
+      },
+      err => {
+        console.log(err);
+      }
+    )
+  },
+  getTestCaseSuitData({commit, state},) {
+    getSuitList(state.curreentPro.id).then(
+      res => {
+        let data_list = res.data.data_list.map(v => {
+            Vue.set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
+            v.originalRank = v.rank //  will be used when user click the cancel botton
+            v.originalTestCaseSuitId = v.test_case_suit_id
+            return v
+          })
+        commit('SET_TESTCASESUITDATA', data_list)
+      },
+      err => {
+        console.log(err)
       }
     )
   },

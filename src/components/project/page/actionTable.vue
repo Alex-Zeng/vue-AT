@@ -249,7 +249,7 @@
       }
     },
     watch: {
-      '$route'(to, from) { //监听路由是否变化
+      $route(to, from) { //监听路由是否变化
         if (to.params.page_id) {// 判断条件1  判断传递值的变化
           this.getData()
           this.getElementData()

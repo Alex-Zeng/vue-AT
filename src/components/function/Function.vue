@@ -151,10 +151,17 @@
       }
     },
     mounted() {
-      this.getList()
+      this.getFunctionList()
+    },
+    watch: {
+      $route(to, from) {
+        if (to.name == 'function') {
+          this.getFunctionList()
+        }
+      }
     },
     methods: {
-      getList() {
+      getFunctionList() {
         this.listLoading = true
         this.$store.dispatch('tableData/getFunctionData')
         this.listLoading = false
@@ -164,7 +171,7 @@
           if (res.status == 1) {
             this.search = ''
             this.addForm = false
-            this.getList()
+            this.getFunctionList()
             this.$message(res.message)
           }
         })
@@ -194,7 +201,7 @@
               message: '编辑成功',
               type: 'success'
             })
-            this.getList()
+            this.getFunctionList()
           } else {
             this.$message({
               message: res.message,
@@ -209,7 +216,7 @@
         }).then(() => {
           deleteFunction(rowId).then(res => {
             if (res.status == 1) {
-              this.getList()
+              this.getFunctionList()
               this.search = ''
               this.$message({
                 type: 'info',

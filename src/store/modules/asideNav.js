@@ -1,26 +1,23 @@
 const state = {
-  caseVisible: false,
-  pageVisible: false,
-  caseSuitVisible: false,
+  visible: 1,
 }
 
 const mutations = {
   SET_VISIBLE_NAV: (state, nav) => {
     switch (nav) {
       case 'page':
-        state.pageVisible = true
-        state.caseVisible = false
-        state.caseSuitVisible = false
+        state.visible = 1
+
         break;
       case 'case':
-        state.caseVisible = true
-        state.pageVisible = false
-        state.caseSuitVisible = false
+        state.visible = 2
+
         break;
       case 'suit':
-        state.caseSuitVisible = true
-        state.caseVisible = false
-        state.pageVisible = false
+        state.visible = 3
+        break;
+      case 'execute':
+        state.visible = 4
         break;
     }
   }

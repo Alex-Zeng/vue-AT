@@ -1,5 +1,5 @@
 <template>
-  <el-container  class="root_container">
+  <el-container class="root_container">
     <el-header>
       <Header></Header>
     </el-header>
@@ -8,7 +8,13 @@
         <aside-nav></aside-nav>
       </el-aside>
       <el-main>
-        <tab-views ></tab-views>
+        <div class="tab">
+          <tab-views></tab-views>
+        </div>
+
+        <keep-alive>
+          <router-view></router-view>
+        </keep-alive>
       </el-main>
     </el-container>
   </el-container>
@@ -55,6 +61,9 @@
     text-align: center;
     padding: 5px;
 
+  }
+  .tab{
+    height: 45px;
   }
 
   body > .el-container {

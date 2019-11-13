@@ -10,7 +10,7 @@
 
     >
 
-      <el-table-column label="步骤" align="center" prop="rank" width="80">
+      <el-table-column label="步骤" align="center" prop="rank" width="60">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model.number="row.rank" class="edit-input" size="mini"/>
@@ -18,7 +18,7 @@
           <span v-else>{{ row.rank }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否跳过" align="center"  width="120">
+      <el-table-column label="是否跳过" align="center" width="120">
         <template slot-scope="{row}">
           <el-switch
             v-model="row.skip"
@@ -31,7 +31,7 @@
           </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="是否截图" align="center"  width="120">
+      <el-table-column label="是否截图" align="center" width="120">
         <template slot-scope="{row}">
           <el-switch
             v-model="row.take_screen_shot"
@@ -44,7 +44,7 @@
           </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="延时" align="center"  width="80">
+      <el-table-column label="延时" align="center" width="80">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model.number="row.wait_time" class="edit-input" size="mini"/>
@@ -158,7 +158,7 @@
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-select v-model="form.page_id" placeholder="请选择页面" size="mini"
-                     @change="form.action_id='';getActionData(form.page_id);">
+                     @change="form.action_id='';getActionData(form.page_id)">
             <el-option v-for="page in pageData" :label="page.title" :value="page.id" :key="page.id"></el-option>
           </el-select>
           <el-select v-model="form.action_id" placeholder="请选择方法" size="mini">
@@ -293,7 +293,7 @@
         this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
         this.form.page_id = ''
         this.form.action_id = ''
-        this.form.take_screen_shot = 1
+        this.form.take_screen_shot = 0
         this.form.wait_time = 0
         this.form.input_key = ''
         this.form.output_key = ''
@@ -430,7 +430,7 @@
         )
       }
     },
-    created() {
+    mounted() {
       if (this.$route.name == 'case') {
         this.projectId = this.$route.params.id
         this.caseId = this.$route.params.case_id
@@ -441,15 +441,15 @@
       }
     },
     watch: {
-      '$route'(to, from) { //监听路由是否变化
-        if (to.name == 'case') {// 判断条件1  判断传递值的变化
+      $route(to, from) {
+        if (to.name == 'case') {
           this.projectId = this.$route.params.id
           this.caseId = this.$route.params.case_id
           this.getTableData()
           this.getPageData()
         }
       }
-    }
+    },
   }
 </script>
 

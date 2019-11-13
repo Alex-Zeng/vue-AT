@@ -4,6 +4,7 @@ import Login from '@/views/Login'
 import Home from '@/views/Home'
 import Function from '@/components/function/Function'
 import Equipment from '@/components/equipment/Equipment'
+import ExecuteTest from '@/components/executeTest/ExecuteTest'
 import Pages from '@/components/project/Pages'
 import Case from '@/components/project/Case'
 import tabViews from '@/components/common/tabViews'
@@ -12,7 +13,10 @@ import Cookies from 'js-cookie'
 
 Vue.use(Router)
 Vue.prototype.$cookies = Cookies
-
+const routerPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error => error)
+}
 export const constantRoutes = [
   {
     path: '/login',
@@ -61,7 +65,8 @@ export const constantRoutes = [
         component: Equipment,
         name: 'equipment',
         props: true,
-        meta: {title: '设备列表'}
+        meta: {title: '设备列表'},
+
       },
       {
         path: 'projects/:id/suit/:suit_id',
@@ -69,6 +74,13 @@ export const constantRoutes = [
         name: 'suit',
         props: true,
         meta: {title: '用例集'}
+      },
+      {
+        path: 'equipment/:e_id/executeTest',
+        component: ExecuteTest,
+        name: 'executeTest',
+        props: true,
+        meta: {title: '测试执行'}
       },
     ]
   },
@@ -82,10 +94,5 @@ const createRouter = () => new Router({
 
 const router = createRouter()
 
-// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
-export function resetRouter() {
-  const newRouter = createRouter()
-  router.matcher = newRouter.matcher // reset router
-}
 
 export default router

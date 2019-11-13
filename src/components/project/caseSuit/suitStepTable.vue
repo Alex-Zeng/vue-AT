@@ -8,6 +8,7 @@
       size="small"
       :row-key="getRowKeys"
       :expand-row-keys="expands"
+      @row-click="rowClick"
       :default-sort="{prop: 'rank', order: 'ascending'}"
     >
       <el-table-column type="expand">
@@ -66,7 +67,7 @@
             <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
 
             <el-select v-model="row.case_id" placeholder="请选择用例" size="mini"
-                       @change="getCaseData();">
+                       @change="selectOption($event,row)">
               <el-option v-for="test_case in caseData" :label="test_case.title" :value="test_case.id"
                          :key="test_case.id"></el-option>
             </el-select>
@@ -122,7 +123,7 @@
               type="primary"
               size="mini"
               icon="el-icon-edit"
-              @click="row.edit=!row.edit;expands.push(row.id);getCaseData()"
+              @click="row.edit=!row.edit;getCaseData()"
             >
               编辑
             </el-button>
@@ -220,17 +221,25 @@
         this.inputK = ''
         this.outputK = ''
       },
+      rowClick(row, column, even) {
+        this.expands = [row.id]
+      },
       selectOption(e, s) {
+        console.log(s)
         this.form.input_args = ''
         for (let i = 0; i < this.caseData.length; i++) {
-          if (this.caseData[i].id == e){
-              this.inputK = this.caseData[i].input_keys
-              this.outputK = this.caseData[i].output_keys
+          if (this.caseData[i].id == e) {
+            this.inputK = this.caseData[i].input_keys
+            this.outputK = this.caseData[i].output_keys
           }
         }
-        this.form.input_args = formatArgs(this.inputK)
+        if (this.inputK != '') {
+          this.form.input_args = formatArgs(this.inputK)
+        }
+
       },
       addData() {
+        console.log(this.form.input_args)
         if (checkJson(this.form.input_args)) {
           postSuitStep(this.$route.params.id, this.$route.params.suit_id, this.form).then(res => {
             if (res.status == 1) {
@@ -249,6 +258,7 @@
 
       },
       confirmEdit(row) {
+        console.log(row.input_args)
         if (checkJson(row.input_args)) {
           row.edit = false
           row.originalRank = row.rank
@@ -274,8 +284,6 @@
         row.edit = false
         row.skip = row.originalSkip
         row.input_args = row.originalInputArgs
-        let index = this.expands.indexOf(row.id)
-        delete this.expands[index]
         this.$message({
           message: '放弃编辑',
           type: 'warning'
@@ -343,16 +351,15 @@
         this.getCaseData()
 
       }
-    }
-    ,
+    },
     watch: {
-      '$route'(to, from) { //监听路由是否变化
-        if (to.name == 'suit') {// 判断条件1  判断传递值的变化
+      $route(to, from) {
+        if (to.name == 'suit') {
           this.getTableData()
           this.getCaseData()
         }
       }
-    }
+    },
   }
 </script>
 
