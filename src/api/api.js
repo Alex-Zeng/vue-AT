@@ -88,7 +88,7 @@ export const deleteCase = (projectId, caseId) => {
 };
 //调试用例
 export const debugCase = (projectId, caseId, formData) => {
-  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`, formData, {timeout: 300000}).then(res => res);
+  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`, formData, {timeout: 60*30*1000}).then(res => res);
 };
 
 
@@ -188,8 +188,8 @@ export const deleteEquipment = (e_id) => {
   return remove(`/runtest/equipment/${e_id}`).then(res => res);
 };
 //启动设备
-export const startEquipment = (e_id,) => {
-  return get(`/runtest/equipment/${e_id}/start`, {}, {timeout: 30000}).then(res => res);
+export const startEquipment = (e_id) => {
+  return get(`/runtest/equipment/${e_id}/start`,{} ,60*2*1000).then(res => res);
 };
 //停止设备
 export const stopEquipment = (e_id, formData) => {
@@ -211,4 +211,8 @@ export const editES = (e_id, es_id, formData) => {
 // 删除设备用例集
 export const deleteES = (e_id, es_id) => {
   return remove(`/runtest/equipment/${e_id}/execute_suit/${es_id}`).then(res => res);
+};
+//执行测试
+export const startES = (e_id) => {
+  return get(`/runtest/equipment/${e_id}/execute_suit/start`,{},60*60*1000).then(res => res);
 };

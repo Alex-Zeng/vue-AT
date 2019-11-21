@@ -21,7 +21,7 @@ export function formatArgs (strP ) {
 export function checkJson (strP ) {
   // 检查字符串是否可以被解析,是否符合json格式要求
         try {
-          if (strP != null) {
+          if (strP) {
             JSON.parse(strP)
             console.log(JSON.parse(strP))
           }

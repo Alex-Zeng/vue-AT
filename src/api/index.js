@@ -32,10 +32,10 @@ axios.interceptors.response.use(
   response => {
 
     if (response.data.status == 2) {
-
       window.location.href = '#/login'
     }if (response.data.status == 0) {
       Vue.$alert(response.data.message)
+      return response;
     }else {
       return response;
     }
@@ -54,10 +54,11 @@ axios.interceptors.response.use(
  * @returns {Promise}
  */
 
-export function get(url, params = {}) {
+export function get(url, params = {},timeout= axios.defaults.timeout) {
   return new Promise((resolve, reject) => {
     axios.get(url, {
       params: params,
+      timeout: timeout
     })
       .then(response => {
         resolve(response.data);

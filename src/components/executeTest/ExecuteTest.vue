@@ -4,9 +4,17 @@
       :data="dataList"
       fit highlight-current-row style="width: 100%"
       size="small"
-
+      :row-key="getRowKeys"
+      :expand-row-keys="expands"
+      @row-click="rowClick"
+      :default-sort="{prop: 'rank', order: 'ascending'}"
     >
-
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <div v-for=" item in props.row.test_cases"><span> 用例 {{item.title}} 执行中</span> <i class="el-icon-loading"></i>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="执行顺序" width="80">
         <template slot-scope="{row}">
           <template v-if="row.edit">
@@ -33,7 +41,9 @@
           <span v-else>{{ row.suit_title }}</span>
         </template>
       </el-table-column>
-
+      <el-table-column label="状态">
+        <span>执行中</span>
+      </el-table-column>
       <el-table-column label="更新时间">
         <template slot-scope="{row}">
           <span>{{ row.update_datetime }}</span>
@@ -43,7 +53,8 @@
       <el-table-column align="center" label="操作" width="300">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addNew" size="mini">新增</el-button>
-          <el-button type="primary" @click="addNew" size="mini">运行</el-button>
+          <el-button type="primary" @click="runTest" size="mini" v-if="!running">运行</el-button>
+          <el-button type="info" disabled size="mini" v-else>执行中<i class="el-icon-loading"></i></el-button>
         </template>
         <template slot-scope="{row}">
 
@@ -116,7 +127,7 @@
 </template>
 
 <script>
-  import {postES, editES, deleteES, startEquipment,getESList} from '../../api/api'
+  import {postES, editES, deleteES, startEquipment, getESList, startES} from '../../api/api'
   import {checkJson} from '@/utils/tableDate'
 
   export default {
@@ -128,6 +139,7 @@
         dataList: [],
         formLabelWidth: '140px',
         textareaWidth: '520px',
+        running: 0,
         getRowKeys(row) {
           return row.id;
         },
@@ -142,17 +154,31 @@
       this.$store.dispatch('tableData/getTestCaseSuitData')
       this.getList()
     },
-    watch:{
-      $route(to,from){
-        if(to.name == 'executeTest')
+    watch: {
+      $route(to, from) {
+        if (to.name == 'executeTest')
           this.getList()
-        }
-      },
+      }
+    },
 
     methods: {
+      rowClick(row, column, even) {
+        this.expands = [row.id]
+      },
       addNew() {
         this.addForm = true
         this.form.rank = this.$store.state.tableData.equipmentTestCaseSuitData.slice(-1)[0].rank + 1
+      },
+      runTest() {
+        this.running = 1
+        startES(this.$route.params.e_id).then((res) => {
+          this.$message({
+            message: res.message,
+            type: 'info'
+          })
+          this.running = 0
+        })
+
       },
       getList() {
         getESList(this.$route.params.e_id).then((res) => {
