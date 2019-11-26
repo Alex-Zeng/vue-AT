@@ -8,10 +8,15 @@
       size="small"
     >
       <el-table-column
-        label="ID"
-        width="60">
+        label="所属页面"
+        width="180">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
+          <template v-if="scope.row.edit">
+            <el-select v-model="scope.row.page_id" placeholder="请选择操作" size="mini">
+              <el-option v-for="item in $store.state.tableData.pageData" :label="item.title" :value="item.id" :key="item.id"></el-option>
+            </el-select>
+          </template>
+          <span v-else>{{ scope.row.page_title }}</span>
         </template>
       </el-table-column>
 
@@ -51,7 +56,7 @@
         prop="update_datetime"
         label="更新时间">
       </el-table-column>
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="操作" width="200">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addForm=true;getElementData;getFunctionData">新增<i
             class="el-icon-plus el-icon--right"></i>
@@ -86,15 +91,13 @@
               icon="el-icon-edit"
               @click="row.edit=!row.edit"
             >
-              编辑
             </el-button>
             <el-button
               type="primary"
               size="mini"
-              icon="el-icon-edit"
+              icon="el-icon-delete"
               @click="deleteRow(row.id)"
             >
-              删除
             </el-button>
           </div>
         </template>

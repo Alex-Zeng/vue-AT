@@ -62,7 +62,8 @@
 </template>
 
 <script>
-  import {getPageList, postPage, putPage, deletePage} from "@/api/api";
+  import {getPageList, postPage, putPage, deletePage} from "@/api/api"
+  import {mapState} from "vuex"
 
   export default {
     name: 'listCard',
@@ -70,7 +71,6 @@
       return {
         search: '',
         currentPage: '页面',
-        pageList: [],
         defaultPageId: '',
         addForm: false,
         editFormVisible: false,
@@ -83,19 +83,24 @@
 
       }
     },
+    mounted() {
+      this.getPageData()
 
+    },
+    watch: {
+      proId() {
+        this.getPageData()
+      }
+    },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        pageList: state => state.tableData.pageData,
+        proId: state => state.tableData.curreentPro.id
+      })
+    },
     methods: {
       getPageData() {
-        getPageList(this.proId).then(res => {
-          if (res.status == 1) {
-            this.pageList = res.data.page_list
-          } else {
-            Vue.$message({
-              message: res.msg,
-              type: 'error'
-            })
-          }
-        })
+        this.$store.dispatch('tableData/getPage')
       },
 
       addPage() {
@@ -161,19 +166,6 @@
         }
       },
     },
-    mounted() {
-      this.getPageData()
-    },
-    computed: {
-      proId() {
-        return this.$store.state.tableData.curreentPro.id
-      }
-    },
-    watch: {
-      proId() {
-        this.getPageData()
-      }
-    }
   }
 </script>
 

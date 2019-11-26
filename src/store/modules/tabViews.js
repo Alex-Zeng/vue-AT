@@ -49,6 +49,16 @@ const mutations = {
     }
 
   },
+  DELETE_ALL_VIEWS: (state) => {
+    state.visitedViews = []
+
+  },
+  DELETE_OTHER_VIEWS:(state,view) => {
+    state.visitedViews=[]
+    state.visitedViews.push(view)
+    state.editableTabsValue = view.index
+
+  },
 
 }
 
@@ -62,6 +72,12 @@ const actions = {
   },
   changeView({commit}, viewIndex) {
     commit('CHANGE_VIEW', viewIndex)
+  },
+  delAllViews({commit}) {
+    commit('DELETE_ALL_VIEWS')
+  },
+  delOthersViews({commit},view) {
+    commit('DELETE_OTHER_VIEWS',view)
   },
 }
 

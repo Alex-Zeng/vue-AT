@@ -16,8 +16,8 @@ const mutations = {
       case 'suit':
         state.visible = 3
         break;
-      case 'execute':
-        state.visible = 4
+      default:
+        state.visible = 0
         break;
     }
   }

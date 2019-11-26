@@ -9,14 +9,19 @@
     >
 
       <el-table-column
-        label="ID"
-        width="60">
+        label="所属页面"
+        width="180">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
+          <template v-if="scope.row.edit">
+            <el-select v-model="scope.row.page_id" placeholder="请选择操作" size="mini">
+              <el-option v-for="item in $store.state.tableData.pageData" :label="item.title" :value="item.id" :key="item.id"></el-option>
+            </el-select>
+          </template>
+          <span v-else>{{ scope.row.page_title }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" label="元素名称" >
+      <el-table-column width="150px" label="元素名称">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -27,13 +32,15 @@
       <el-table-column width="150px" label="查找方式">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.type" class="edit-input" size="mini"/>
+            <el-select v-model="row.type" placeholder="请选择操作" size="mini">
+              <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
+            </el-select>
           </template>
           <span v-else>{{ row.type }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="400px" label="元素位置" >
+      <el-table-column label="元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.loc" class="edit-input" size="mini"/>
@@ -45,7 +52,7 @@
         prop="update_datetime"
         label="更新时间">
       </el-table-column>
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="操作" width="200">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
@@ -79,15 +86,13 @@
               icon="el-icon-edit"
               @click="row.edit=!row.edit"
             >
-              编辑
             </el-button>
             <el-button
               type="primary"
               size="mini"
-              icon="el-icon-edit"
+              icon="el-icon-delete"
               @click="deleteRow(row.id)"
             >
-              删除
             </el-button>
           </div>
         </template>
@@ -102,10 +107,12 @@
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="查找方式：" :label-width="formLabelWidth">
-          <el-input v-model="form.type" autocomplete="off"></el-input>
+          <el-select v-model="form.type" placeholder="请选择查找方式" size="mini">
+              <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
+            </el-select>
         </el-form-item>
-        <el-form-item label="元素位置：" :label-width="formLabelWidth">
-          <el-input v-model="form.loc" autocomplete="off"></el-input>
+        <el-form-item label="元素位置："  :label-width="formLabelWidth">
+          <el-input v-model="form.loc" placeholder="根据查找方式,填写元素位置" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -132,9 +139,10 @@
         deleteDialogVisible: false,
         form: {
           title: '',
-          type: '',
+          type: 'xpath',
           loc: '',
         },
+        findType:['xpath','id','css','class','tag','tap_by_proportional','tap_by_coordinates','android_uiautomator','accessibility_id'],
         formLabelWidth: '120px'
       }
     },

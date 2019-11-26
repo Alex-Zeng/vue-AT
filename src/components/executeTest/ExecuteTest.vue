@@ -53,8 +53,6 @@
       <el-table-column align="center" label="操作" width="300">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addNew" size="mini">新增</el-button>
-          <el-button type="primary" @click="runTest" size="mini" v-if="!running">运行</el-button>
-          <el-button type="info" disabled size="mini" v-else>执行中<i class="el-icon-loading"></i></el-button>
         </template>
         <template slot-scope="{row}">
 
@@ -103,7 +101,7 @@
 
     <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addForm">
+    <el-dialog title="添加" :visible.sync="addForm" :modal="false">
       <el-form :model="form" :inline="true" class="demo-form-inline" size="mini" label-position="top">
         <el-form-item label="执行顺序：" :label-width="formLabelWidth">
           <el-input v-model="form.rank" autocomplete="off"></el-input>
@@ -132,6 +130,7 @@
 
   export default {
     name: "ExecuteText",
+    props:['e_id'],
     data() {
       return {
         search: "",
@@ -153,10 +152,10 @@
     mounted() {
       this.$store.dispatch('tableData/getTestCaseSuitData')
       this.getList()
+
     },
     watch: {
-      $route(to, from) {
-        if (to.name == 'executeTest')
+      e_id() {
           this.getList()
       }
     },
@@ -169,19 +168,9 @@
         this.addForm = true
         this.form.rank = this.$store.state.tableData.equipmentTestCaseSuitData.slice(-1)[0].rank + 1
       },
-      runTest() {
-        this.running = 1
-        startES(this.$route.params.e_id).then((res) => {
-          this.$message({
-            message: res.message,
-            type: 'info'
-          })
-          this.running = 0
-        })
 
-      },
       getList() {
-        getESList(this.$route.params.e_id).then((res) => {
+        getESList(this.e_id).then((res) => {
           this.dataList = res.data.data_list.map(v => {
             this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
             v.originalRank = v.rank //  will be used when user click the cancel botton
@@ -192,7 +181,7 @@
       },
       addData() {
         if (checkJson(this.form.setting_args) == true) {
-          postES(this.$route.params.e_id, this.form).then(res => {
+          postES(this.e_id, this.form).then(res => {
             if (res.status == 1) {
               this.search = ''
               this.addForm = false
@@ -203,7 +192,6 @@
         }
       },
       cancelEdit(row) {
-        console.log()
         row.edit = false
         row.rank = row.originalRank
         row.test_case_suit_id = row.originalTestCaseSuitId
@@ -215,7 +203,7 @@
       confirmEdit(row) {
         row.edit = false
 
-        editES(this.$route.params.e_id, row.id, row).then(res => {
+        editES(this.e_id, row.id, row).then(res => {
           if (res.status == 1) {
             row.originalRank = row.rank
             row.originalTestCaseSuitId = row.test_case_suit_id
@@ -238,7 +226,7 @@
         this.$alert('确定删除?', '删除', {
           confirmButtonText: '确定',
         }).then(() => {
-          deleteES(this.$route.params.e_id, rowId).then(res => {
+          deleteES(this.e_id, rowId).then(res => {
             if (res.status == 1) {
               this.getList()
               this.search = ''

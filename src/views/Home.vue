@@ -11,9 +11,8 @@
         <div class="tab">
           <tab-views></tab-views>
         </div>
-
         <keep-alive>
-          <router-view></router-view>
+          <router-view v-if="refresh"></router-view>
         </keep-alive>
       </el-main>
     </el-container>
@@ -33,6 +32,25 @@
       Header,
       tabViews,
       asideNav,
+    },provide(){
+        return{
+            reload:this.reload
+        }
+    },
+
+
+    data() {
+      return {
+        refresh: true
+      }
+    },
+    methods:{
+        reload(){
+            this.refresh = false;
+            this.$nextTick(function(){
+                this.refresh = true;
+            })
+        }
     }
   }
 </script>
@@ -51,7 +69,7 @@
 
   .el-aside {
     color: #333;
-    padding: 5px;
+    padding: 10px 0px;
     text-align: left;
 
   }
@@ -59,10 +77,11 @@
   .el-main {
     color: #333;
     text-align: center;
-    padding: 5px;
+    padding: 10px 0;
 
   }
-  .tab{
+
+  .tab {
     height: 45px;
   }
 

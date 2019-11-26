@@ -125,15 +125,13 @@
               icon="el-icon-edit"
               @click="row.edit=!row.edit;getCaseData()"
             >
-              编辑
             </el-button>
             <el-button
               type="primary"
               size="mini"
-              icon="el-icon-edit"
+              icon="el-icon-delete"
               @click="deleteRow(row.id)"
             >
-              删除
             </el-button>
           </div>
         </template>

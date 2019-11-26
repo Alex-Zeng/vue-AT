@@ -59,7 +59,8 @@
 
             <el-select v-model="row.page_id" placeholder="请选择页面" size="mini"
                        @change="row.action_id='';getActionData(row.page_id);">
-              <el-option v-for="page in pageData" :label="page.title" :value="page.id" :key="page.id"></el-option>
+              <el-option v-for="page in $store.state.tableData.pageData" :label="page.title" :value="page.id"
+                         :key="page.id"></el-option>
             </el-select>
           </template>
           <span v-else>{{ row.page_title }}</span>
@@ -159,7 +160,8 @@
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-select v-model="form.page_id" placeholder="请选择页面" size="mini"
                      @change="form.action_id='';getActionData(form.page_id)">
-            <el-option v-for="page in pageData" :label="page.title" :value="page.id" :key="page.id"></el-option>
+            <el-option v-for="page in pageData" :label="page.title" :value="page.id"
+                       :key="page.id"></el-option>
           </el-select>
           <el-select v-model="form.action_id" placeholder="请选择方法" size="mini">
             <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
@@ -243,19 +245,17 @@
 </template>
 
 <script>
-  import {postStep, getStepList, putStep, deleteStep, getActionList, getPageList, debugCase} from '@/api/api'
-
+  import {postStep, getStepList, putStep, deleteStep, getActionList, debugCase} from '@/api/api'
+  import {mapState} from "vuex"
   export default {
     name: 'stepTable',
     data() {
       return {
         search: '',
-        projectId: '',
         caseId: '',
         tableData: [],
         EquipmentData: [],
         actData: [],
-        pageData: [],
         defaultDataId: '',
         equipmentId: '',
         debugInputArg: '',
@@ -275,7 +275,29 @@
       }
 
     },
-
+    mounted() {
+      if (this.$route.name == 'case') {
+        this.caseId = this.$route.params.case_id
+        this.getTableData()
+        this.getPageData()
+        this.$store.dispatch('tableData/getEquipmentData')
+      }
+    },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        pageData: state => state.tableData.pageData,
+        projectId: state => state.tableData.curreentPro.id
+      })
+    },
+    watch: {
+      $route(to, from) {
+        if (to.name == 'case') {
+          this.caseId = this.$route.params.case_id
+          this.getTableData()
+          this.getPageData()
+        }
+      }
+    },
     methods: {
       isRealNum(val) {
         // 先判定是否为number
@@ -396,14 +418,7 @@
         )
       },
       getPageData() {
-        getPageList(this.projectId).then(
-          res => {
-            this.pageData = res.data.page_list
-          },
-          err => {
-            console.log(err)
-          }
-        )
+        this.$store.dispatch('tableData/getPage')
       },
       getTableData() {
         getStepList(this.projectId, this.caseId).then(
@@ -430,26 +445,7 @@
         )
       }
     },
-    mounted() {
-      if (this.$route.name == 'case') {
-        this.projectId = this.$route.params.id
-        this.caseId = this.$route.params.case_id
-        this.getTableData()
-        this.getPageData()
-        this.$store.dispatch('tableData/getEquipmentData')
 
-      }
-    },
-    watch: {
-      $route(to, from) {
-        if (to.name == 'case') {
-          this.projectId = this.$route.params.id
-          this.caseId = this.$route.params.case_id
-          this.getTableData()
-          this.getPageData()
-        }
-      }
-    },
   }
 </script>
 

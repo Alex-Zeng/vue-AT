@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
     <el-table
-              :data="dataList.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
-              fit highlight-current-row style="width: 100%"
-              size="small"
-              :row-key="getRowKeys"
-              @row-click="rowClick"
-              :expand-row-keys="expands"
+      :data="dataList.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
+      fit highlight-current-row style="width: 100%"
+      size="small"
+      :row-key="getRowKeys"
+      @row-click="rowClick"
+      :expand-row-keys="expands"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -80,7 +80,23 @@
             size="mini"
             placeholder="输入操作搜索"/>
         </template>
+
         <template slot-scope="{row}">
+           <div>
+          <template v-if="row.running">
+            <span type="info" disabled size="mini">执行中<i class="el-icon-loading"></i>
+            </span>
+          </template>
+          <el-button v-else type="primary" @click.stop="runTest(row)" size="mini">运行用例集</el-button>
+
+          <el-button
+            type="success"
+            size="mini"
+            @click="suitEdit(row)"
+          >
+            管理用例集
+          </el-button>
+           </div>
           <div v-if="row.edit ">
             <el-button
               type="success"
@@ -157,21 +173,44 @@
         <el-button type="primary" @click="addData">确 定</el-button>
       </div>
     </el-dialog>
+    <el-drawer
+      :title="currentEtitle"
+      :visible.sync="suitForm"
+      direction="rtl"
+      size="80%">
+      <ExecuteTest :e_id="currentEid"></ExecuteTest>
+    </el-drawer>
+
   </div>
 </template>
 
 <script>
-  import {postEquipment, editEquipment, deleteEquipment, startEquipment, stopEquipment,getEquipmentList} from '../../api/api'
+  import {
+    postEquipment,
+    editEquipment,
+    deleteEquipment,
+    startEquipment,
+    stopEquipment,
+    getEquipmentList,
+    startES
+  } from '../../api/api'
+  import ExecuteTest from '../executeTest/ExecuteTest'
   import {checkJson} from '@/utils/tableDate'
 
   export default {
     name: "Equipment",
+    components: {
+      ExecuteTest,
+    },
     data() {
       return {
         search: "",
         addForm: false,
+        suitForm: false,
         dataList: [],
         listLoading: true,
+        currentEid: '',
+        currentEtitle: '管理用例集',
         formLabelWidth: '140px',
         textareaWidth: '520px',
         getRowKeys(row) {
@@ -189,9 +228,9 @@
     created() {
       this.getEquipmentDataList()
     },
-    watch:{
-      $route(to,from){
-        if(to.name == 'equipment'){
+    watch: {
+      $route(to, from) {
+        if (to.name == 'equipment') {
           this.getEquipmentDataList()
         }
       }
@@ -200,24 +239,43 @@
       rowClick(row, column, even) {
         this.expands = [row.id]
       },
+
       getEquipmentDataList() {
-            getEquipmentList().then(res => {
-        if (res.status == 1) {
-          this.dataList = res.data.data_list.map(v => {
-            this.$set(v, 'edit', false)
-            v.originalTitle = v.title
-            v.originalSetting_args = v.setting_args
-            v.originalRemoteHost = v.remoteHost
-            v.originalRemotePort = v.remotePort
-            return v
-          })
-        } else {
+        getEquipmentList().then(res => {
+          if (res.status == 1) {
+            this.dataList = res.data.data_list.map(v => {
+              this.$set(v, 'edit', false)
+              v.originalTitle = v.title
+              v.originalSetting_args = v.setting_args
+              v.originalRemoteHost = v.remoteHost
+              v.originalRemotePort = v.remotePort
+              return v
+            })
+          } else {
+            this.$message({
+              message: res.message,
+              type: 'error'
+            })
+          }
+        })
+      },
+      suitEdit(row) {
+        this.suitForm = true
+        this.currentEid = row.id
+        this.currentEtitle = row.title
+      },
+      runTest(row) {
+        this.expands = [row.id]
+        row.running = true
+        startES(row.id).then((res) => {
           this.$message({
             message: res.message,
-            type: 'error'
+            type: 'info'
           })
-        }
-      })
+          this.expands = [row.id]
+          row.running = false
+        })
+
       },
       addData() {
         if (checkJson(this.form.setting_args) == true) {
@@ -284,8 +342,8 @@
         });
       },
 
-       startEt(row) {
-         startEquipment(row.id).then( res => {
+      startEt(row) {
+        startEquipment(row.id).then(res => {
           if (res.status == 1) {
             this.search = ''
             this.$message({
@@ -299,8 +357,8 @@
           }
         })
       },
-       stopEt(row) {
-         stopEquipment(row.id, {'session_id':row.session_id}).then(res => {
+      stopEt(row) {
+        stopEquipment(row.id, {'session_id': row.session_id}).then(res => {
           if (res.status == 1) {
             this.search = ''
             this.$message({

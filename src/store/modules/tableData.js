@@ -6,13 +6,15 @@ import {
   getProjectList,
   getEquipmentList,
   getSuitStepList,
-  getSuitList
+  getSuitList,
+  getPageList
 } from '@/api/api'
 import Vue from 'vue'
 
 const state = {
   deafultPageId: '',
   curreentPro: '',
+  pageData: [],
   elementData: [],
   actionData: [],
   functionData: [],
@@ -40,6 +42,9 @@ const mutations = {
       state.curreentPro = argsList[0]
     }
   },
+    SET_PAGEDATA: (state, argsList) => {
+    state.pageData = argsList
+  },
   CHANGE_PROJECTDATA: (state, args) => {
     state.curreentPro = args
   },
@@ -62,6 +67,19 @@ const actions = {
       commit('SET_PROJECTDATA', datas)
     })
   },
+  getPage({commit, state}){
+            getPageList(state.curreentPro.id).then(res => {
+          if (res.status == 1) {
+            let datas = res.data.page_list
+            commit('SET_PAGEDATA', datas)
+          } else {
+            Vue.$message({
+              message: res.msg,
+              type: 'error'
+            })
+          }
+        })
+  },
 
 
   changeProjects({commit}, args) {
@@ -75,6 +93,7 @@ const actions = {
           v.originalTitle = v.title
           v.originalType = v.type
           v.originalLoc = v.loc
+          v.running = v.status
           return v
         })
         commit('SET_ELEMENTDATA', datas)

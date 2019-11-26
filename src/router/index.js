@@ -34,6 +34,7 @@ export const constantRoutes = [
   {
     path: '/home',
     component: Home,
+    name:'home',
     meta: {
       title: '首页',
       requireAuth: true

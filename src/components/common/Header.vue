@@ -11,6 +11,7 @@
       </el-menu-item>
       <el-submenu index="1">
         <template slot="title">
+          <i class="el-icon-picture-outline-round"></i>
           <span slot="title">项目:{{$store.state.tableData.curreentPro.title}}</span>
         </template>
         <el-menu-item v-for="item in $store.state.tableData.projectData" :index="'1-'+item.id" :key="item.id"
@@ -20,15 +21,15 @@
       </el-submenu>
 
       <el-menu-item index="2" @click="showNav('page')">
-        <i class="el-icon-s-platform"></i>
+        <i class="el-icon-s-help"></i>
         <span>页面对象PO</span>
       </el-menu-item>
       <el-menu-item index="3" @click="showNav('case')">
-        <i class="el-icon-s-platform"></i>
+        <i class="el-icon-s-order"></i>
         <span>用例</span>
       </el-menu-item>
       <el-menu-item index="4" @click="showNav('suit')">
-        <i class="el-icon-s-platform"></i>
+        <i class="el-icon-s-cooperation"></i>
         <span>用例集</span>
       </el-menu-item>
       <el-menu-item index="5" @click="toFunction()">
@@ -36,13 +37,10 @@
         <span>操作方法</span>
       </el-menu-item>
       <el-menu-item index="6" @click="toEquipment()">
-        <i class="el-icon-s-platform"></i>
-        <span>设备列表</span>
+        <i class="el-icon-s-platform" ></i>
+        <span>测试设备</span>
       </el-menu-item>
-      <el-menu-item index="7" @click="showNav('execute')">
-        <i class="el-icon-s-platform"></i>
-        <span>测试执行</span>
-      </el-menu-item>
+
     </el-menu>
   </div>
 </template>
@@ -57,8 +55,10 @@
       }
     },
     methods: {
+
       toProject(proObject) {
         this.$store.dispatch('tableData/changeProjects', proObject)
+
       },
       showNav(nav) {
         this.$store.dispatch('asideNav/setNavVisible', nav)

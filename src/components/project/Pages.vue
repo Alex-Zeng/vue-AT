@@ -34,6 +34,9 @@
   export default {
     name: 'Pages',
     components: {listCard, elementTable, actionTable},
+    mounted() {
+      this.$store.dispatch('tableData/getPage')
+    }
 
   }
 </script>
