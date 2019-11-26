@@ -3,13 +3,11 @@
     <el-tabs v-model="$store.state.tabViews.editableTabsValue+''" type="card"
              @tab-click="handleClick">
       <el-tab-pane
+        class="mytabitem"
         v-for="(item, index) in visitedViews"
         :key="item.index"
-
         :name="item.index+''"
-        style="padding: 0px"
       >
-
         <div slot="label" @contextmenu.prevent="rightClick(item,$event)">{{item.title}}</div>
       </el-tab-pane>
     </el-tabs>
@@ -47,8 +45,6 @@
       async handleClick(tab, event) {
         if (this.$store.state.tabViews.editableTabsValue != tab.name) {
           await this.$store.dispatch('tabViews/changeView', tab.name)
-          // console.log(this.$store.state.tabViews.visitedViews[tab.index])
-
           this.$router.push({
             name: this.$store.state.tabViews.visitedViews[tab.index].name,
             params: this.$store.state.tabViews.visitedViews[tab.index].params
@@ -72,7 +68,6 @@
         this.top = e.clientY
         this.visible = true
         this.selectedTag = tag
-        console.log(this.selectedTag)
       },
       closeSelectedTag(tag) {
         this.$store.dispatch('tabViews/delView', tag.index)
@@ -109,6 +104,7 @@
   }
 </script>
 <style lang="less">
+
   .contextmenu {
     margin: 0;
     background: #fff;

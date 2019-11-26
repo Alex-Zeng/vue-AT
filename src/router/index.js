@@ -45,7 +45,7 @@ export const constantRoutes = [
         component: Pages,
         name: 'page',
         props: true,
-        meta: {title: '页面'}
+        meta: {title: 'PO'}
       },
       {
         path: 'projects/:id/cases/:case_id',
