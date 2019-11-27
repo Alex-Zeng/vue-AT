@@ -74,7 +74,7 @@ const actions = {
             commit('SET_PAGEDATA', datas)
           } else {
             Vue.$message({
-              message: res.msg,
+              message: res.message,
               type: 'error'
             })
           }

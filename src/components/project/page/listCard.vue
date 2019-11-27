@@ -114,7 +114,7 @@
             })
             this.$router.push({name: 'page'})
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -123,11 +123,11 @@
         putPage(this.proId, page_id, this.form).then(res => {
           if (res.status == 1) {
             this.editFormVisible = false
-            this.$alert(res.msg)
+            this.$alert(res.message)
             this.getPageData()
             this.$router.push({name: 'page'})
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },
@@ -136,11 +136,11 @@
         deletePage(this.proId, page_id).then(res => {
           if (res.status == 1) {
             this.deleteDialogVisible = false
-            this.$alert(res.msg)
+            this.$alert(res.message)
             this.getPageData()
             this.$router.push({name: 'page'})
           } else {
-            this.$alert(res.msg)
+            this.$alert(res.message)
           }
         })
       },

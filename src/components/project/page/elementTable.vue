@@ -54,7 +54,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true">新增<i class="el-icon-plus el-icon--right"></i>
+          <el-button type="primary" @click="openAddForm" size="mini">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
           <el-input
             v-model="search"
@@ -139,10 +139,10 @@
         deleteDialogVisible: false,
         form: {
           title: '',
-          type: 'xpath',
+          type: 'id',
           loc: '',
         },
-        findType:['xpath','id','css','class','tag','tap_by_proportional','tap_by_coordinates','android_uiautomator','accessibility_id'],
+        findType:['xpath','id','css','class','tag','tap_by_proportional','tap_by_coordinates','android_uiautomator','accessibility_id','no_need'],
         formLabelWidth: '120px'
       }
     },
@@ -153,6 +153,12 @@
           "projectId": this.$route.params.id,
           "pageId": this.$route.params.page_id
         })
+      },
+      openAddForm(){
+        this.addForm=true
+        form.title = ''
+        form.type = 'id'
+        form.title = ''
       },
       addData() {
 
