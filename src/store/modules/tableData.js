@@ -7,14 +7,28 @@ import {
   getEquipmentList,
   getSuitStepList,
   getSuitList,
-  getPageList
+  getPageList,
+  getCaseList,
+  putCase,
+  putPage,
+  putSuit,
+  deleteSuit,
+  deletePage,
+  deleteCase,
+  postPage,
+  postCase,
+  postSuit,
 } from '@/api/api'
 import Vue from 'vue'
 
 const state = {
+  visible: 1,
   deafultPageId: '',
   curreentPro: '',
+  curreentProId: '',
   pageData: [],
+  asideTreeData: [],
+  caseData: [],
   elementData: [],
   actionData: [],
   functionData: [],
@@ -26,12 +40,33 @@ const state = {
 const getters = {}
 
 const mutations = {
+  SET_VISIBLE_NAV: (state, nav) => {
+    switch (nav) {
+      case 'page':
+        state.visible = 1
+
+        break;
+      case 'case':
+        state.visible = 2
+
+        break;
+      case 'suit':
+        state.visible = 3
+        break;
+      default:
+        state.visible = 0
+        break;
+    }
+  },
 
   SET_ELEMENTDATA: (state, argsList) => {
     state.elementData = argsList
   },
   SET_ACTIONDATA: (state, argsList) => {
     state.actionData = argsList
+  },
+  SET_ASIDETREEDATA: (state, argsList) => {
+    state.asideTreeData = argsList
   },
   SET_FUNCTIONDATA: (state, argsList) => {
     state.functionData = argsList
@@ -40,10 +75,20 @@ const mutations = {
     state.projectData = argsList
     if (argsList.length > 0) {
       state.curreentPro = argsList[0]
+      state.curreentProId = argsList[0].id
     }
   },
-    SET_PAGEDATA: (state, argsList) => {
+  SET_PAGEDATA: (state, argsList) => {
     state.pageData = argsList
+    if (state.visible == 1) {
+      state.asideTreeData = argsList
+    }
+  },
+  SET_CASEDATA: (state, argsList) => {
+    state.caseData = argsList
+    if (state.visible == 2) {
+      state.asideTreeData = argsList
+    }
   },
   CHANGE_PROJECTDATA: (state, args) => {
     state.curreentPro = args
@@ -53,6 +98,9 @@ const mutations = {
   },
   SET_TESTCASESUITDATA: (state, argsList) => {
     state.testCaseSuitData = argsList
+    if (state.visible == 3) {
+      state.asideTreeData = argsList
+    }
   },
   SET_TESTCASESUITSTEPDATA: (state, argsList) => {
     state.testCaseSuitStepData = argsList
@@ -67,23 +115,120 @@ const actions = {
       commit('SET_PROJECTDATA', datas)
     })
   },
-  getPage({commit, state}){
-            getPageList(state.curreentPro.id).then(res => {
-          if (res.status == 1) {
-            let datas = res.data.page_list
-            commit('SET_PAGEDATA', datas)
-          } else {
-            Vue.$message({
-              message: res.message,
-              type: 'error'
-            })
-          }
+  setNavVisible({dispatch, commit}, nav) {
+    commit('SET_VISIBLE_NAV', nav)
+    switch (nav) {
+      case 'page':
+        state.visible = 1
+        dispatch('getPage')
+        break;
+      case 'case':
+        state.visible = 2
+        dispatch('getCaseData')
+        break;
+      case 'suit':
+        state.visible = 3
+        dispatch('getTestCaseSuitData')
+        break;
+      default:
+        state.visible = 0
+        break;
+    }
+  },
+  getPage({commit, state}) {
+    getPageList(state.curreentPro.id).then(res => {
+      if (res.status == 1) {
+        let datas = res.data.page_list
+        commit('SET_PAGEDATA', datas)
+      } else {
+        Vue.$message({
+          message: res.message,
+          type: 'error'
         })
+      }
+    })
   },
 
 
   changeProjects({commit}, args) {
     commit('CHANGE_PROJECTDATA', args)
+  },
+  getCaseData({commit, state}) {
+    getCaseList(state.curreentPro.id).then(
+      res => {
+        let datas = res.data.data_list
+        commit('SET_CASEDATA', datas)
+      },
+      err => {
+        console.log(err)
+      }
+    )
+  },
+  editSelectData({dispatch, state}, args) {
+    let proId = state.curreentProId
+    if (state.visible == 1) {
+      putPage(proId, args.edit_id, {"parentId": args.parentId, "title": args.title}).then(
+        res => {
+          dispatch('getPage')
+        }
+      )
+    } else if (state.visible == 2) {
+      putCase(proId, args.edit_id, {"parentId": args.parentId, "title": args.title}).then(
+        res => {
+          dispatch('getCaseData')
+        }
+      )
+    } else if (state.visible == 3) {
+      putSuit(proId, args.edit_id, {"parentId": args.parentId, "title": args.title}).then(
+        res => {
+          dispatch('getTestCaseSuitData')
+        }
+      )
+    }
+  },
+  addAsideTreeData({dispatch, state}, args) {
+    let proId = state.curreentProId
+    if (state.visible == 1) {
+      postPage(proId, args).then(
+        res => {
+          dispatch('getPage')
+        }
+      )
+    } else if (state.visible == 2) {
+      postCase(proId, args).then(
+        res => {
+          dispatch('getCaseData')
+        }
+      )
+    } else if (state.visible == 3) {
+      postSuit(proId, args).then(
+        res => {
+          dispatch('getTestCaseSuitData')
+        }
+      )
+    }
+  },
+  deleteSelectData({dispatch, state}, delete_id) {
+    let proId = state.curreentProId
+    if (state.visible == 1) {
+      deletePage(proId, delete_id).then(
+        res => {
+          dispatch('getPage')
+        }
+      )
+    } else if (state.visible == 2) {
+      deleteCase(proId, delete_id).then(
+        res => {
+          dispatch('getCaseData')
+        }
+      )
+    } else if (state.visible == 3) {
+      deleteSuit(proId, delete_id).then(
+        res => {
+          dispatch('getTestCaseSuitData')
+        }
+      )
+    }
   },
   getElementData({commit}, args) {
     getElementList(args.projectId, args.pageId).then(res => {
@@ -125,7 +270,7 @@ const actions = {
       }
     )
   },
-  getFunctionData({commit}) {
+  getFunctionData({commit, state}) {
     getFunctionList().then(res => {
         if (res.status == 1) {
           let datas = res.data.data_list.map(v => {
@@ -175,11 +320,11 @@ const actions = {
     getSuitList(state.curreentPro.id).then(
       res => {
         let data_list = res.data.data_list.map(v => {
-            Vue.set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-            v.originalRank = v.rank //  will be used when user click the cancel botton
-            v.originalTestCaseSuitId = v.test_case_suit_id
-            return v
-          })
+          Vue.set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
+          v.originalRank = v.rank //  will be used when user click the cancel botton
+          v.originalTestCaseSuitId = v.test_case_suit_id
+          return v
+        })
         commit('SET_TESTCASESUITDATA', data_list)
       },
       err => {

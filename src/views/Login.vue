@@ -70,7 +70,7 @@
     },
     created() {
       if (window.history.length > 1) {
-        window.alert("登录失效,请重新登录")
+        alert("登录失效,请重新登录")
       }
     }
   }

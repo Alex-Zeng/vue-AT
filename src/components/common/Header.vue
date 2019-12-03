@@ -61,7 +61,7 @@
 
       },
       showNav(nav) {
-        this.$store.dispatch('asideNav/setNavVisible', nav)
+        this.$store.dispatch('tableData/setNavVisible', nav)
       },
       toFunction() {
         this.$router.push({name: 'function'})
@@ -82,21 +82,5 @@
   }
 </script>
 <style>
-  @media screen and (max-height: 900px) {
-    /*屏幕宽度小于640px时显示红色字体*/
-    .el-menu-vertical-demo:not(.el-menu--collapse) {
-      min-height: 720px;
-      max-height: 720px;
-    }
-  }
-
-  @media screen and (min-height: 910px) {
-    /*屏幕宽度小于640px时显示红色字体*/
-    .el-menu-vertical-demo:not(.el-menu--collapse) {
-      min-height: 940px;
-      max-height: 940px;
-    }
-  }
-
 
 </style>

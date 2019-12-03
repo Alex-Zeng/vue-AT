@@ -27,13 +27,10 @@
 </template>
 
 <script>
-  import elementTable from "./page/elementTable";
-  import actionTable from "./page/actionTable";
-  import listCard from "./page/listCard";
+
 
   export default {
     name: 'Pages',
-    components: {listCard, elementTable, actionTable},
     mounted() {
       this.$store.dispatch('tableData/getPage')
     }

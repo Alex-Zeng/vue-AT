@@ -4,16 +4,18 @@
       <Header></Header>
     </el-header>
     <el-container>
-      <el-aside width="200px">
-        <aside-nav></aside-nav>
+      <el-aside width="200px" class="main_container">
+        <aside-nav-tree ></aside-nav-tree>
       </el-aside>
       <el-main>
         <div class="tab">
           <tab-views></tab-views>
         </div>
-        <keep-alive>
-          <router-view v-if="refresh"></router-view>
-        </keep-alive>
+        <div class="main_container">
+          <keep-alive>
+            <router-view v-if="refresh"></router-view>
+          </keep-alive>
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -23,7 +25,7 @@
 
   import Header from '@/components/common/Header'
   import tabViews from '@/components/common/tabViews'
-  import asideNav from '@/components/common/asideNav'
+  import asideNavTree from '@/components/common/asideNavTree'
 
   export default {
 
@@ -31,11 +33,11 @@
     components: {
       Header,
       tabViews,
-      asideNav,
-    },provide(){
-        return{
-            reload:this.reload
-        }
+      asideNavTree,
+    }, provide() {
+      return {
+        reload: this.reload
+      }
     },
 
 
@@ -44,13 +46,13 @@
         refresh: true
       }
     },
-    methods:{
-        reload(){
-            this.refresh = false;
-            this.$nextTick(function(){
-                this.refresh = true;
-            })
-        }
+    methods: {
+      reload() {
+        this.refresh = false;
+        this.$nextTick(function () {
+          this.refresh = true;
+        })
+      }
     }
   }
 </script>
@@ -69,7 +71,7 @@
 
   .el-aside {
     color: #333;
-    padding: 10px 0px;
+    padding: 10px 0 0 0;
     text-align: left;
 
   }
@@ -77,7 +79,7 @@
   .el-main {
     color: #333;
     text-align: center;
-    padding: 10px 0;
+    padding: 0;
 
   }
 
@@ -86,7 +88,23 @@
   }
 
   body > .el-container {
-    margin-bottom: 40px;
-    width: 100%;
+    /*margin-bottom: 40px;*/
+    /*width: 100%;*/
+  }
+
+  @media screen and (max-height: 800px) {
+    /*屏幕宽度小于640px时显示红色字体*/
+    .main_container {
+      min-height: 300px;
+      max-height: 700px;
+    }
+  }
+
+  @media screen and (min-height: 910px) {
+    /*屏幕宽度小于640px时显示红色字体*/
+    .main_container {
+      min-height: 700px;
+      max-height: 880px;
+    }
   }
 </style>

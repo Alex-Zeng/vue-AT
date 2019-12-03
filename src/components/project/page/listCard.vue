@@ -10,13 +10,14 @@
                    @click="operationDialog(3,currentPage)"></el-button>
       </el-button-group>
     </div>
-    <el-menu
-      default-active="2"
-      class="el-menu-vertical-demo">
-      <el-menu-item v-for="page in pageList" :index="'1-'+proId+'-1-'+page.id" :key="page.id" @click="selectPage(page)">
-        <span slot="title">{{page.title}}</span>
-      </el-menu-item>
-    </el-menu>
+    <aside-nav-tree :dataList="pageList" @node-click="selectPage"></aside-nav-tree>
+<!--    <el-menu-->
+<!--      default-active="2"-->
+<!--      class="el-menu-vertical-demo">-->
+<!--      <el-menu-item v-for="page in pageList" :index="'1-'+proId+'-1-'+page.id" :key="page.id" @click="selectPage(page)">-->
+<!--        <span slot="title">{{page.title}}</span>-->
+<!--      </el-menu-item>-->
+<!--    </el-menu>-->
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
@@ -64,9 +65,11 @@
 <script>
   import {getPageList, postPage, putPage, deletePage} from "@/api/api"
   import {mapState} from "vuex"
+  import asideNavTree from '../../common/asideNavTree'
 
   export default {
     name: 'listCard',
+    components: {asideNavTree},
     data() {
       return {
         search: '',
@@ -85,7 +88,6 @@
     },
     mounted() {
       this.getPageData()
-
     },
     watch: {
       proId() {

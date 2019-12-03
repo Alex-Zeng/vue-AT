@@ -14,7 +14,8 @@
         <template slot-scope="scope">
           <template v-if="scope.row.edit">
             <el-select v-model="scope.row.page_id" placeholder="请选择操作" size="mini">
-              <el-option v-for="item in $store.state.tableData.pageData" :label="item.title" :value="item.id" :key="item.id"></el-option>
+              <el-option v-for="item in $store.state.tableData.pageData" :label="item.title" :value="item.id"
+                         :key="item.id"></el-option>
             </el-select>
           </template>
           <span v-else>{{ scope.row.page_title }}</span>
@@ -54,6 +55,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template slot="header" slot-scope="scope">
+
           <el-button type="primary" @click="openAddForm" size="mini">新增<i class="el-icon-plus el-icon--right"></i>
           </el-button>
           <el-input
@@ -80,6 +82,7 @@
           </div>
 
           <div v-else>
+
             <el-button
               type="primary"
               size="mini"
@@ -108,10 +111,10 @@
         </el-form-item>
         <el-form-item label="查找方式：" :label-width="formLabelWidth">
           <el-select v-model="form.type" placeholder="请选择查找方式" size="mini">
-              <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
-            </el-select>
+            <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="元素位置："  :label-width="formLabelWidth">
+        <el-form-item label="元素位置：" :label-width="formLabelWidth">
           <el-input v-model="form.loc" placeholder="根据查找方式,填写元素位置" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -142,7 +145,7 @@
           type: 'id',
           loc: '',
         },
-        findType:['xpath','id','css','class','tag','tap_by_proportional','tap_by_coordinates','android_uiautomator','accessibility_id','no_need'],
+        findType: ['xpath', 'id', 'css', 'class', 'tag', 'tap_by_proportional', 'tap_by_coordinates', 'android_uiautomator', 'accessibility_id', 'no_need'],
         formLabelWidth: '120px'
       }
     },
@@ -154,8 +157,8 @@
           "pageId": this.$route.params.page_id
         })
       },
-      openAddForm(){
-        this.addForm=true
+      openAddForm() {
+        this.addForm = true
         form.title = ''
         form.type = 'id'
         form.title = ''
@@ -219,8 +222,6 @@
                   type: 'info',
                   message: res.message
                 });
-              } else {
-                this.$alert(res.message)
               }
             })
           }

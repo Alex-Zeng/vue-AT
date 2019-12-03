@@ -130,22 +130,34 @@
           </div>
 
           <div v-else>
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-edit"
-              @click="row.edit=!row.edit;getActionData(row.page_id)"
-            >
+            <el-button-group>
+              <el-tooltip class="item" effect="dark" content="复制" placement="top-start">
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-document-copy"
+                @click="row.edit=!row.edit"
+              >
 
-            </el-button>
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-delete"
-              @click="deleteRow(row.id)"
-            >
+              </el-button>
+              </el-tooltip>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-edit"
+                @click="row.edit=!row.edit;getActionData(row.page_id)"
+              >
 
-            </el-button>
+              </el-button>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-delete"
+                @click="deleteRow(row.id)"
+              >
+
+              </el-button>
+            </el-button-group>
           </div>
         </template>
       </el-table-column>
@@ -247,6 +259,7 @@
 <script>
   import {postStep, getStepList, putStep, deleteStep, getActionList, debugCase} from '@/api/api'
   import {mapState} from "vuex"
+
   export default {
     name: 'stepTable',
     data() {

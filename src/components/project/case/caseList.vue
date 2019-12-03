@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div align="center" >
+    <div align="center">
       <h5>用例</h5>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus" @click="operationDialog(2,'')"></el-button>
@@ -10,17 +10,23 @@
                    @click="operationDialog(3,currentCase)"></el-button>
       </el-button-group>
     </div>
-
-    <el-menu
-      default-active="2"
-      class="el-menu-vertical-demo"
-
-    >
-      <el-menu-item v-for="item in caseList" :index="'1-' + proId + '-2' + item.id" :key="item.id"
-                    @click="selectData(item)">
-        <span slot="title">{{item.title}}</span>
-      </el-menu-item>
-    </el-menu>
+    <el-input
+      placeholder="输入关键字进行过滤"
+      v-model="filterText">
+    </el-input>
+    <el-tree
+      class="filter-tree"
+      :data="caseList"
+      node-key="id"
+      default-expand-all
+      :filter-node-method="filterNode"
+      draggable
+      @node-click="selectData"
+      @node-drop="handleDrop"
+      :expand-on-click-node="false"
+      :highlight-current="true"
+      ref="tree">
+    </el-tree>
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm">
@@ -67,11 +73,11 @@
 
 <script>
   import {getCaseList, postCase, putCase, deleteCase} from "@/api/api";
-
   export default {
     name: 'caseList',
     data() {
       return {
+        filterText: '',
         search: '',
         currentCase: '用例',
         caseList: [],
@@ -83,6 +89,7 @@
         dialogTitle: '',
         form: {
           title: '',
+
         },
         formLabelWidth: '120px'
 
@@ -90,7 +97,20 @@
     },
 
     methods: {
-
+      handleDrop(draggingNode, dropNode, dropType, ev) {
+        let case_id = draggingNode.data.id
+        let pId = 0
+        if (dropType == 'inner'){
+          pId = dropNode.data.id
+        }else {
+          if(dropNode.parent.data.id){
+              pId = dropNode.parent.data.id
+            }else {
+            pId = 0
+          }
+        }
+        putCase(this.proId, case_id, {"parentId": pId})
+      },
       addData() {
         postCase(this.proId, this.form).then(res => {
           if (res.status == 1) {
@@ -134,8 +154,10 @@
       },
       selectData(data) {
         this.currentCase = data.title
-        this.$router.push({name: 'case', params: {id: this.proId, case_id: data.id}})
-        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + data.title})
+        this.$emit('clickNode', data)
+        // console.log(data)
+        // this.$router.push({name: 'case', params: {id: this.proId, case_id: data.id}})
+        // this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + data.title})
       },
       operationDialog(ope, casetitle) {
         switch (ope) {
@@ -167,6 +189,10 @@
           }
         )
       },
+      filterNode(value, data) {
+        if (!value) return true;
+        return data.label.indexOf(value) !== -1;
+      }
     },
     mounted() {
       this.getCaseData()
@@ -179,6 +205,9 @@
     watch: {
       proId() {
         this.getCaseData()
+      },
+      filterText(val) {
+        this.$refs.tree.filter(val);
       }
     }
   }

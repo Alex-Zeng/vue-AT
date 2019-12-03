@@ -65,14 +65,19 @@
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
-
-            <el-select v-model="row.case_id" placeholder="请选择用例" size="mini"
-                       @change="selectOption($event,row)">
-              <el-option v-for="test_case in caseData" :label="test_case.title" :value="test_case.id"
-                         :key="test_case.id"></el-option>
-            </el-select>
+            <el-popover
+              placement="bottom"
+              title="标题"
+              width="200"
+              trigger="click"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <case-list @clickNode="selectOptionEdit"></case-list>
+              </div>
+              <el-button slot="reference">{{row.case_title}}</el-button>
+            </el-popover>
           </template>
-          <span v-else>{{ row.case_title }}</span>
+          <span v-else>{{  row.case_title  }}</span>
         </template>
       </el-table-column>
       <el-table-column label="输入参数" align="center">
@@ -119,20 +124,30 @@
           </div>
 
           <div v-else>
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-edit"
-              @click="row.edit=!row.edit;getCaseData()"
-            >
-            </el-button>
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-delete"
-              @click="deleteRow(row.id)"
-            >
-            </el-button>
+            <el-button-group>
+
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-document-copy"
+                @click="row.edit=!row.edit"
+              >
+              </el-button>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-edit"
+                @click="row.edit=!row.edit;getCaseData()"
+              >
+              </el-button>
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-delete"
+                @click="deleteRow(row.id)"
+              >
+              </el-button>
+            </el-button-group>
           </div>
         </template>
       </el-table-column>
@@ -146,9 +161,19 @@
         </el-form-item>
         <el-form-item label="用例：" :label-width="formLabelWidth">
           <template slot-scope="scope">
-            <el-select v-model="form.case_id" placeholder="请选择用例" size="mini" @change="selectOption($event,scope)">
-              <el-option v-for="item in caseData" :label="item.title" :value="item.id" :key="item.id"></el-option>
-            </el-select>
+            <div class="block">
+              <el-cascader
+                ref="caseCascader"
+                :options="caseData"
+                :props="{ checkStrictly: true }"
+                filterable
+                @change="selectOption"
+              ></el-cascader>
+            </div>
+            <!--            <el-select v-model="form.case_id" placeholder="请选择用例" size="mini" @change="selectOption($event,scope)">-->
+            <!--              <el-option v-for="item in caseData" :label="item.title" :value="item.id" :key="item.id"></el-option>-->
+            <!--            <el-tree :data="caseData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>-->
+            <!--            </el-select>-->
           </template>
         </el-form-item>
         <el-form-item label="输入参数：" :label-width="formLabelWidth">
@@ -185,18 +210,27 @@
 <script>
   import {postSuitStep, getSuitStepList, putSuitStep, deleteSuitStep, getCaseList} from '@/api/api'
   import {formatArgs, checkJson} from '@/utils/tableDate'
+  import caseList from "../../project/case/caseList"
 
   export default {
     name: 'suitStepTable',
+    components: {caseList},
     data() {
       return {
         search: '',
+        filterText: '',
         tableData: [],
         caseData: [],
         defaultDataId: '',
+        selectCase: '',
+        currentRow: '',
         addForm: false,
         inputK: '',
         outputK: '',
+        defaultProps: {
+          children: 'children',
+          label: 'label'
+        },
         getRowKeys(row) {
           return row.id;
         },
@@ -221,12 +255,35 @@
       },
       rowClick(row, column, even) {
         this.expands = [row.id]
+        this.currentRow = row
       },
-      selectOption(e, s) {
-        console.log(s)
+      filterNode(value, data) {
+        if (!value) return true;
+        return data.label.indexOf(value) !== -1;
+      },
+      selectOption(value) {
+
+        let nodeId = value.id
         this.form.input_args = ''
+        this.form.case_id = nodeId
         for (let i = 0; i < this.caseData.length; i++) {
-          if (this.caseData[i].id == e) {
+          if (this.caseData[i].id == nodeId) {
+            this.inputK = this.caseData[i].input_keys
+            this.outputK = this.caseData[i].output_keys
+          }
+        }
+        if (this.inputK != '') {
+          this.form.input_args = formatArgs(this.inputK)
+        }
+
+      },
+      selectOptionEdit(value) {
+        let nodeId = value.id
+        this.currentRow.case_title = value.title
+        this.form.input_args = ''
+        this.form.case_id = nodeId
+        for (let i = 0; i < this.caseData.length; i++) {
+          if (this.caseData[i].id == nodeId) {
             this.inputK = this.caseData[i].input_keys
             this.outputK = this.caseData[i].output_keys
           }
@@ -263,6 +320,7 @@
           row.originalCaseTitle = row.case_title
           row.originalSkip = row.skip
           row.originalInputArgs = row.input_args
+          row.case_id = this.form.case_id
           putSuitStep(this.$route.params.id, this.$route.params.suit_id, row.id, row).then(res => {
             if (res.status == 1) {
               this.$message({
@@ -356,6 +414,9 @@
           this.getTableData()
           this.getCaseData()
         }
+      },
+      filterText(val) {
+        this.$refs.tree.filter(val);
       }
     },
   }

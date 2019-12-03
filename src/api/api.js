@@ -86,6 +86,10 @@ export const putCase = (projectId, caseId, formData) => {
 export const deleteCase = (projectId, caseId) => {
   return remove(`/uitest/projects/${projectId}/cases/${caseId}`).then(res => res);
 };
+// 复制用例
+export const copyCase = (projectId, caseId) => {
+  return get(`/uitest/projects/${projectId}/cases/${caseId}`).then(res => res);
+};
 //调试用例
 export const debugCase = (projectId, caseId, formData) => {
   return post(`/runtest/projects/${projectId}/cases/${caseId}/start`, formData, {timeout: 60*30*1000}).then(res => res);
@@ -110,7 +114,10 @@ export const putStep = (projectId, caseId, stepId, formData) => {
 export const deleteStep = (projectId, caseId, stepId,) => {
   return remove(`/uitest/projects/${projectId}/cases/${caseId}/steps/${stepId}`).then(res => res);
 };
-
+// 复制步骤
+export const copyStep = (projectId, caseId, stepId) => {
+  return get(`/uitest/projects/${projectId}/cases/${caseId}/steps/${stepId}`).then(res => res);
+};
 
 // ----------------用例集操作-----------------
 //添加用例集
