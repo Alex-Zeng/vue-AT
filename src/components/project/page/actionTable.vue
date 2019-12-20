@@ -6,6 +6,7 @@
       :data="$store.state.tableData.actionData.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
+      :row-class-name="tableRowClassName"
     >
       <el-table-column
         label="所属页面"
@@ -228,10 +229,7 @@
         })
       },
       getData() {
-        this.$store.dispatch('tableData/getData', {
-          "projectId": this.$route.params.id,
-          "pageId": this.$route.params.page_id
-        })
+        this.$store.dispatch('tableData/getActionData', this.$route.params.page_id)
       },
       getElementData() {
 
@@ -242,6 +240,14 @@
       },
       getFunctionData() {
         this.$store.dispatch('tableData/getFunctionData')
+      },
+            tableRowClassName({row, rowIndex}) {
+        if (rowIndex % 2 === 0) {
+          return 'warning-row';
+        } else {
+          return 'success-row';
+        }
+        return '';
       },
     },
     mounted() {
@@ -263,5 +269,11 @@
 </script>
 
 <style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
 
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
 </style>

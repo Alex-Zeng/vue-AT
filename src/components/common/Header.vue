@@ -40,6 +40,10 @@
         <i class="el-icon-s-platform" ></i>
         <span>测试设备</span>
       </el-menu-item>
+            <el-menu-item index="7" @click="toReport()">
+        <i class="el-icon-s-data" ></i>
+        <span>测试报告</span>
+      </el-menu-item>
 
     </el-menu>
   </div>
@@ -66,11 +70,19 @@
       toFunction() {
         this.$router.push({name: 'function'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
+        this.$store.dispatch('tableData/setNavVisible', 'function')
 
       },
       toEquipment() {
         this.$router.push({name: 'equipment'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
+        this.$store.dispatch('tableData/setNavVisible', 'equipment')
+
+      },
+       toReport() {
+        this.$router.push({name: 'report'})
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
+        this.$store.dispatch('tableData/setNavVisible', 'report')
 
       },
     },

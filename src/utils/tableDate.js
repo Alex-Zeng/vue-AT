@@ -32,3 +32,9 @@ export function checkJson (strP ) {
         }
 }
 
+export function formatDate(row, column, cellValue, index) {
+  let d = column
+  let date = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+  return date
+
+}

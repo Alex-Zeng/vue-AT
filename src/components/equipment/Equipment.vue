@@ -4,6 +4,7 @@
       :data="dataList.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row style="width: 100%"
       size="small"
+      border
       :row-key="getRowKeys"
       @row-click="rowClick"
       :expand-row-keys="expands"
@@ -32,7 +33,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="设备名" width="200">
+      <el-table-column label="设备名">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -50,7 +51,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Appium端口" width="120">
+      <el-table-column label="Appium端口">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.remotePort" class="edit-input" size="mini"/>
@@ -59,19 +60,40 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="状态" width="120">
+
+      <el-table-column label="定时任务开关">
         <template slot-scope="{row}">
-          <span>{{ row.status == 0 ? "停止":"运行中"}}</span>
+          <el-switch
+            v-model="row.cron_status"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+            @change="confirmEdit(row)"
+          >
+          </el-switch>
         </template>
       </el-table-column>
 
-      <el-table-column label="sessionID">
+      <el-table-column label="下次运行时间">
         <template slot-scope="{row}">
-          <span>{{ row.session_id}}</span>
+          <span>{{ row.next_run_time}}</span>
         </template>
       </el-table-column>
+      <el-table-column label="cron表达式">
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-input v-model="row.cron_times" class="edit-input" size="mini"/>
+          </template>
+          <el-tooltip class="item" effect="dark" content="cron表达式: 秒 分 时 日 月 年,如 10 10 10 * * * 表示每天10点10分10秒执行一次任务"
+                      placement="top" v-else>
+            <span>{{ row.cron_times}}</span>
+          </el-tooltip>
 
-      <el-table-column align="center" label="操作">
+
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" fixed="right" width="300">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addForm=true" icon="el-icon-plus" size="mini">新增
           </el-button>
@@ -82,21 +104,22 @@
         </template>
 
         <template slot-scope="{row}">
-           <div>
-          <template v-if="row.running">
+          <div>
+            <template v-if="row.running">
             <span type="info" disabled size="mini">执行中<i class="el-icon-loading"></i>
             </span>
-          </template>
-          <el-button v-else type="primary" @click.stop="runTest(row)" size="mini">运行用例集</el-button>
+            </template>
+            <el-button v-else type="primary" @click.stop="runTest(row)" size="mini">运行用例集</el-button>
 
-          <el-button
-            type="success"
-            size="mini"
-            @click="suitEdit(row)"
-          >
-            管理用例集
-          </el-button>
-           </div>
+            <el-button
+              type="success"
+              size="mini"
+              @click="suitEdit(row)"
+            >
+              管理用例集
+            </el-button>
+
+          </div>
           <div v-if="row.edit ">
             <el-button
               type="success"
@@ -157,12 +180,28 @@
         </el-form-item>
         <el-form-item label="remotePort：" :label-width="formLabelWidth">
           <el-input v-model="form.remotePort" autocomplete="off" placeholder="连接的appium端口"></el-input>
+
         </el-form-item>
+        <el-form-item label="是否开启定时任务：" :label-width="formLabelWidth">
+          <el-switch
+            v-model="form.cron_status"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            :active-value="1"
+            :inactive-value="0"
+          >
+          </el-switch>
+        </el-form-item>
+        <el-form-item label="cron_times：" :label-width="formLabelWidth">
+          <el-input v-model="form.cron_times" autocomplete="off"
+                    placeholder="cron表达式 例如:0 15 10 * * ? 2005 2005年的每天上午10:15触发"></el-input>
+        </el-form-item>
+
         <el-form-item label="setting_args：" :label-width="formLabelWidth">
           <el-input
             class="text-input"
             type="textarea"
-            :autosize="{ minRows: 14, maxRows: 15}"
+            :autosize="{ minRows: 10, maxRows: 15}"
             placeholder="请输入参数 kye=value"
             v-model="form.setting_args">
           </el-input>
@@ -180,6 +219,13 @@
       size="80%">
       <ExecuteTest :e_id="currentEid"></ExecuteTest>
     </el-drawer>
+    <el-drawer
+      :title="currentEtitle"
+      :visible.sync="logForm"
+      direction="rtl"
+      size="80%">
+      <ExecuteLog :e_id="currentEid"></ExecuteLog>
+    </el-drawer>
 
   </div>
 </template>
@@ -195,19 +241,22 @@
     startES
   } from '../../api/api'
   import ExecuteTest from '../executeTest/ExecuteTest'
+  import ExecuteLog from '../report/ExecuteLog'
   import {checkJson} from '@/utils/tableDate'
+  import {mapState} from "vuex"
 
   export default {
     name: "Equipment",
     components: {
       ExecuteTest,
+      ExecuteLog,
     },
     data() {
       return {
         search: "",
         addForm: false,
+        logForm: false,
         suitForm: false,
-        dataList: [],
         listLoading: true,
         currentEid: '',
         currentEtitle: '管理用例集',
@@ -221,9 +270,16 @@
           title: "",
           setting_args: "",
           remoteHost: "",
-          remotePort: ""
+          remotePort: "",
+          cron_status: "",
+          cron_times: ""
         }
       }
+    },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        dataList: state => state.tableData.equipmentData,
+      })
     },
     created() {
       this.getEquipmentDataList()
@@ -241,28 +297,18 @@
       },
 
       getEquipmentDataList() {
-        getEquipmentList().then(res => {
-          if (res.status == 1) {
-            this.dataList = res.data.data_list.map(v => {
-              this.$set(v, 'edit', false)
-              v.originalTitle = v.title
-              v.originalSetting_args = v.setting_args
-              v.originalRemoteHost = v.remoteHost
-              v.originalRemotePort = v.remotePort
-              return v
-            })
-          } else {
-            this.$message({
-              message: res.message,
-              type: 'error'
-            })
-          }
-        })
+        this.$store.dispatch('tableData/getEquipmentData')
       },
       suitEdit(row) {
         this.suitForm = true
         this.currentEid = row.id
         this.currentEtitle = row.title
+      },
+      openLog(row) {
+        this.logForm = true
+        this.currentEid = row.id
+        this.currentEtitle = row.title
+        this.$store.dispatch('tableData/getESLogData', row.id)
       },
       runTest(row) {
         this.expands = [row.id]
@@ -295,22 +341,27 @@
         row.setting_args = row.originalSetting_args
         row.remoteHost = row.originalRemoteHost
         row.remotePort = row.originalRemotePort
+        row.cron_times = row.originalCronTimes
+        row.cron_status = row.originalCronStatus
         this.$message({
           message: '放弃编辑',
           type: 'warning'
         })
       },
       confirmEdit(row) {
+
         if (checkJson(row.setting_args)) {
           row.edit = false
           row.originalTitle = row.title
           row.originalSetting_args = row.setting_args
           row.originalRemoteHost = row.remoteHost
           row.originalRemotePort = row.remotePort
+          row.originalCronTimes = row.cron_times
+          row.originalCronStatus = row.cron_status
           editEquipment(row.id, row).then(res => {
             if (res.status == 1) {
               this.$message({
-                message: '编辑成功',
+                message: res.message,
                 type: 'success'
               })
               this.getEquipmentDataList()
@@ -393,11 +444,7 @@
     width: 50%;
   }
 
-  .el-dialog input {
-    color: red;
-  }
-
   .text-input {
-    width: 360px;
+    width: 300px;
   }
 </style>

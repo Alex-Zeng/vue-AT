@@ -9,6 +9,7 @@ import Pages from '@/components/project/Pages'
 import Case from '@/components/project/Case'
 import tabViews from '@/components/common/tabViews'
 import caseSuit from '@/components/project/caseSuit'
+import Report from '@/components/report/Report'
 import Cookies from 'js-cookie'
 
 Vue.use(Router)
@@ -34,7 +35,7 @@ export const constantRoutes = [
   {
     path: '/home',
     component: Home,
-    name:'home',
+    name: 'home',
     meta: {
       title: '首页',
       requireAuth: true
@@ -82,6 +83,21 @@ export const constantRoutes = [
         name: 'executeTest',
         props: true,
         meta: {title: '测试执行'}
+      },
+      {
+        path: 'report',
+        component: Report,
+        name: 'report',
+        props: true,
+        // children: [
+        //   {
+        //     path: 'suit/:suit_id',
+        //     component: Report,
+        //     name: 'report',
+        //     props: true,
+        //   }
+        // ],
+        meta: {title: '测试报告'}
       },
     ]
   },

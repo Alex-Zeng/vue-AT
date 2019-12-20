@@ -223,3 +223,7 @@ export const deleteES = (e_id, es_id) => {
 export const startES = (e_id) => {
   return get(`/runtest/equipment/${e_id}/execute_suit/start`,{},60*60*1000).then(res => res);
 };
+//执行测试
+export const getLog = (formData) => {
+  return get(`/runtest/report`, formData).then(res => res);
+};

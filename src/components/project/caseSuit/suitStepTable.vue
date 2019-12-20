@@ -9,6 +9,7 @@
       :row-key="getRowKeys"
       :expand-row-keys="expands"
       @row-click="rowClick"
+      :row-class-name="tableRowClassName"
       :default-sort="{prop: 'rank', order: 'ascending'}"
     >
       <el-table-column type="expand">
@@ -64,15 +65,14 @@
       <el-table-column label="用例" align="center" prop="case_title" width="200">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
             <el-popover
               placement="bottom"
-              title="标题"
+              title="选择用例"
               width="200"
-              trigger="click"
+              trigger="hover"
               content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
               <div>
-                <case-list @clickNode="selectOptionEdit"></case-list>
+                <select-tree :dataList="caseData" :row="row" @addNodeClick="editNodeClick"></select-tree>
               </div>
               <el-button slot="reference">{{row.case_title}}</el-button>
             </el-popover>
@@ -82,13 +82,13 @@
       </el-table-column>
       <el-table-column label="输入参数" align="center">
         <template slot-scope="{row}">
-          <span v-for="item in row.input_keys">{{ item }}, </span>
+          <span>{{ row.input_keys + '' }} </span>
         </template>
       </el-table-column>
       <el-table-column label="输出参数" align="center">
         <template slot-scope="{row}">
 
-          <span v-for="item in row.output_keys">{{ item }}</span>
+          <span>{{ row.output_keys + '' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -161,19 +161,17 @@
         </el-form-item>
         <el-form-item label="用例：" :label-width="formLabelWidth">
           <template slot-scope="scope">
-            <div class="block">
-              <el-cascader
-                ref="caseCascader"
-                :options="caseData"
-                :props="{ checkStrictly: true }"
-                filterable
-                @change="selectOption"
-              ></el-cascader>
-            </div>
-            <!--            <el-select v-model="form.case_id" placeholder="请选择用例" size="mini" @change="selectOption($event,scope)">-->
-            <!--              <el-option v-for="item in caseData" :label="item.title" :value="item.id" :key="item.id"></el-option>-->
-            <!--            <el-tree :data="caseData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>-->
-            <!--            </el-select>-->
+            <el-popover
+              placement="right"
+              title="选择用例"
+              width="200"
+              trigger="hover"
+              >
+              <div>
+                <select-tree :dataList="caseData" @addNodeClick="addNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference">{{form.case_title?form.case_title:'请选择用例'}}</el-button>
+            </el-popover>
           </template>
         </el-form-item>
         <el-form-item label="输入参数：" :label-width="formLabelWidth">
@@ -210,17 +208,16 @@
 <script>
   import {postSuitStep, getSuitStepList, putSuitStep, deleteSuitStep, getCaseList} from '@/api/api'
   import {formatArgs, checkJson} from '@/utils/tableDate'
-  import caseList from "../../project/case/caseList"
+  import selectTree from '@/components/common/selectTree'
+  import {mapState} from "vuex"
 
   export default {
     name: 'suitStepTable',
-    components: {caseList},
+    components: {selectTree},
     data() {
       return {
         search: '',
         filterText: '',
-        tableData: [],
-        caseData: [],
         defaultDataId: '',
         selectCase: '',
         currentRow: '',
@@ -239,12 +236,27 @@
           rank: '',
           case_id: '',
           input_args: '',
+          case_title: '',
         },
         formLabelWidth: '120px',
       }
     },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        caseData: state => state.tableData.caseData,
+        tableData: state => state.tableData.testCaseSuitStepData,
+      })
+    },
 
     methods: {
+      tableRowClassName({row, rowIndex}) {
+        if (rowIndex % 2 === 0) {
+          return 'warning-row';
+        } else {
+          return 'success-row';
+        }
+        return '';
+      },
       addNew() {
         this.addForm = true
         this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
@@ -252,6 +264,7 @@
         this.form.input_args = ''
         this.inputK = ''
         this.outputK = ''
+        this.case_title = ''
       },
       rowClick(row, column, even) {
         this.expands = [row.id]
@@ -261,9 +274,9 @@
         if (!value) return true;
         return data.label.indexOf(value) !== -1;
       },
-      selectOption(value) {
-
-        let nodeId = value.id
+      addNodeClick(value) {
+        let nodeId = value.treeData.id
+        this.form.case_title = value.treeData.title
         this.form.input_args = ''
         this.form.case_id = nodeId
         for (let i = 0; i < this.caseData.length; i++) {
@@ -277,21 +290,20 @@
         }
 
       },
-      selectOptionEdit(value) {
-        let nodeId = value.id
-        this.currentRow.case_title = value.title
-        this.form.input_args = ''
-        this.form.case_id = nodeId
-        for (let i = 0; i < this.caseData.length; i++) {
-          if (this.caseData[i].id == nodeId) {
-            this.inputK = this.caseData[i].input_keys
-            this.outputK = this.caseData[i].output_keys
+      editNodeClick(value) {
+        let nodeId = value.treeData.id
+        value.row.case_title = value.treeData.title
+        value.row.case_id = nodeId
+
+        for (let index in this.caseData) {
+          if (this.caseData[index].id == nodeId) {
+            value.row.input_keys = this.caseData[index].input_keys
+            value.row.output_keys = this.caseData[index].output_keys
           }
         }
-        if (this.inputK != '') {
-          this.form.input_args = formatArgs(this.inputK)
+        if (value.row.input_keys != '') {
+          value.row.input_args = formatArgs(value.row.input_keys)
         }
-
       },
       addData() {
         console.log(this.form.input_args)
@@ -320,7 +332,7 @@
           row.originalCaseTitle = row.case_title
           row.originalSkip = row.skip
           row.originalInputArgs = row.input_args
-          row.case_id = this.form.case_id
+          row.case_id = row.case_id
           putSuitStep(this.$route.params.id, this.$route.params.suit_id, row.id, row).then(res => {
             if (res.status == 1) {
               this.$message({
@@ -365,39 +377,11 @@
       },
 
       getCaseData() {
-        this.projectId = this.$route.params.id
-        getCaseList(this.projectId).then(
-          res => {
-            this.caseData = res.data.data_list
-          },
-          err => {
-            console.log(err)
-          }
-        )
+        this.$store.dispatch('tableData/getCaseData')
       },
       getTableData() {
-        let projectId = this.$route.params.id
-        let dataId = this.$route.params.suit_id
-        getSuitStepList(projectId, dataId).then(
-          res => {
-            if (res.data.data_list.length > 0) {
-              this.tableData = res.data.data_list.map(v => {
-                this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-                v.originalRank = v.rank //  will be used when user click the cancel botton
-                v.originalCaseTitle = v.case_title
-                v.originalSkip = v.skip
-                v.originalInputArgs = v.input_args
-                return v
-              })
-            } else {
-              this.tableData = res.data.data_list
-            }
-
-          },
-          err => {
-            console.log(err);
-          }
-        )
+        let suitId = this.$route.params.suit_id
+        this.$store.dispatch('tableData/getTestCaseSuitStepData',suitId)
       },
     }
     ,
@@ -427,4 +411,11 @@
     text-align: left;
   }
 
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
 </style>

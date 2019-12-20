@@ -15,7 +15,7 @@
 
   export default {
     name: "selectTree",
-    props:['dataList'],
+    props:['dataList','row'],
     watch: {
       filterText(val) {
         this.$refs.tree.filter(val);
@@ -40,7 +40,11 @@
     },
     methods: {
 
-      addNodeClick(data) {
+      addNodeClick(treeData) {
+        let data = {
+          treeData:treeData,
+          row:this.row
+        }
         this.$emit('addNodeClick', data)
       },
       filterNode(value, data) {

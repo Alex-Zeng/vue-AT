@@ -27,10 +27,12 @@
 </template>
 
 <script>
-
+  import elementTable from "./page/elementTable";
+  import actionTable from "./page/actionTable";
 
   export default {
     name: 'Pages',
+    components: { elementTable, actionTable},
     mounted() {
       this.$store.dispatch('tableData/getPage')
     }
@@ -39,22 +41,5 @@
 </script>
 
 <style>
-    @media screen and (max-height: 900px) {
-  /*屏幕宽度小于640px时显示红色字体*/
-  .ta{
-    min-height: 700px;
-    max-height: 860px;
-    background-color: #fff;
-  }
-  }
-  @media screen and (min-height: 910px) {
-  /*屏幕宽度小于640px时显示红色字体*/
-  .ta {
-    background-color: #fff;
-    min-height: 880px;
-    max-height: 1200px;
-  }
-  }
-
 
 </style>

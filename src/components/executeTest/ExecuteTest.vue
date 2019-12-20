@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-table
-      :data="dataList"
+      :data="datalist"
       fit highlight-current-row style="width: 100%"
       size="small"
       :row-key="getRowKeys"
@@ -32,11 +32,18 @@
       <el-table-column label="测试集">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-select v-model="row.suit_id" placeholder="请选择测试集" size="mini"
-                       @change="selectOption($event,scope)">
-              <el-option v-for="item in $store.state.tableData.testCaseSuitData" :label="item.title" :value="item.id"
-                         :key="item.id"></el-option>
-            </el-select>
+            <el-popover
+              placement="bottom"
+              title="标题"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="testCaseSuitData" :row="row" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference">{{row.suit_title}}</el-button>
+            </el-popover>
+
           </template>
           <span v-else>{{ row.suit_title }}</span>
         </template>
@@ -108,11 +115,17 @@
         </el-form-item>
         <el-form-item label="测试集：" :label-width="formLabelWidth">
           <template slot-scope="scope">
-            <el-select v-model="form.suit_id" placeholder="请选择测试集" size="mini"
-                       @change="selectOption($event,scope)">
-              <el-option v-for="item in $store.state.tableData.testCaseSuitData" :label="item.title" :value="item.id"
-                         :key="item.id"></el-option>
-            </el-select>
+            <el-popover
+              placement="bottom"
+              title="选择测试集"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="testCaseSuitData" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference">{{form.suit_title?form.suit_title:'选择测试集'}}</el-button>
+            </el-popover>
           </template>
         </el-form-item>
       </el-form>
@@ -127,15 +140,17 @@
 <script>
   import {postES, editES, deleteES, startEquipment, getESList, startES} from '../../api/api'
   import {checkJson} from '@/utils/tableDate'
+  import selectTree from '@/components/common/selectTree'
+  import {mapState} from "vuex"
 
   export default {
     name: "ExecuteText",
-    props:['e_id'],
+    props: ['e_id'],
+    components: {selectTree},
     data() {
       return {
         search: "",
         addForm: false,
-        dataList: [],
         formLabelWidth: '140px',
         textareaWidth: '520px',
         running: 0,
@@ -146,6 +161,7 @@
         form: {
           rank: "",
           suit_id: "",
+          suit_title: "",
         }
       }
     },
@@ -154,9 +170,15 @@
       this.getList()
 
     },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        testCaseSuitData: state => state.tableData.testCaseSuitData,
+        datalist: state => state.tableData.equipmentTestCaseSuitData,
+      })
+    },
     watch: {
       e_id() {
-          this.getList()
+        this.getList()
       }
     },
 
@@ -166,18 +188,22 @@
       },
       addNew() {
         this.addForm = true
-        this.form.rank = this.$store.state.tableData.equipmentTestCaseSuitData.slice(-1)[0].rank + 1
+        this.form.suit_id = ''
+        this.form.suit_title = ''
+        this.form.rank = this.datalist.slice(-1)[0].rank + 1
       },
-
+      editNodeClick(value) {
+        let suitId = value.treeData.id
+        let suitTitle = value.treeData.title
+        if (value.row) {
+          value.row.suit_id = suitId
+          value.row.suit_title = suitTitle
+        }
+        this.form.suit_id = suitId
+        this.form.suit_title = suitTitle
+      },
       getList() {
-        getESList(this.e_id).then((res) => {
-          this.dataList = res.data.data_list.map(v => {
-            this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-            v.originalRank = v.rank //  will be used when user click the cancel botton
-            v.originalTestCaseSuitId = v.test_case_suit_id
-            return v
-          })
-        })
+        this.$store.dispatch('tableData/getESData', this.e_id)
       },
       addData() {
         if (checkJson(this.form.setting_args) == true) {

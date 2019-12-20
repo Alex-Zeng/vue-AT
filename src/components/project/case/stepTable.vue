@@ -1,13 +1,19 @@
 <template>
   <div>
-
+    <el-drawer
+  title="我是标题"
+  :visible.sync="drawer"
+  :direction="rtl"
+  :before-close="handleClose">
+  <span>我来啦!</span>
+</el-drawer>
     <el-table
       ref="multipleTable"
       :data="tableData.filter(data => !search || data.action_title.toLowerCase().includes(search.toLowerCase())|| data.rank.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
+      :row-class-name="tableRowClassName"
       :default-sort="{prop: 'rank', order: 'ascending'}"
-
     >
 
       <el-table-column label="步骤" align="center" prop="rank" width="60">
@@ -56,12 +62,17 @@
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
-
-            <el-select v-model="row.page_id" placeholder="请选择页面" size="mini"
-                       @change="row.action_id='';getActionData(row.page_id);">
-              <el-option v-for="page in $store.state.tableData.pageData" :label="page.title" :value="page.id"
-                         :key="page.id"></el-option>
-            </el-select>
+            <el-popover
+              placement="left"
+              title="选择页面"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="pageData" :row="row" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference" size="mini">{{row.page_title?row.page_title:'请选择页面'}}</el-button>
+            </el-popover>
           </template>
           <span v-else>{{ row.page_title }}</span>
         </template>
@@ -69,8 +80,6 @@
       <el-table-column label="操作方法" align="center">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-
-            <!--            <el-input v-model="row.fun_title" class="edit-input" size="mini"/>-->
             <el-select v-model="row.action_id" placeholder="请选择操作" size="mini">
               <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
             </el-select>
@@ -94,13 +103,8 @@
           <span v-else>{{ row.output_key }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="update_datetime"
-        label="更新时间"
-        align="center"
-        width="160px">
-      </el-table-column>
-      <el-table-column align="right" label="操作" fixed="right" width="160px">
+
+      <el-table-column align="right" label="操作"  width="160px">
         <template slot="header" slot-scope="scope">
           <el-button-group>
             <el-button type="primary" @click="addNew" size="mini">新增</el-button>
@@ -132,14 +136,14 @@
           <div v-else>
             <el-button-group>
               <el-tooltip class="item" effect="dark" content="复制" placement="top-start">
-              <el-button
-                type="primary"
-                size="mini"
-                icon="el-icon-document-copy"
-                @click="row.edit=!row.edit"
-              >
+                <el-button
+                  type="primary"
+                  size="mini"
+                  icon="el-icon-document-copy"
+                  @click="row.edit=!row.edit"
+                >
 
-              </el-button>
+                </el-button>
               </el-tooltip>
               <el-button
                 type="primary"
@@ -170,11 +174,17 @@
           <el-input v-model.number="form.rank" placeholder="请输入 正整数且不重复"></el-input>
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
-          <el-select v-model="form.page_id" placeholder="请选择页面" size="mini"
-                     @change="form.action_id='';getActionData(form.page_id)">
-            <el-option v-for="page in pageData" :label="page.title" :value="page.id"
-                       :key="page.id"></el-option>
-          </el-select>
+          <el-popover
+            placement="top"
+            title="选择页面"
+            width="200"
+            trigger="hover"
+            content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+            <div>
+              <select-tree :dataList="pageData" :row="form" @addNodeClick="editNodeClick"></select-tree>
+            </div>
+            <el-button slot="reference" size="mini">{{form.page_title?form.page_title:'请选择页面'}}</el-button>
+          </el-popover>
           <el-select v-model="form.action_id" placeholder="请选择方法" size="mini">
             <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
           </el-select>
@@ -258,17 +268,19 @@
 
 <script>
   import {postStep, getStepList, putStep, deleteStep, getActionList, debugCase} from '@/api/api'
+  import selectTree from '@/components/common/selectTree'
   import {mapState} from "vuex"
 
   export default {
     name: 'stepTable',
+    components: {selectTree},
     data() {
       return {
         search: '',
         caseId: '',
         tableData: [],
+        drawer: false,
         EquipmentData: [],
-        actData: [],
         defaultDataId: '',
         equipmentId: '',
         debugInputArg: '',
@@ -277,6 +289,7 @@
         form: {
           rank: '',
           page_id: '',
+          page_title: '',
           action_id: '',
           input_key: '',
           output_key: '',
@@ -299,7 +312,8 @@
     computed: {
       ...mapState({  //这里的...不是省略号了,是对象扩展符
         pageData: state => state.tableData.pageData,
-        projectId: state => state.tableData.curreentPro.id
+        projectId: state => state.tableData.curreentPro.id,
+        actData: state => state.tableData.actionData
       })
     },
     watch: {
@@ -323,10 +337,29 @@
           return false;
         }
       },
+      tableRowClassName({row, rowIndex}) {
+        if (rowIndex % 2 === 0) {
+          return 'warning-row';
+        } else {
+          return 'success-row';
+        }
+        return '';
+      },
+      editNodeClick(data) {
+        if (data.row) {
+          data.row.page_title = data.treeData.title
+          data.row.page_id = data.treeData.id
+          data.row.action_id = ''
+        }
+        this.form.page_title = data.treeData.title
+        this.form.page_id = data.treeData.id
+        this.getActionData(data.treeData.id)
+      },
       addNew() {
         this.addForm = true
         this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
         this.form.page_id = ''
+        this.form.page_title = ''
         this.form.action_id = ''
         this.form.take_screen_shot = 0
         this.form.wait_time = 0
@@ -363,6 +396,7 @@
         row.originalSkip = row.skip
         row.originalTakeScreenShot = row.take_screen_shot
         row.originalWaitTime = row.wait_time
+        row.originalPageTitle = row.page_title
 
         putStep(this.projectId, this.caseId, row.id, row).then(res => {
           if (res.status == 1) {
@@ -385,6 +419,7 @@
         row.page_id = row.originalPageId
         row.skip = row.originalSkip
         row.wait_time = row.originalWaitTime
+        row.page_title = row.originalPageTitle
         row.take_screen_shot = row.originalTakeScreenShot
         row.edit = false
         this.$message({
@@ -421,14 +456,7 @@
         debugCase(this.projectId, this.caseId, debugForm)
       },
       getActionData(pageId) {
-        getActionList(this.projectId, pageId).then(
-          res => {
-            this.actData = res.data.data_list
-          },
-          err => {
-            console.log(err);
-          }
-        )
+        this.$store.dispatch('tableData/getActionData', pageId)
       },
       getPageData() {
         this.$store.dispatch('tableData/getPage')
@@ -442,6 +470,7 @@
                 v.originalRank = v.rank //  will be used when user click the cancel botton
                 v.originalActionId = v.action_id
                 v.originalPageId = v.page_id
+                v.originalPageTitle = v.page_title
                 v.originalSkip = v.skip
                 v.originalWaitTime = v.wait_time
                 v.originalTakeScreenShot = v.take_screen_shot
@@ -457,11 +486,23 @@
           }
         )
       }
-    },
+    }
+    ,
 
   }
 </script>
 
 <style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+
+  .el-table th {
+    background: #deffe2;
+  }
 
 </style>

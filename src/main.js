@@ -7,6 +7,11 @@ import ElementUI from 'element-ui'
 import store from '@/store/index.js'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/style/reset.css'
+import { HappyScroll } from 'vue-happy-scroll'
+//自定义组件名
+Vue.component('happy-scroll', HappyScroll)
+// 引入css
+import 'vue-happy-scroll/docs/happy-scroll.css'
 Vue.use(ElementUI)
 Vue.config.productionTip = false
 

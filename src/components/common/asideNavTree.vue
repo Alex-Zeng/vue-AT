@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div align="center">
-      <h5>页面对象PO</h5>
+    <el-card class="box-card">
+  <div slot="header" class="clearfix">
+      <h5>{{asideTitle}}</h5>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus"
                    @click="addForm=true;form.title='';form.pId=0;addFormSelectTitle='';"></el-button>
@@ -19,8 +20,9 @@
           <el-button slot="reference" size="mini" type="primary" icon="el-icon-delete"></el-button>
         </el-popover>
       </el-button-group>
-    </div>
-    <el-tree
+  </div>
+  <div class="text item">
+        <el-tree
       class="filter-tree"
       :data="dataList"
       node-key="id"
@@ -33,16 +35,29 @@
       :highlight-current="true"
       ref="tree">
     </el-tree>
+  </div>
+</el-card>
+
+
 
     <!--    添加-->
 
     <el-dialog title="添加" :visible.sync="addForm" align="left">
       <el-form :model="form">
         <el-form-item label="选择父级：" :label-width="formLabelWidth">
-          <span>{{addFormSelectTitle?addFormSelectTitle:'不选择父级则为根节点'}}</span>
+                              <el-popover
+            placement="bottom"
+            title="选择父级"
+            width="200"
+            trigger="hover"
+            content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+            <div>
+              <select-tree :dataList="dataList" @addNodeClick="addNodeClick"></select-tree>
+            </div>
+            <el-button slot="reference" size="mini">{{addFormSelectTitle?addFormSelectTitle:'请选择父级,不选择父级则为根节点'}}</el-button>
+          </el-popover>
         </el-form-item>
-        <el-form-item label="选择父级：" :label-width="formLabelWidth">
-          <select-tree :dataList="dataList" @addNodeClick="addNodeClick"></select-tree>
+         <el-form-item label="标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -59,10 +74,19 @@
       </el-form>
       <el-form :model="form">
         <el-form-item label="选择父级：" :label-width="formLabelWidth">
-          <span>{{editFormSelectTitle?editFormSelectTitle:'不选择父级则为根节点'}}</span>
-        </el-form-item>
-        <el-form-item label="父级：" :label-width="formLabelWidth">
-          <select-tree :dataList="dataList" @addNodeClick="editNodeClick"></select-tree>
+                    <el-popover
+            placement="bottom"
+            title="选择父级"
+            width="200"
+            trigger="hover"
+            content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+            <div>
+              <select-tree :dataList="dataList" @addNodeClick="editNodeClick"></select-tree>
+            </div>
+            <el-button slot="reference" size="mini">{{editFormSelectTitle?editFormSelectTitle:'请选择父级,不选择父级则为根节点'}}</el-button>
+          </el-popover>
+ </el-form-item>
+        <el-form-item label="标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -90,6 +114,7 @@
       ...mapState({  //这里的...不是省略号了,是对象扩展符
         dataList: state => state.tableData.asideTreeData,
         visible: state => state.tableData.visible,
+        asideTitle: state => state.tableData.asideTitle,
         proId: state => state.tableData.curreentProId,
       })
     },
@@ -128,12 +153,12 @@
         }
       },
       addNodeClick(data) {
-        this.form.pId = data.id
-        this.addFormSelectTitle = data.title
+        this.form.pId = data.treeData.id
+        this.addFormSelectTitle = data.treeData.title
       },
       editNodeClick(data) {
-        this.form.pId = data.id
-        this.editFormSelectTitle = data.title
+        this.form.pId = data.treeData.id
+        this.editFormSelectTitle = data.treeData.title
       },
 
       addNode() {
@@ -177,5 +202,24 @@
 </script>
 
 <style scoped>
+  .text {
+    font-size: 14px;
+  }
 
+  .item {
+    margin-bottom: 18px;
+  }
+
+  .clearfix:before,
+  .clearfix:after {
+    display: table;
+    content: "";
+  }
+  .clearfix:after {
+    clear: both
+  }
+
+  .box-card {
+    width: 210px;
+  }
 </style>

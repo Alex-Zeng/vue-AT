@@ -3,15 +3,17 @@
     <el-header>
       <Header></Header>
     </el-header>
+    <div class="tab">
+      <tab-views></tab-views>
+    </div>
     <el-container>
-      <el-aside width="200px" class="main_container">
-        <aside-nav-tree ></aside-nav-tree>
+      <el-aside width="200px" class="main_container" v-if="asideVisible">
+        <aside-nav-tree></aside-nav-tree>
       </el-aside>
       <el-main>
-        <div class="tab">
-          <tab-views></tab-views>
-        </div>
+
         <div class="main_container">
+
           <keep-alive>
             <router-view v-if="refresh"></router-view>
           </keep-alive>
@@ -26,6 +28,7 @@
   import Header from '@/components/common/Header'
   import tabViews from '@/components/common/tabViews'
   import asideNavTree from '@/components/common/asideNavTree'
+  import {mapState} from "vuex"
 
   export default {
 
@@ -34,7 +37,13 @@
       Header,
       tabViews,
       asideNavTree,
-    }, provide() {
+    },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        asideVisible: state => state.tableData.visible,
+      })
+    },
+    provide() {
       return {
         reload: this.reload
       }
@@ -59,19 +68,18 @@
 
 <style scoped lang="less">
   .el-header {
-    height: 60px;
     color: #000000;
     text-align: center;
-    line-height: 60px;
   }
 
   .root_container {
     min-width: 1220px;
+
   }
 
   .el-aside {
     color: #333;
-    padding: 10px 0 0 0;
+    padding: 0 0 0 0;
     text-align: left;
 
   }
@@ -79,12 +87,12 @@
   .el-main {
     color: #333;
     text-align: center;
-    padding: 0;
 
   }
 
   .tab {
-    height: 45px;
+    height: 20px;
+    padding-bottom: 20px;
   }
 
   body > .el-container {
@@ -92,19 +100,4 @@
     /*width: 100%;*/
   }
 
-  @media screen and (max-height: 800px) {
-    /*屏幕宽度小于640px时显示红色字体*/
-    .main_container {
-      min-height: 300px;
-      max-height: 700px;
-    }
-  }
-
-  @media screen and (min-height: 910px) {
-    /*屏幕宽度小于640px时显示红色字体*/
-    .main_container {
-      min-height: 700px;
-      max-height: 880px;
-    }
-  }
 </style>

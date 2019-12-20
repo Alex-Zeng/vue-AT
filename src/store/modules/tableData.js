@@ -18,6 +18,8 @@ import {
   postPage,
   postCase,
   postSuit,
+  getESList,
+  getLog,
 } from '@/api/api'
 import Vue from 'vue'
 
@@ -26,6 +28,7 @@ const state = {
   deafultPageId: '',
   curreentPro: '',
   curreentProId: '',
+  asideTitle: '',
   pageData: [],
   asideTreeData: [],
   caseData: [],
@@ -36,6 +39,9 @@ const state = {
   equipmentData: [],
   testCaseSuitData: [],
   testCaseSuitStepData: [],
+  equipmentTestCaseSuitData: [],
+  logData: [],
+  logCount: [],
 }
 const getters = {}
 
@@ -44,14 +50,15 @@ const mutations = {
     switch (nav) {
       case 'page':
         state.visible = 1
-
+        state.asideTitle = '页面对象PO'
         break;
       case 'case':
         state.visible = 2
-
+        state.asideTitle = '用例'
         break;
       case 'suit':
         state.visible = 3
+        state.asideTitle = '用例集'
         break;
       default:
         state.visible = 0
@@ -105,7 +112,15 @@ const mutations = {
   SET_TESTCASESUITSTEPDATA: (state, argsList) => {
     state.testCaseSuitStepData = argsList
   },
-
+  SET_ESDATA: (state, argsList) => {
+    state.equipmentTestCaseSuitData = argsList
+  },
+  SET_LOGDATA: (state, argsList) => {
+    state.logData = argsList
+  },
+  SET_LOCOUNT: (state, argsList) => {
+    state.logCount = argsList
+  },
 }
 
 const actions = {
@@ -115,23 +130,19 @@ const actions = {
       commit('SET_PROJECTDATA', datas)
     })
   },
-  setNavVisible({dispatch, commit}, nav) {
+  setNavVisible({dispatch, commit, state}, nav) {
     commit('SET_VISIBLE_NAV', nav)
     switch (nav) {
       case 'page':
-        state.visible = 1
         dispatch('getPage')
         break;
       case 'case':
-        state.visible = 2
         dispatch('getCaseData')
         break;
       case 'suit':
-        state.visible = 3
         dispatch('getTestCaseSuitData')
         break;
       default:
-        state.visible = 0
         break;
     }
   },
@@ -250,8 +261,8 @@ const actions = {
       }
     })
   },
-  getData({commit}, args) {
-    getActionList(args.projectId, args.pageId).then(res => {
+  getActionData({commit, state}, pageId) {
+    getActionList(state.curreentProId, pageId).then(res => {
         if (res.status == 1) {
           let datas = res.data.data_list.map(v => {
             Vue.set(v, 'edit', false)
@@ -261,11 +272,6 @@ const actions = {
             return v
           })
           commit('SET_ACTIONDATA', datas)
-        } else {
-          Vue.$message({
-            message: res.message,
-            type: 'error'
-          })
         }
       }
     )
@@ -274,7 +280,7 @@ const actions = {
     getFunctionList().then(res => {
         if (res.status == 1) {
           let datas = res.data.data_list.map(v => {
-            Vue.set(v, 'edit', false)
+            v.edit = v.false
             v.originalTitle = v.title
             v.originalType = v.type
             v.originalDescription = v.description
@@ -291,28 +297,20 @@ const actions = {
       }
     )
   },
-  getTestCaseSuitStepData({commit, state},) {
-    getSuitStepList(state.curreentPro.id).then(
+  getTestCaseSuitStepData({commit, state}, suitId) {
+    getSuitStepList(state.curreentPro.id, suitId).then(
       res => {
-
-        if (res.data.data_list.length > 0) {
+        if (res.status == 1) {
           let data_list = res.data.data_list.map(v => {
-            Vue.set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-            v.originalRank = v.rank //  will be used when user click the cancel botton
+            v.edit = false //  will be used when user click the cancel botton
+            v.originalRank = v.rank
             v.originalCaseTitle = v.case_title
             v.originalSkip = v.skip
             v.originalInputArgs = v.input_args
             return v
           })
           commit('SET_TESTCASESUITSTEPDATA', data_list)
-        } else {
-          let data_list = res.data.data_list
-          commit('SET_TESTCASESUITSTEPDATA', data_list)
         }
-
-      },
-      err => {
-        console.log(err);
       }
     )
   },
@@ -336,24 +334,40 @@ const actions = {
     getEquipmentList().then(res => {
         if (res.status == 1) {
           let datas = res.data.data_list.map(v => {
-            Vue.set(v, 'edit', false)
+            v.edit = false
             v.originalTitle = v.title
             v.originalSetting_args = v.setting_args
             v.originalRemoteHost = v.remoteHost
             v.originalRemotePort = v.remotePort
+            v.originalCronTimes = v.cron_times
+            v.originalCronStatus = v.cron_status
             return v
           })
           commit('SET_EQUIPMENTDATA', datas)
-        } else {
-          Vue.$message({
-            message: res.message,
-            type: 'error'
-          })
         }
-
       }
     )
   },
+  getESData({commit}, EId) {
+    getESList(EId).then((res) => {
+      let data = res.data.data_list.map(v => {
+        v.originalRank = v.rank //  will be used when user click the cancel botton
+        v.edit = false
+        v.originalTestCaseSuitId = v.test_case_suit_id
+        return v
+      })
+      commit('SET_ESDATA', data)
+    })
+  },
+  getESLogData({commit},args) {
+
+    getLog(args.type,args.id).then((res) => {
+      let data = res.data.data_list
+      let dataCount = res.data.data_count
+      commit('SET_LOGDATA', data)
+      commit('SET_LOCOUNT', dataCount)
+    })
+  }
 }
 
 export default {
