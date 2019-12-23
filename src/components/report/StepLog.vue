@@ -1,20 +1,29 @@
 <template>
   <div class="log_container">
     <el-row>
-      <h5>测试集日志</h5>
+      <h5>测试步骤日志</h5>
       <div>
         <el-row>
           <el-col :span="12">
-            <div class="grid-content bg-purple">
+            <div>
               <el-breadcrumb separator-class="el-icon-arrow-right">
                 <el-breadcrumb-item :to="{ name: 'testLog' }">日志: {{$route.params.id}}</el-breadcrumb-item>
-                <el-breadcrumb-item :to="{ name: 'suitLog',params: {id: $route.params.id} }">测试集:{{$route.params.suitId}}</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ name: 'suitLog',params: {id: $route.params.id} }">
+                  测试集:{{$route.params.suitId}}
+                </el-breadcrumb-item>
+                <el-breadcrumb-item
+                  :to="{ name: 'caseLog',params: {id: $route.params.id,suitId:$route.params.suitId} }">
+                  测试用例:{{$route.params.caseId}}
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>
+                  测试步骤
+                </el-breadcrumb-item>
               </el-breadcrumb>
             </div>
           </el-col>
           <el-col :span="12">
             <div>
-              <test_static :data="suitLogCount"></test_static>
+              <test_static :data="stepLogCount"></test_static>
             </div>
           </el-col>
         </el-row>
@@ -22,7 +31,7 @@
 
       <div class="grid-content bg-purple-light">
         <el-table
-          :data="suitLogData"
+          :data="stepLogData"
           fit
           max-height="600"
           border
@@ -32,20 +41,20 @@
           :row-key="getRowKeys"
           @row-click="rowClick"
         >
-          <el-table-column label="ID" width="40">
+          <el-table-column label="ID" width="60">
             <template slot-scope="{row}">
               <span>{{ row.id}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="测试集">
+          <el-table-column label="用例">
             <template slot-scope="{row}">
-              <span>{{ row.test_case_suit_title}}</span>
+              <span>{{ row.test_case_action_title}}</span>
             </template>
           </el-table-column>
 
           <el-table-column label="执行结果">
             <template slot-scope="{row}">
-              <span>{{ row.run_test_result?'成功':'失败' }}</span>
+              <span>{{ row.run_test_action_result?'成功':'失败' }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -53,12 +62,32 @@
 
           >
             <template slot-scope="{row}">
-              <span>{{ formatDatey(row.run_test_suit_start_time)}}</span>
+              <span>{{ formatDatey(row.action_start_time)}}</span>
             </template>
           </el-table-column>
           <el-table-column label="用时">
             <template slot-scope="{row}">
-              <span>{{ row.run_test_suit_times}} 秒</span>
+              <span>{{ row.run_test_case_times}} 秒</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="截图">
+            <template slot-scope="{row}">
+              <el-popover
+                placement="right-end"
+                width="400"
+                trigger="hover"
+                v-if="row.screen_shot_path"
+                >
+                <div class="demo-image">
+                  <div class="block">
+                    <el-image
+                      style="width: 400px; height: 700px"
+                      :src="url+row.id + ''"
+                      fit="contain"></el-image>
+                  </div>
+                </div>
+                <el-button slot="reference">查看截图</el-button>
+              </el-popover>
             </template>
           </el-table-column>
         </el-table>
@@ -74,16 +103,17 @@
   import {mapState} from "vuex"
 
   export default {
-    name: "SuitLog",
+    name: "CaseLog",
     components: {test_static},
     data() {
       return {
         search: "",
         formLabelWidth: '140px',
         textareaWidth: '520px',
-        currentSuitId: '',
-        suitLogData: [],
-        suitLogCount: '',
+        currentCaseId: '',
+        stepLogData: [],
+        stepLogCount: '',
+        url: 'http://localhost:5002/runtest/image_log/',
         getRowKeys(row) {
           return row.id;
         },
@@ -96,28 +126,28 @@
 
     watch: {
       $route(to, from) {
-        if (to.name == 'suitLog') {
+        if (to.name == 'stepLog') {
           this.getList()
         }
       }
     },
     methods: {
       rowClick(row, column, even) {
-        this.expands = [row.id]
-        this.currentSuitId = row.id
-        this.showCase(row.id)
+        // this.expands = [row.id]
+        // this.currentCaseId = row.id
+        // this.showStep(row.id)
       },
 
       getList() {
-        let formData = {"type": 'suit', "id": this.$route.params.id}
+        let formData = {"type": 'step', "id": this.$route.params.caseId}
         getLog(formData).then((res) => {
-          this.suitLogData = res.data.data_list
-          this.suitLogCount = res.data.data_count
+          this.stepLogData = res.data.data_list
+          this.stepLogCount = res.data.data_count
         })
       },
-      showCase(suitId){
-        this.$router.push({name: "caseLog", params: {"id": this.$route.params.id,"suitId":suitId}})
-      },
+      // showStep(caseId) {
+      //   this.$router.push({name: "StepLog", params: {"id": this.$route.params.id, "suitId": this.$route.params.suitId, "caseId": caseId}})
+      // },
       formatDatey(column) {
         column += '+0800'
         let d = new Date(column)
@@ -125,9 +155,6 @@
         return date
 
       },
-      getData(type, id) {
-
-      }
     },
   }
 </script>

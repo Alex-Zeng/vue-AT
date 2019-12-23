@@ -1,20 +1,19 @@
 <template>
   <div class="log_container">
     <el-row>
-      <h5>测试集日志</h5>
+      <h5>整体测试</h5>
       <div>
         <el-row>
           <el-col :span="12">
             <div class="grid-content bg-purple">
               <el-breadcrumb separator-class="el-icon-arrow-right">
-                <el-breadcrumb-item :to="{ name: 'testLog' }">日志: {{$route.params.id}}</el-breadcrumb-item>
-                <el-breadcrumb-item :to="{ name: 'suitLog',params: {id: $route.params.id} }">测试集:{{$route.params.suitId}}</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ name: 'testLog' }">日志: {{currentId}}</el-breadcrumb-item>
               </el-breadcrumb>
             </div>
           </el-col>
           <el-col :span="12">
             <div>
-              <test_static :data="suitLogCount"></test_static>
+              <test_static :data="testLogCount"></test_static>
             </div>
           </el-col>
         </el-row>
@@ -22,7 +21,7 @@
 
       <div class="grid-content bg-purple-light">
         <el-table
-          :data="suitLogData"
+          :data="testLogData"
           fit
           max-height="600"
           border
@@ -30,6 +29,7 @@
           style="width: 100%"
           size="small"
           :row-key="getRowKeys"
+          :expand-row-keys="expands"
           @row-click="rowClick"
         >
           <el-table-column label="ID" width="40">
@@ -37,9 +37,9 @@
               <span>{{ row.id}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="测试集">
+          <el-table-column label="设备名">
             <template slot-scope="{row}">
-              <span>{{ row.test_case_suit_title}}</span>
+              <span>{{ row.equipment_title}}</span>
             </template>
           </el-table-column>
 
@@ -53,12 +53,12 @@
 
           >
             <template slot-scope="{row}">
-              <span>{{ formatDatey(row.run_test_suit_start_time)}}</span>
+              <span>{{ formatDatey(row.run_test_start_time)}}</span>
             </template>
           </el-table-column>
           <el-table-column label="用时">
             <template slot-scope="{row}">
-              <span>{{ row.run_test_suit_times}} 秒</span>
+              <span>{{ row.run_test_times}} 秒</span>
             </template>
           </el-table-column>
         </el-table>
@@ -71,7 +71,6 @@
 <script>
   import {getLog} from '@/api/api'
   import test_static from './test_static'
-  import {mapState} from "vuex"
 
   export default {
     name: "SuitLog",
@@ -81,9 +80,9 @@
         search: "",
         formLabelWidth: '140px',
         textareaWidth: '520px',
-        currentSuitId: '',
-        suitLogData: [],
-        suitLogCount: '',
+        testLogData: [],
+        testLogCount: '',
+        currentId: '',
         getRowKeys(row) {
           return row.id;
         },
@@ -96,7 +95,7 @@
 
     watch: {
       $route(to, from) {
-        if (to.name == 'suitLog') {
+        if (to.name == 'testLog') {
           this.getList()
         }
       }
@@ -104,19 +103,19 @@
     methods: {
       rowClick(row, column, even) {
         this.expands = [row.id]
-        this.currentSuitId = row.id
-        this.showCase(row.id)
+        this.currentId = row.id
+        this.toSuitLog(row.id)
       },
 
       getList() {
-        let formData = {"type": 'suit', "id": this.$route.params.id}
+        let formData = {"type": 'test', "id": 0}
         getLog(formData).then((res) => {
-          this.suitLogData = res.data.data_list
-          this.suitLogCount = res.data.data_count
+          this.testLogData = res.data.data_list
+          this.testLogCount = res.data.data_count
         })
       },
-      showCase(suitId){
-        this.$router.push({name: "caseLog", params: {"id": this.$route.params.id,"suitId":suitId}})
+      toSuitLog(id) {
+        this.$router.push({name: "suitLog", params: {"id": id}})
       },
       formatDatey(column) {
         column += '+0800'

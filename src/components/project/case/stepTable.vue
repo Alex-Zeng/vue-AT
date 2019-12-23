@@ -1,12 +1,5 @@
 <template>
   <div>
-    <el-drawer
-  title="我是标题"
-  :visible.sync="drawer"
-  :direction="rtl"
-  :before-close="handleClose">
-  <span>我来啦!</span>
-</el-drawer>
     <el-table
       ref="multipleTable"
       :data="tableData.filter(data => !search || data.action_title.toLowerCase().includes(search.toLowerCase())|| data.rank.toLowerCase().includes(search.toLowerCase()))"

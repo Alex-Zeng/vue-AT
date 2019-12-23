@@ -7,8 +7,8 @@
           <el-col :span="12">
           <div class="grid-content bg-purple">
             <el-breadcrumb separator-class="el-icon-arrow-right">
-              <el-breadcrumb-item :to="{ path: '/' }">设备: {{11}}</el-breadcrumb-item>
-              <el-breadcrumb-item>测试集:{{22}}</el-breadcrumb-item>
+              <el-breadcrumb-item :to="{ name: 'testLog' }">日志: {{currentId}}</el-breadcrumb-item>
+              <el-breadcrumb-item  :to="{ name: 'suitLog',params: {suit_id: 23} }">测试集:{{22}}</el-breadcrumb-item>
               <el-breadcrumb-item>测试用例: {{33}}</el-breadcrumb-item>
               <el-breadcrumb-item>测试步骤: {{44}}</el-breadcrumb-item>
             </el-breadcrumb>
@@ -23,45 +23,9 @@
       </div>
 
       <div class="grid-content bg-purple-light">
-        <el-table
-          :data="testLogData"
-          fit
-          max-height="600"
-          border
-          highlight-current-row
-          style="width: 100%"
-          size="small"
-          :row-key="getRowKeys"
-          :expand-row-keys="expands"
-          @row-click="rowClick"
-          :default-sort="{prop: 'rank', order: 'ascending'}"
-        >
-
-          <el-table-column label="设备名">
-            <template slot-scope="{row}">
-              <span>{{ row.equipment_title}}</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="执行结果">
-            <template slot-scope="{row}">
-              <span>{{ row.run_test_result?'成功':'失败' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="开始时间"
-
-          >
-            <template slot-scope="{row}">
-              <span>{{ formatDatey(row.run_test_start_time)}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="用时">
-            <template slot-scope="{row}">
-              <span>{{ row.run_test_times}} 秒</span>
-            </template>
-          </el-table-column>
-        </el-table>
+         <router-view ></router-view>
+<!--        <test-log></test-log>-->
+<!--        <suit-log></suit-log>-->
       </div>
     </el-row>
   </div>
@@ -70,12 +34,13 @@
 <script>
   import {getLog} from '@/api/api'
   import test_static from './test_static'
+  import SuitLog from './SuitLog'
+  import TestLog from './TestLog'
   import {mapState} from "vuex"
 
   export default {
     name: "Report",
-    props: ['e_id'],
-    components: {test_static},
+    components: {test_static,SuitLog,TestLog},
     data() {
       return {
         search: "",
@@ -83,6 +48,7 @@
         textareaWidth: '520px',
         testLogData: '',
         testLogCount: '',
+        currentId: '',
         suitLogData: '',
         suitLogCount: '',
         caseLogData: '',
@@ -110,7 +76,8 @@
     methods: {
       rowClick(row, column, even) {
         this.expands = [row.id]
-        this.getSuitLogList(row.id)
+        this.currentId = row.id
+        this.$router.push({name:"suitLog",params:{"suit_id":id}})
       },
 
       getList() {
@@ -120,13 +87,7 @@
           this.testLogCount = res.data.data_count
         })
       },
-      getSuitLogList(id) {
-        let formData = {"type": 'suit', "id": id}
-        getLog(formData).then((res) => {
-          this.suitLogData = res.data.data_list
-          this.suitLogCount = res.data.data_count
-        })
-      },
+
       formatDatey(column) {
         column += '+0800'
         let d = new Date(column)

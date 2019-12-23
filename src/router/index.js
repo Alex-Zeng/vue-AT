@@ -10,7 +10,11 @@ import Case from '@/components/project/Case'
 import tabViews from '@/components/common/tabViews'
 import caseSuit from '@/components/project/caseSuit'
 import Report from '@/components/report/Report'
+import SuitLog from '@/components/report/SuitLog'
 import Cookies from 'js-cookie'
+import TestLog from "../components/report/TestLog";
+import CaseLog from "../components/report/CaseLog";
+import StepLog from "../components/report/StepLog";
 
 Vue.use(Router)
 Vue.prototype.$cookies = Cookies
@@ -88,15 +92,36 @@ export const constantRoutes = [
         path: 'report',
         component: Report,
         name: 'report',
+        redirect: 'report/testLog',
         props: true,
-        // children: [
-        //   {
-        //     path: 'suit/:suit_id',
-        //     component: Report,
-        //     name: 'report',
-        //     props: true,
-        //   }
-        // ],
+        meta: {title: '测试报告'}
+      },
+      {
+        path: 'report/testLog',
+        component: TestLog,
+        name: 'testLog',
+        props: true,
+        meta: {title: '测试报告'}
+      },
+      {
+        path: 'testLog/:id/SuitLod',
+        component: SuitLog,
+        name: 'suitLog',
+        props: true,
+        meta: {title: '测试报告'}
+      },
+      {
+        path: 'testLog/:id/SuitLod/:suitId/CaseLog',
+        component: CaseLog,
+        name: 'caseLog',
+        props: true,
+        meta: {title: '测试报告'}
+      },
+      {
+        path: 'testLog/:id/SuitLod/:suitId/CaseLog/:caseId/StepLog',
+        component: StepLog,
+        name: 'stepLog',
+        props: true,
         meta: {title: '测试报告'}
       },
     ]

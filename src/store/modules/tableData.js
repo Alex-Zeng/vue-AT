@@ -42,6 +42,7 @@ const state = {
   equipmentTestCaseSuitData: [],
   logData: [],
   logCount: [],
+  reportBreadcrumbData: {"suit": {}, "case": {}, "step": {}},
 }
 const getters = {}
 
@@ -120,6 +121,9 @@ const mutations = {
   },
   SET_LOCOUNT: (state, argsList) => {
     state.logCount = argsList
+  },
+  SET_RB: (state, argsList) => {
+    state.reportBreadcrumbData = argsList
   },
 }
 
@@ -359,14 +363,27 @@ const actions = {
       commit('SET_ESDATA', data)
     })
   },
-  getESLogData({commit},args) {
+  getESLogData({commit}, args) {
 
-    getLog(args.type,args.id).then((res) => {
+    getLog(args.type, args.id).then((res) => {
       let data = res.data.data_list
       let dataCount = res.data.data_count
       commit('SET_LOGDATA', data)
       commit('SET_LOCOUNT', dataCount)
     })
+  },
+  setrb({commit,state}, args) {
+    let name = args.name
+    let id = args.id
+    switch (name) {
+      case 'suit':
+        state.reportBreadcrumbData.suit.map(v => {
+          v.id = id
+          return v
+        } )
+    }
+
+    commit('SET_RB', data)
   }
 }
 
