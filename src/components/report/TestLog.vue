@@ -18,7 +18,7 @@
           </el-col>
         </el-row>
       </div>
-
+      <el-divider></el-divider>
       <div class="grid-content bg-purple-light">
         <el-table
           :data="testLogData"
@@ -32,33 +32,58 @@
           :expand-row-keys="expands"
           @row-click="rowClick"
         >
-          <el-table-column label="ID" width="40">
+          <el-table-column label="ID" width="60" align="center">
             <template slot-scope="{row}">
               <span>{{ row.id}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="设备名">
+          <el-table-column label="设备名" width="160" align="center">
             <template slot-scope="{row}">
               <span>{{ row.equipment_title}}</span>
             </template>
           </el-table-column>
-
-          <el-table-column label="执行结果">
+                    <el-table-column label="设备ID" width="60" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.run_test_result?'成功':'失败' }}</span>
+              <span>{{ row.equipment_id}}</span>
             </template>
           </el-table-column>
-          <el-table-column
-            label="开始时间"
-
-          >
+          <el-table-column label="执行结果" align="center">
+            <template slot-scope="{row}">
+              <span v-if="row.run_test_result==2" style="color: black">运行中 </span>
+              <span v-if="row.run_test_result==1" style="color: chartreuse">成功 </span>
+              <span v-if="row.run_test_result==0" style="color: red">失败 </span>
+              <el-button  size="mini" type="text"  @click="showSuit(row.id)">详情</el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="开始时间" align="center">
             <template slot-scope="{row}">
               <span>{{ formatDatey(row.run_test_start_time)}}</span>
             </template>
+            </el-table-column>
+            <el-table-column   label="结束时间" align="center">
+            <template slot-scope="{row}">
+              <span>{{ formatDatey(row.run_test_end_time)}}</span>
+            </template>
           </el-table-column>
-          <el-table-column label="用时">
+          <el-table-column label="用时" align="center" >
             <template slot-scope="{row}">
               <span>{{ row.run_test_times}} 秒</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作" width="300" align="center">
+            <template slot-scope="{row}">
+              <el-popover
+                placement="right"
+                title="日志查看"
+                width="1000"
+                trigger="click"
+              >
+                <div style="height: 500px" class="cmm-wrapper" v-html="logText"></div>
+                <el-button slot="reference" size="mini" type="info" plain @click="getRunTestLogData(row.id)">查看运行日志</el-button>
+                <el-button slot="reference" size="mini" type="warning"  @click="delLogData(row.id)">删除日志</el-button>
+              </el-popover>
+
             </template>
           </el-table-column>
         </el-table>
@@ -69,7 +94,7 @@
 </template>
 
 <script>
-  import {getLog} from '@/api/api'
+  import {getLog, getLogFile, deleteLogData} from '@/api/api'
   import test_static from './test_static'
 
   export default {
@@ -82,6 +107,7 @@
         textareaWidth: '520px',
         testLogData: [],
         testLogCount: '',
+        logText: '',
         currentId: '',
         getRowKeys(row) {
           return row.id;
@@ -104,7 +130,7 @@
       rowClick(row, column, even) {
         this.expands = [row.id]
         this.currentId = row.id
-        this.toSuitLog(row.id)
+        // this.toSuitLog(row.id)
       },
 
       getList() {
@@ -114,8 +140,18 @@
           this.testLogCount = res.data.data_count
         })
       },
-      toSuitLog(id) {
+      showSuit(id) {
         this.$router.push({name: "suitLog", params: {"id": id}})
+      },
+      delLogData(id){
+        deleteLogData(id).then((res) => {
+          this.$message({
+              message: '删除成功',
+              type: 'success'
+            })
+          this.getList()
+        })
+
       },
       formatDatey(column) {
         column += '+0800'
@@ -124,8 +160,11 @@
         return date
 
       },
-      getData(type, id) {
-
+      getRunTestLogData(id) {
+        this.logText = ''
+        getLogFile(id).then((res) => {
+          this.logText = res.data
+        })
       }
     },
   }
@@ -169,5 +208,13 @@
   .box-card {
     width: 80%;
     min-height: 600px;
+  }
+
+  .cmm-wrapper {
+    white-space: pre-wrap;
+  line-height: 40 px;
+    color: #000032;
+    font-size: 12px; /*px*/
+    overflow: scroll;
   }
 </style>

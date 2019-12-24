@@ -223,7 +223,15 @@ export const deleteES = (e_id, es_id) => {
 export const startES = (e_id) => {
   return get(`/runtest/equipment/${e_id}/execute_suit/start`,{},60*60*1000).then(res => res);
 };
-//执行测试
+//获取日志数据
 export const getLog = (formData) => {
   return get(`/runtest/report`, formData).then(res => res);
+};
+//获取日志文件
+export const getLogFile = (log_id) => {
+  return get(`/runtest/getLogFile/${log_id}`).then(res => res);
+};
+//删除日志数据
+export const deleteLogData = (log_id) => {
+  return remove(`/runtest/clearLogFile/${log_id}`).then(res => res);
 };

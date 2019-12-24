@@ -27,7 +27,7 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="ID" width="80">
+      <el-table-column align="center" label="ID" width="60">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
@@ -51,7 +51,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Appium端口">
+      <el-table-column label="Appium端口" width="100">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.remotePort" class="edit-input" size="mini"/>
@@ -60,8 +60,7 @@
         </template>
       </el-table-column>
 
-
-      <el-table-column label="定时任务开关">
+      <el-table-column label="开启定时" width="80">
         <template slot-scope="{row}">
           <el-switch
             v-model="row.cron_status"
@@ -93,16 +92,7 @@
 
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" fixed="right" width="300">
-        <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true" icon="el-icon-plus" size="mini">新增
-          </el-button>
-          <el-input
-            v-model="search"
-            size="mini"
-            placeholder="输入操作搜索"/>
-        </template>
-
+            <el-table-column label="操作" width="220" align="center">
         <template slot-scope="{row}">
           <div>
             <template v-if="row.running">
@@ -118,9 +108,22 @@
             >
               管理用例集
             </el-button>
-
           </div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" fixed="right" width="200">
+        <template slot="header" slot-scope="scope">
+          <el-button type="primary" @click="addForm=true" icon="el-icon-plus" size="mini">新增
+          </el-button>
+          <el-input
+            v-model="search"
+            size="mini"
+            placeholder="输入操作搜索"/>
+        </template>
+
+        <template slot-scope="{row}">
           <div v-if="row.edit ">
+
             <el-button
               type="success"
               size="mini"
@@ -139,11 +142,11 @@
 
           <div v-else>
             <el-button-group>
-              <el-button v-if="row.session_id" type="danger" icon="el-icon-video-pause" size="mini"
-                         @click="stopEt(row)">停止
-              </el-button>
-              <el-button v-else type="primary" icon="el-icon-video-play" size="mini" @click="startEt(row)">启动
-              </el-button>
+<!--              <el-button v-if="row.session_id" type="danger" icon="el-icon-video-pause" size="mini"-->
+<!--                         @click="stopEt(row)">停止-->
+<!--              </el-button>-->
+<!--              <el-button v-else type="primary" icon="el-icon-video-play" size="mini" @click="startEt(row)">启动-->
+<!--              </el-button>-->
               <el-button
                 type="primary"
                 size="mini"
@@ -237,7 +240,6 @@
     deleteEquipment,
     startEquipment,
     stopEquipment,
-    getEquipmentList,
     startES
   } from '../../api/api'
   import ExecuteTest from '../executeTest/ExecuteTest'

@@ -12,9 +12,9 @@
       <el-submenu index="1">
         <template slot="title">
           <i class="el-icon-picture-outline-round"></i>
-          <span slot="title">项目:{{$store.state.tableData.curreentPro.title}}</span>
+          <span slot="title" >项目:{{curPro.title}}</span>
         </template>
-        <el-menu-item v-for="item in $store.state.tableData.projectData" :index="'1-'+item.id" :key="item.id"
+        <el-menu-item v-for="item in proData" :index="'1-'+item.id" :key="item.id"
                       @click="toProject(item)">
           <h6 slot="title">{{item.title}}</h6>
         </el-menu-item>
@@ -37,11 +37,11 @@
         <span>操作方法</span>
       </el-menu-item>
       <el-menu-item index="6" @click="toEquipment()">
-        <i class="el-icon-s-platform" ></i>
-        <span>测试设备</span>
+        <i class="el-icon-s-platform"></i>
+        <span>执行测试</span>
       </el-menu-item>
-            <el-menu-item index="7" @click="toReport()">
-        <i class="el-icon-s-data" ></i>
+      <el-menu-item index="7" @click="toReport()">
+        <i class="el-icon-s-data"></i>
         <span>测试报告</span>
       </el-menu-item>
 
@@ -50,7 +50,7 @@
 </template>
 
 <script>
-
+  import {mapState} from "vuex"
   export default {
     name: 'Header',
     data() {
@@ -58,11 +58,17 @@
         username: '',
       }
     },
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        curPro: state => state.tableData.curreentPro,
+        proData: state => state.tableData.projectData,
+      })
+    },
     methods: {
 
       toProject(proObject) {
         this.$store.dispatch('tableData/changeProjects', proObject)
-
+        this.showNav('home')
       },
       showNav(nav) {
         this.$store.dispatch('tableData/setNavVisible', nav)
@@ -70,19 +76,19 @@
       toFunction() {
         this.$router.push({name: 'function'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
-        this.$store.dispatch('tableData/setNavVisible', 'function')
+        this.showNav('function')
 
       },
       toEquipment() {
         this.$router.push({name: 'equipment'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
-        this.$store.dispatch('tableData/setNavVisible', 'equipment')
+        this.showNav('equipment')
 
       },
-       toReport() {
+      toReport() {
         this.$router.push({name: 'report'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
-        this.$store.dispatch('tableData/setNavVisible', 'report')
+        this.showNav('report')
 
       },
     },

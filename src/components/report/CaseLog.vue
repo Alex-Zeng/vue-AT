@@ -25,7 +25,7 @@
           </el-col>
         </el-row>
       </div>
-
+<el-divider></el-divider>
       <div class="grid-content bg-purple-light">
         <el-table
           :data="caseLogData"
@@ -38,35 +38,40 @@
           :row-key="getRowKeys"
           @row-click="rowClick"
         >
-          <el-table-column label="ID" width="60">
+          <el-table-column label="ID" width="60" align="center">
             <template slot-scope="{row}">
               <span>{{ row.id}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="用例">
+          <el-table-column label="用例" align="center">
             <template slot-scope="{row}">
               <span>{{ row.test_case_title}}</span>
             </template>
           </el-table-column>
-
-          <el-table-column label="执行结果">
+          <el-table-column label="用例ID" width="60" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.run_test_case_result?'成功':'失败' }}</span>
+              <span>{{ row.test_case_id}}</span>
             </template>
           </el-table-column>
-          <el-table-column
-            label="开始时间"
-
-          >
+          <el-table-column label="执行结果" align="center">
+            <template slot-scope="{row}">
+              <span v-if="row.run_test_case_result==2" style="color: black">运行中</span>
+              <span v-if="row.run_test_case_result==1" style="color: chartreuse">成功</span>
+              <span v-if="row.run_test_case_result==0" style="color: red">失败</span>
+              <el-button size="mini" type="text" @click="showStep(row.id)">详情</el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="开始时间" align="center">
             <template slot-scope="{row}">
               <span>{{ formatDatey(row.action_start_time)}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="用时">
+          <el-table-column label="用时" align="center">
             <template slot-scope="{row}">
               <span>{{ row.run_test_case_times}} 秒</span>
             </template>
           </el-table-column>
+
         </el-table>
       </div>
     </el-row>

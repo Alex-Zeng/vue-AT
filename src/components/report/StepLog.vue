@@ -28,7 +28,7 @@
           </el-col>
         </el-row>
       </div>
-
+      <el-divider></el-divider>
       <div class="grid-content bg-purple-light">
         <el-table
           :data="stepLogData"
@@ -41,20 +41,40 @@
           :row-key="getRowKeys"
           @row-click="rowClick"
         >
-          <el-table-column label="ID" width="60">
+          <el-table-column label="ID" width="60" align="center">
             <template slot-scope="{row}">
               <span>{{ row.id}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="用例">
+          <el-table-column label="用例" align="center">
             <template slot-scope="{row}">
               <span>{{ row.test_case_action_title}}</span>
             </template>
           </el-table-column>
-
-          <el-table-column label="执行结果">
+          <el-table-column label="步骤" width="60" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.run_test_action_result?'成功':'失败' }}</span>
+              <span>{{ row.test_case_step_rank}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="执行结果" align="center">
+            <template slot-scope="{row}">
+              <span v-if="row.run_test_action_result==2" style="color: black">运行中</span>
+              <span v-if="row.run_test_action_result==1" style="color: chartreuse">成功</span>
+              <span v-if="row.run_test_action_result==0" style="color: red">失败
+                               <el-popover
+                                 placement="right-end"
+                                 width="400"
+                                 trigger="hover"
+                                 v-if="row.error_msg"
+                               >
+                <div class="demo-image">
+                  <div class="block">
+                    <div style="height: 500px" class="cmm-wrapper" v-html="row.error_msg"></div>
+                  </div>
+                </div>
+                <el-button slot="reference" type="text">错误信息</el-button>
+              </el-popover>
+              </span>
             </template>
           </el-table-column>
           <el-table-column
@@ -65,19 +85,29 @@
               <span>{{ formatDatey(row.action_start_time)}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="用时">
+          <el-table-column label="输入参数" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.test_case_action_input}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="输出参数" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.test_case_action_output}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="用时" align="center">
             <template slot-scope="{row}">
               <span>{{ row.run_test_case_times}} 秒</span>
             </template>
           </el-table-column>
-          <el-table-column label="截图">
+          <el-table-column label="截图" align="center">
             <template slot-scope="{row}">
               <el-popover
                 placement="right-end"
                 width="400"
                 trigger="hover"
                 v-if="row.screen_shot_path"
-                >
+              >
                 <div class="demo-image">
                   <div class="block">
                     <el-image
@@ -197,5 +227,13 @@
   .box-card {
     width: 80%;
     min-height: 600px;
+  }
+
+  .cmm-wrapper {
+    white-space: pre-wrap;
+    line-height: 40px;
+    color: #000032;
+    font-size: 12px; /*px*/
+    overflow: scroll;
   }
 </style>
