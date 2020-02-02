@@ -14,10 +14,17 @@
         width="180">
         <template slot-scope="scope">
           <template v-if="scope.row.edit">
-            <el-select v-model="scope.row.page_id" placeholder="请选择操作" size="mini">
-              <el-option v-for="item in $store.state.tableData.pageData" :label="item.title" :value="item.id"
-                         :key="item.id"></el-option>
-            </el-select>
+            <el-popover
+              placement="left"
+              title="选择页面"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="pageData" :row="scope.row" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference" size="mini">{{scope.row.page_title?scope.row.page_title:'请选择页面'}}</el-button>
+            </el-popover>
           </template>
           <span v-else>{{ scope.row.page_title }}</span>
         </template>
@@ -31,23 +38,42 @@
           <span v-else>{{ row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column width="150px" label="查找方式">
+      <el-table-column width="150px" label="Android查找方式">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-select v-model="row.type" placeholder="请选择操作" size="mini">
+            <el-select v-model="row.type_for_android" placeholder="请选择操作" size="mini">
               <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
             </el-select>
           </template>
-          <span v-else>{{ row.type }}</span>
+          <span v-else>{{ row.type_for_android }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="元素位置">
+      <el-table-column label="Android元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.loc" class="edit-input" size="mini"/>
+            <el-input v-model="row.loc_for_android" class="edit-input" size="mini"/>
           </template>
-          <span v-else>{{ row.loc }}</span>
+          <span v-else>{{ row.loc_for_android }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="150px" label="IOS查找方式">
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-select v-model="row.type_for_ios" placeholder="请选择操作" size="mini">
+              <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
+            </el-select>
+          </template>
+          <span v-else>{{ row.type_for_ios }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="IOS元素位置">
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-input v-model="row.loc_for_ios" class="edit-input" size="mini"/>
+          </template>
+          <span v-else>{{ row.loc_for_ios }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -83,7 +109,12 @@
           </div>
 
           <div v-else>
-
+            <el-button
+              type="primary"
+              size="mini"
+              @click="copyData(row)"
+            >复制
+            </el-button>
             <el-button
               type="primary"
               size="mini"
@@ -110,13 +141,22 @@
         <el-form-item label="元素标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="查找方式：" :label-width="formLabelWidth">
-          <el-select v-model="form.type" placeholder="请选择查找方式" size="mini">
+        <el-form-item label="Android查找方式：" :label-width="formLabelWidth">
+          <el-select v-model="form.type_for_android" placeholder="请选择查找方式" size="mini">
             <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="元素位置：" :label-width="formLabelWidth">
-          <el-input v-model="form.loc" placeholder="根据查找方式,填写元素位置" autocomplete="off"></el-input>
+        <el-form-item label="Android元素位置：" :label-width="formLabelWidth">
+          <el-input v-model="form.loc_for_android" placeholder="根据查找方式,填写元素位置" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="IOS查找方式：" :label-width="formLabelWidth">
+          <el-select v-model="form.type_for_ios" placeholder="请选择查找方式" size="mini">
+            <el-option v-for="item in findType" :label="item" :value="item" :key="item.index"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="IOS元素位置：" :label-width="formLabelWidth">
+          <el-input v-model="form.loc_for_ios" placeholder="根据查找方式,填写元素位置" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -130,9 +170,12 @@
 
 <script>
   import {getElementList, postElement, editElement, deleteElement} from "@/api/api";
+  import selectTree from '@/components/common/selectTree'
+  import {mapState} from "vuex"
 
   export default {
     name: 'elementTable',
+    components: {selectTree},
     data() {
       return {
         search: '',
@@ -144,15 +187,32 @@
         form: {
           title: '',
           type: 'id',
-          loc: '',
+          loc_for_ios: '',
+          type_for_ios: '',
+          loc_for_android: '',
+          type_for_android: '',
         },
-        findType: ['xpath', 'id', 'css', 'class', 'tag', 'tap_by_proportional', 'tap_by_coordinates', 'android_uiautomator', 'accessibility_id', 'no_need'],
-        formLabelWidth: '120px'
+        findType: ['xpath', 'id', 'ios_predicate', 'css', 'class', 'tag', 'tap_by_proportional', 'tap_by_coordinates', 'android_uiautomator', 'ios_uiautomation', 'accessibility_id', 'ios_class_chain', 'no_need'],
+        formLabelWidth: '160px'
       }
     },
-
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        pageData: state => state.tableData.pageData,
+      })
+    },
     methods: {
-            tableRowClassName({row, rowIndex}) {
+      editNodeClick(data) {
+        if (data.row) {
+          data.row.page_title = data.treeData.title
+          data.row.page_id = data.treeData.id
+          data.row.action_id = ''
+        }
+        this.form.page_title = data.treeData.title
+        this.form.page_id = data.treeData.id
+        this.getActionData(data.treeData.id)
+      },
+      tableRowClassName({row, rowIndex}) {
         if (rowIndex % 2 === 0) {
           return 'warning-row';
         } else {
@@ -188,11 +248,28 @@
           }
         })
       },
+      copyData(row) {
+        postElement(this.$route.params.id, this.$route.params.page_id, row).then(res => {
+          if (res.status == 1) {
+            this.getElementData()
+            this.addForm = false
+            this.$message({
+              message: '添加成功',
+              type: 'success'
+            })
+            this.search = ''
+          } else {
+            this.$alert(res.message)
+          }
+        })
+      },
       confirmEdit(row) {
         row.edit = false
         row.originalTitle = row.title
-        row.originalLoc = row.loc
-        row.originalType = row.type
+        row.originalLocAndroid = row.loc_for_android
+        row.originalType = row.type_for_android
+        row.originalTypeIos = row.type_for_ios
+        row.originalLocIos = row.loc_for_ios
         editElement(this.$route.params.id, this.$route.params.page_id, row.id, row).then(res => {
           if (res.status == 1) {
             this.getElementData()
@@ -210,8 +287,10 @@
       },
       cancelEdit(row) {
         row.title = row.originalTitle
-        row.loc = row.originalLoc
-        row.type = row.originalType
+        row.loc_for_android = row.originalLocAndroid
+        row.type_for_android = row.originalTypeAndroid
+        row.loc_for_ios = row.originalLocIos
+        row.type_for_ios = row.originalTypeIos
         row.edit = !row.edit
         this.$message({
           message: '放弃编辑',

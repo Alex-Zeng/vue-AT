@@ -12,11 +12,10 @@
       </el-tab-pane>
     </el-tabs>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <li @click="closeMenu">关闭弹出</li>
+      <li @click="closeMenu">取消</li>
       <li @click="closeSelectedTag(selectedTag)">关闭</li>
       <li @click="closeOthersTags">关闭其他</li>
       <li @click="closeAllTags">关闭所有</li>
-      <li @click="refreshSelectedTag">Refresh</li>
     </ul>
   </div>
 

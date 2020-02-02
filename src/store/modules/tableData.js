@@ -251,8 +251,10 @@ const actions = {
         let datas = res.data.data_list.map(v => {
           Vue.set(v, 'edit', false)
           v.originalTitle = v.title
-          v.originalType = v.type
-          v.originalLoc = v.loc
+          v.originalTypeAndroid = v.type_for_android
+          v.originalLocAndroid = v.loc_for_android
+          v.originalTypeIos = v.type_for_ios
+          v.originalLocIos = v.loc_for_ios
           v.running = v.status
           return v
         })
@@ -271,8 +273,8 @@ const actions = {
           let datas = res.data.data_list.map(v => {
             Vue.set(v, 'edit', false)
             v.originalTitle = v.title
-            v.originalElementTitle = v.elementTitle
-            v.originalFunctionTitle = v.functionTitle
+            v.originalElementTitle = v.ele_title
+            v.originalFunctionTitle = v.fun_title
             return v
           })
           commit('SET_ACTIONDATA', datas)

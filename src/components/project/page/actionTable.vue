@@ -13,9 +13,18 @@
         width="180">
         <template slot-scope="scope">
           <template v-if="scope.row.edit">
-            <el-select v-model="scope.row.page_id" placeholder="请选择操作" size="mini">
-              <el-option v-for="item in $store.state.tableData.pageData" :label="item.title" :value="item.id" :key="item.id"></el-option>
-            </el-select>
+            <el-popover
+              placement="left"
+              title="选择页面"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="pageData" :row="scope.row" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference" size="mini">{{scope.row.page_title?scope.row.page_title:'请选择页面'}}</el-button>
+            </el-popover>
+
           </template>
           <span v-else>{{ scope.row.page_title }}</span>
         </template>
@@ -89,6 +98,13 @@
             <el-button
               type="primary"
               size="mini"
+              @click="copyData(row)"
+            >
+              复制
+            </el-button>
+            <el-button
+              type="primary"
+              size="mini"
               icon="el-icon-edit"
               @click="row.edit=!row.edit"
             >
@@ -135,9 +151,12 @@
 
 <script>
   import {postAction, editAction, deleteAction} from '@/api/api'
+  import selectTree from '@/components/common/selectTree'
+  import {mapState} from "vuex"
 
   export default {
     name: 'actionTable',
+    components: {selectTree},
     data() {
       return {
         search: '',
@@ -148,20 +167,23 @@
         currentElementId: '',
         addForm: false,
         form: {
-          title: '',
           fun_id: '',
           functionTitle: '',
           ele_id: '',
           elementTitle: '',
+          title: '',
         },
         formLabelWidth: '120px'
       }
     },
-
+    computed: {
+      ...mapState({  //这里的...不是省略号了,是对象扩展符
+        pageData: state => state.tableData.pageData,
+      })
+    },
     methods: {
 
       addData() {
-
         postAction(this.$route.params.id, this.$route.params.page_id, this.form).then(res => {
           if (res.status == 1) {
             this.addForm = false
@@ -175,96 +197,133 @@
             this.$alert(res.message)
           }
         })
-      },
-      confirmEdit(row) {
-        row.edit = false
-        row.originalTitle = row.title
-        row.originalElementTitle = row.elementTitle
-        row.originalFunctionTitle = row.functionTitle
-        editAction(this.$route.params.id, this.$route.params.page_id, row.id, row).then(res => {
+      }
+      ,
+      copyData(row) {
+        postAction(this.$route.params.id, this.$route.params.page_id, row).then(res => {
           if (res.status == 1) {
+            this.addForm = false
             this.$message({
-              message: '编辑成功',
+              message: '复制成功',
               type: 'success'
             })
             this.getData()
+            this.search = ''
           } else {
-            this.$message({
-              message: res.message,
-              type: 'error'
-            })
+            this.$alert(res.message)
           }
         })
-      },
-      cancelEdit(row) {
-        row.title = row.originalTitle
-        row.elementTitle = row.originalElementTitle
-        row.functionTitle = row.originalFunctionTitle
-        row.edit = false
-
-        this.$message({
-          message: '放弃编辑',
-          type: 'warning'
-        })
-      },
-      deleteRow(rowId) {
-        this.$confirm('确定删除?', '删除', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        }).then(() => {
-            deleteAction(this.$route.params.id, this.$route.params.page_id, rowId).then(res => {
-              if (res.status == 1) {
-                this.getData()
-                this.search = ''
-                this.$message({
-                  type: 'info',
-                  message: res.message
-                });
-              } else {
-                this.$alert(res.message)
-              }
-            })
-          }
-        ).catch(() => {
-        })
-      },
-      getData() {
-        this.$store.dispatch('tableData/getActionData', this.$route.params.page_id)
-      },
-      getElementData() {
-
-        this.$store.dispatch('tableData/getElementData', {
-          "projectId": this.$route.params.id,
-          "pageId": this.$route.params.page_id
-        })
-      },
-      getFunctionData() {
-        this.$store.dispatch('tableData/getFunctionData')
-      },
-            tableRowClassName({row, rowIndex}) {
-        if (rowIndex % 2 === 0) {
-          return 'warning-row';
-        } else {
-          return 'success-row';
-        }
-        return '';
-      },
     },
-    mounted() {
-      if (this.$route.params.page_id) {
+    editNodeClick(data) {
+      if (data.row) {
+        data.row.page_title = data.treeData.title
+        data.row.page_id = data.treeData.id
+        data.row.action_id = ''
+      }
+      this.form.page_title = data.treeData.title
+      this.form.page_id = data.treeData.id
+      this.getActionData(data.treeData.id)
+    },
+    confirmEdit(row) {
+      row.edit = false
+      row.originalTitle = row.title
+      row.originalElementTitle = row.ele_title
+      row.originalFunctionTitle = row.fun_title
+      editAction(this.$route.params.id, this.$route.params.page_id, row.id, row).then(res => {
+        if (res.status == 1) {
+          this.$message({
+            message: '编辑成功',
+            type: 'success'
+          })
+          this.getData()
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
+        }
+      })
+    }
+    ,
+    cancelEdit(row) {
+      row.title = row.originalTitle
+      row.ele_title = row.originalElementTitle
+      row.fun_title = row.originalFunctionTitle
+      row.edit = false
+
+      this.$message({
+        message: '放弃编辑',
+        type: 'warning'
+      })
+    }
+    ,
+    deleteRow(rowId) {
+      this.$confirm('确定删除?', '删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      }).then(() => {
+          deleteAction(this.$route.params.id, this.$route.params.page_id, rowId).then(res => {
+            if (res.status == 1) {
+              this.getData()
+              this.search = ''
+              this.$message({
+                type: 'info',
+                message: res.message
+              });
+            } else {
+              this.$alert(res.message)
+            }
+          })
+        }
+      ).catch(() => {
+      })
+    }
+    ,
+    getData() {
+      this.$store.dispatch('tableData/getActionData', this.$route.params.page_id)
+    }
+    ,
+    getElementData() {
+
+      this.$store.dispatch('tableData/getElementData', {
+        "projectId": this.$route.params.id,
+        "pageId": this.$route.params.page_id
+      })
+    }
+    ,
+    getFunctionData() {
+      this.$store.dispatch('tableData/getFunctionData')
+    }
+    ,
+    tableRowClassName({row, rowIndex}) {
+      if (rowIndex % 2 === 0) {
+        return 'warning-row';
+      } else {
+        return 'success-row';
+      }
+      return '';
+    }
+    ,
+  }
+  ,
+  mounted()
+  {
+    if (this.$route.params.page_id) {
+      this.getData()
+      this.getFunctionData()
+      this.getElementData()
+    }
+  }
+  ,
+  watch: {
+    $route(to, from)
+    { //监听路由是否变化
+      if (to.params.page_id) {// 判断条件1  判断传递值的变化
         this.getData()
-        this.getFunctionData()
         this.getElementData()
       }
-    },
-    watch: {
-      $route(to, from) { //监听路由是否变化
-        if (to.params.page_id) {// 判断条件1  判断传递值的变化
-          this.getData()
-          this.getElementData()
-        }
-      }
     }
+  }
   }
 </script>
 
