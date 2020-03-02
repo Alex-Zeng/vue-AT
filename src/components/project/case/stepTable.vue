@@ -9,12 +9,20 @@
       :default-sort="{prop: 'rank', order: 'ascending'}"
     >
 
-      <el-table-column label="步骤" align="center" prop="rank" width="60">
+      <el-table-column label="步骤" align="center" prop="rank" width="80">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model.number="row.rank" class="edit-input" size="mini"/>
           </template>
           <span v-else>{{ row.rank }}</span>
+        </template>
+      </el-table-column>
+            <el-table-column label="步骤标题" align="center" prop="rank" >
+        <template slot-scope="{row}">
+          <template v-if="row.edit">
+            <el-input v-model="row.title" class="edit-input" size="mini"/>
+          </template>
+          <span v-else>{{ row.title }}</span>
         </template>
       </el-table-column>
       <el-table-column label="是否跳过" align="center" width="120">
@@ -128,12 +136,12 @@
 
           <div v-else>
             <el-button-group>
-              <el-tooltip class="item" effect="dark" content="复制" placement="top-start">
+              <el-tooltip class="item" effect="dark" content="复制" placement="left-start">
                 <el-button
                   type="primary"
                   size="mini"
                   icon="el-icon-document-copy"
-                  @click="row.edit=!row.edit"
+                  @click="copy_data(row)"
                 >
 
                 </el-button>
@@ -165,6 +173,9 @@
       <el-form :model="form">
         <el-form-item label="步骤：" :label-width="formLabelWidth">
           <el-input v-model.number="form.rank" placeholder="请输入 正整数且不重复"></el-input>
+        </el-form-item>
+                <el-form-item label="标题：" :label-width="formLabelWidth">
+          <el-input v-model="form.title" placeholder="请输入标题"></el-input>
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-popover
@@ -281,6 +292,7 @@
         debugForm: false,
         form: {
           rank: '',
+          title: '',
           page_id: '',
           page_title: '',
           action_id: '',
@@ -351,6 +363,7 @@
       addNew() {
         this.addForm = true
         this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
+        this.form.title = ''
         this.form.page_id = ''
         this.form.page_title = ''
         this.form.action_id = ''
@@ -360,10 +373,34 @@
         this.form.output_key = ''
         this.form.skip = 0
       },
+      copy_data(row){
+        let newRank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
+        let newRow = row
+        newRow.rank = newRank
+        if (this.isRealNum(newRank) != true) {
+          this.$message({
+            message: '步骤必须为正整数',
+            type: 'error'
+          })
+        }
+        postStep(this.$route.params.id, this.$route.params.case_id, newRow).then(res => {
+          if (res.status == 1) {
+            this.addForm = false
+            this.$message({
+              message: '添加成功',
+              type: 'success'
+            })
+            this.getTableData()
+            this.search = ''
+          } else {
+            this.$alert(res.message)
+          }
+        })
+      },
       addData() {
         if (this.isRealNum(this.form.rank) != true) {
           this.$message({
-            message: '步骤必须为正整数且不能重复',
+            message: '步骤必须为正整数',
             type: 'error'
           })
         }
@@ -384,6 +421,7 @@
       confirmEdit(row) {
         row.edit = false
         row.originalRank = row.rank
+        row.originalTitle = row.title
         row.originalActionId = row.action_id
         row.originalPageId = row.page_id
         row.originalSkip = row.skip
@@ -408,6 +446,7 @@
       },
       cancelEdit(row) {
         row.rank = row.originalRank
+        row.title = row.originalTitle
         row.action_id = row.originalActionId
         row.page_id = row.originalPageId
         row.skip = row.originalSkip
@@ -461,6 +500,7 @@
               this.tableData = res.data.data_list.map(v => {
                 this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
                 v.originalRank = v.rank //  will be used when user click the cancel botton
+                v.originalTitle = v.title
                 v.originalActionId = v.action_id
                 v.originalPageId = v.page_id
                 v.originalPageTitle = v.page_title

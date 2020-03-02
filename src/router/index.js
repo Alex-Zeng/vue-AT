@@ -71,7 +71,7 @@ export const constantRoutes = [
         component: Equipment,
         name: 'equipment',
         props: true,
-        meta: {title: '设备列表'},
+        meta: {title: '执行测试'},
 
       },
       {
