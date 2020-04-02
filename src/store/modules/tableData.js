@@ -313,6 +313,7 @@ const actions = {
             v.originalCaseTitle = v.case_title
             v.originalSkip = v.skip
             v.originalInputArgs = v.input_args
+            v.originalInputKeys = v.input_keys
             return v
           })
           commit('SET_TESTCASESUITSTEPDATA', data_list)

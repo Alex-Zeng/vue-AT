@@ -3,7 +3,7 @@
     <el-header>
       <Header></Header>
     </el-header>
-    <div class="tab">
+    <div class="tab" >
       <tab-views></tab-views>
     </div>
     <el-container>
@@ -20,6 +20,7 @@
         </div>
       </el-main>
     </el-container>
+
   </el-container>
 </template>
 
@@ -93,6 +94,7 @@
   .tab {
     height: 20px;
     padding-bottom: 20px;
+
   }
 
   body > .el-container {

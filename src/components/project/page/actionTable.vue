@@ -124,9 +124,7 @@
 
     <el-dialog title="添加" :visible.sync="addForm" style="text-align: left;">
       <el-form :model="form">
-        <el-form-item label="标题：" :label-width="formLabelWidth">
-          <el-input v-model="form.title" autocomplete="off"></el-input>
-        </el-form-item>
+
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
           <el-select v-model="form.fun_id" placeholder="请选择方法">
             <el-option v-for="fun in $store.state.tableData.functionData" :label="fun.title" :value="fun.id"
@@ -171,7 +169,6 @@
           functionTitle: '',
           ele_id: '',
           elementTitle: '',
-          title: '',
         },
         formLabelWidth: '120px'
       }
@@ -213,117 +210,121 @@
             this.$alert(res.message)
           }
         })
-    },
-    editNodeClick(data) {
-      if (data.row) {
-        data.row.page_title = data.treeData.title
-        data.row.page_id = data.treeData.id
-        data.row.action_id = ''
+      },
+      editNodeClick(data) {
+        if (data.row) {
+          data.row.page_title = data.treeData.title
+          data.row.page_id = data.treeData.id
+          data.row.action_id = ''
+        }
+        this.form.page_title = data.treeData.title
+        this.form.page_id = data.treeData.id
+        this.getActionData(data.treeData.id)
+      },
+      confirmEdit(row) {
+        row.edit = false
+        row.originalTitle = row.title
+        row.originalElementTitle = row.ele_title
+        row.originalFunctionTitle = row.fun_title
+        editAction(this.$route.params.id, this.$route.params.page_id, row.id, row).then(res => {
+          if (res.status == 1) {
+            this.$message({
+              message: '编辑成功',
+              type: 'success'
+            })
+            this.getData()
+          } else {
+            this.$message({
+              message: res.message,
+              type: 'error'
+            })
+          }
+        })
       }
-      this.form.page_title = data.treeData.title
-      this.form.page_id = data.treeData.id
-      this.getActionData(data.treeData.id)
-    },
-    confirmEdit(row) {
-      row.edit = false
-      row.originalTitle = row.title
-      row.originalElementTitle = row.ele_title
-      row.originalFunctionTitle = row.fun_title
-      editAction(this.$route.params.id, this.$route.params.page_id, row.id, row).then(res => {
-        if (res.status == 1) {
-          this.$message({
-            message: '编辑成功',
-            type: 'success'
-          })
-          this.getData()
+      ,
+      cancelEdit(row) {
+        row.title = row.originalTitle
+        row.ele_title = row.originalElementTitle
+        row.fun_title = row.originalFunctionTitle
+        row.edit = false
+
+        this.$message({
+          message: '放弃编辑',
+          type: 'warning'
+        })
+      }
+      ,
+      deleteRow(rowId) {
+        this.$confirm('确定删除?', '删除', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+        }).then(() => {
+            deleteAction(this.$route.params.id, this.$route.params.page_id, rowId).then(res => {
+              if (res.status == 1) {
+                this.getData()
+                this.search = ''
+                this.$message({
+                  type: 'info',
+                  message: res.message
+                });
+              } else {
+                this.$alert(res.message)
+              }
+            })
+          }
+        ).catch(() => {
+        })
+      }
+      ,
+      getData() {
+        this.$store.dispatch('tableData/getActionData', this.$route.params.page_id)
+      }
+      ,
+      getElementData() {
+
+        this.$store.dispatch('tableData/getElementData', {
+          "projectId": this.$route.params.id,
+          "pageId": this.$route.params.page_id
+        })
+      }
+      ,
+      getFunctionData() {
+        this.$store.dispatch('tableData/getFunctionData')
+      }
+      ,
+      tableRowClassName({row, rowIndex}) {
+        if (rowIndex % 2 === 0) {
+          if (this.$route.query.actionId == row.id) {
+            return 'danger-row';
+          }
+          return 'warning-row';
         } else {
-          this.$message({
-            message: res.message,
-            type: 'error'
-          })
+          if (this.$route.query.actionId == row.id) {
+            return 'danger-row';
+          }
+          return 'success-row';
         }
-      })
-    }
-    ,
-    cancelEdit(row) {
-      row.title = row.originalTitle
-      row.ele_title = row.originalElementTitle
-      row.fun_title = row.originalFunctionTitle
-      row.edit = false
-
-      this.$message({
-        message: '放弃编辑',
-        type: 'warning'
-      })
-    }
-    ,
-    deleteRow(rowId) {
-      this.$confirm('确定删除?', '删除', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-      }).then(() => {
-          deleteAction(this.$route.params.id, this.$route.params.page_id, rowId).then(res => {
-            if (res.status == 1) {
-              this.getData()
-              this.search = ''
-              this.$message({
-                type: 'info',
-                message: res.message
-              });
-            } else {
-              this.$alert(res.message)
-            }
-          })
-        }
-      ).catch(() => {
-      })
-    }
-    ,
-    getData() {
-      this.$store.dispatch('tableData/getActionData', this.$route.params.page_id)
-    }
-    ,
-    getElementData() {
-
-      this.$store.dispatch('tableData/getElementData', {
-        "projectId": this.$route.params.id,
-        "pageId": this.$route.params.page_id
-      })
-    }
-    ,
-    getFunctionData() {
-      this.$store.dispatch('tableData/getFunctionData')
-    }
-    ,
-    tableRowClassName({row, rowIndex}) {
-      if (rowIndex % 2 === 0) {
-        return 'warning-row';
-      } else {
-        return 'success-row';
+        return '';
       }
-      return '';
+      ,
     }
     ,
-  }
-  ,
-  mounted()
-  {
-    if (this.$route.params.page_id) {
-      this.getData()
-      this.getFunctionData()
-      this.getElementData()
-    }
-  }
-  ,
-  watch: {
-    $route(to, from)
-    { //监听路由是否变化
-      if (to.params.page_id) {// 判断条件1  判断传递值的变化
+    mounted() {
+      if (this.$route.params.page_id) {
         this.getData()
+        this.getFunctionData()
         this.getElementData()
       }
     }
-  }
+    ,
+    watch: {
+      $route(to, from) { //监听路由是否变化
+        if (to.params.page_id) {// 判断条件1  判断传递值的变化
+          this.getData()
+          this.getElementData()
+        }
+      }
+    }
   }
 </script>
 
@@ -333,6 +334,10 @@
   }
 
   .el-table .success-row {
-    background: #f0f9eb;
+    background: #49f944;
+  }
+
+  .el-table .danger-row {
+    background: #ff7a62;
   }
 </style>

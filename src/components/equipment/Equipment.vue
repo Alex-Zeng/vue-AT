@@ -74,12 +74,12 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="下次运行时间">
+      <el-table-column label="下次运行时间" width="180">
         <template slot-scope="{row}">
           <span>{{ row.next_run_time}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="cron表达式">
+      <el-table-column label="cron表达式" width="100">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.cron_times" class="edit-input" size="mini"/>
@@ -88,32 +88,44 @@
                       placement="top" v-else>
             <span>{{ row.cron_times}}</span>
           </el-tooltip>
-
-
         </template>
       </el-table-column>
-            <el-table-column label="操作" width="220" align="center">
+
+      <el-table-column label="最后一次执行日志" width="180">
+        <template slot-scope="{row}">
+              <el-popover
+                placement="right"
+                title="日志查看"
+                width="1000"
+                trigger="click"
+              >
+                <div style="height: 500px" class="cmm-wrapper" v-html="logText"></div>
+                <el-button slot="reference" size="mini" type="info" plain @click="getRunTestLogData(row.id)">查看运行日志</el-button>
+              </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="240" align="center">
         <template slot-scope="{row}">
           <div>
             <template v-if="row.running">
             <span type="info" disabled size="mini">执行中<i class="el-icon-loading"></i>
             </span>
             </template>
-            <el-button v-else type="primary" @click.stop="runTest(row)" size="mini">运行用例集</el-button>
+            <el-button v-else type="primary" @click.stop="runTest(row)" size="mini">执行测试</el-button>
 
             <el-button
               type="success"
               size="mini"
               @click="suitEdit(row)"
             >
-              管理用例集
+              用例集
             </el-button>
           </div>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" fixed="right" width="200">
         <template slot="header" slot-scope="scope">
-          <el-button type="primary" @click="addForm=true" icon="el-icon-plus" size="mini">新增
+          <el-button type="primary" @click="addForm=true" icon="el-icon-plus" size="mini">新增设备
           </el-button>
           <el-input
             v-model="search"
@@ -142,11 +154,11 @@
 
           <div v-else>
             <el-button-group>
-<!--              <el-button v-if="row.session_id" type="danger" icon="el-icon-video-pause" size="mini"-->
-<!--                         @click="stopEt(row)">停止-->
-<!--              </el-button>-->
-<!--              <el-button v-else type="primary" icon="el-icon-video-play" size="mini" @click="startEt(row)">启动-->
-<!--              </el-button>-->
+              <!--              <el-button v-if="row.session_id" type="danger" icon="el-icon-video-pause" size="mini"-->
+              <!--                         @click="stopEt(row)">停止-->
+              <!--              </el-button>-->
+              <!--              <el-button v-else type="primary" icon="el-icon-video-play" size="mini" @click="startEt(row)">启动-->
+              <!--              </el-button>-->
               <el-button
                 type="primary"
                 size="mini"
@@ -240,7 +252,8 @@
     deleteEquipment,
     startEquipment,
     stopEquipment,
-    startES
+    startES,
+    getFinalLogText
   } from '../../api/api'
   import ExecuteTest from '../executeTest/ExecuteTest'
   import ExecuteLog from '../report/ExecuteLog'
@@ -261,6 +274,7 @@
         suitForm: false,
         listLoading: true,
         currentEid: '',
+        logText: '',
         currentEtitle: '管理用例集',
         formLabelWidth: '140px',
         textareaWidth: '520px',
@@ -294,6 +308,12 @@
       }
     },
     methods: {
+      getRunTestLogData(e_id) {
+        this.logText = ''
+        getFinalLogText(e_id).then((res) => {
+          this.logText = res.data
+        })
+      },
       rowClick(row, column, even) {
         this.expands = [row.id]
       },
@@ -306,20 +326,12 @@
         this.currentEid = row.id
         this.currentEtitle = row.title
       },
-      openLog(row) {
-        this.logForm = true
-        this.currentEid = row.id
-        this.currentEtitle = row.title
-        this.$store.dispatch('tableData/getESLogData', row.id)
-      },
       runTest(row) {
         this.expands = [row.id]
         row.running = true
         startES(row.id).then((res) => {
-          this.$message({
-            message: res.message,
-            type: 'info'
-          })
+          alert(res.message)
+
           this.expands = [row.id]
           row.running = false
         })

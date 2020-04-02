@@ -199,6 +199,7 @@
     computed: {
       ...mapState({  //这里的...不是省略号了,是对象扩展符
         pageData: state => state.tableData.pageData,
+
       })
     },
     methods: {
@@ -213,9 +214,16 @@
         this.getActionData(data.treeData.id)
       },
       tableRowClassName({row, rowIndex}) {
+
         if (rowIndex % 2 === 0) {
+          if(this.$route.query.eleId == row.id){
+           return 'danger-row';
+        }
           return 'warning-row';
         } else {
+          if(this.$route.query.eleId == row.id){
+           return 'danger-row';
+        }
           return 'success-row';
         }
         return '';
@@ -225,6 +233,7 @@
           "projectId": this.$route.params.id,
           "pageId": this.$route.params.page_id
         })
+
       },
       openAddForm() {
         this.addForm = true
@@ -330,5 +339,8 @@
 
   .el-table .success-row {
     background: #f0f9eb;
+  }
+    .el-table .danger-row {
+    background: #ff7a62;
   }
 </style>

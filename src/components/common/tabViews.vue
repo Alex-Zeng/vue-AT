@@ -1,14 +1,15 @@
 <template>
   <div>
     <el-tabs v-model="$store.state.tabViews.editableTabsValue+''" type="card"
-             @tab-click="handleClick">
+             @tab-click="handleClick" closable @tab-remove="handleTabsEdit">
       <el-tab-pane
         class="mytabitem"
         v-for="(item, index) in visitedViews"
         :key="item.index"
         :name="item.index+''"
       >
-        <div slot="label" @contextmenu.prevent="rightClick(item,$event)">{{item.title}}</div>
+        <span slot="label" @contextmenu.prevent="rightClick(item,$event)">{{item.title}}</span>
+
       </el-tab-pane>
     </el-tabs>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
@@ -21,10 +22,10 @@
 
 </template>
 <script>
-  import { mapState} from 'vuex';
+  import {mapState} from 'vuex';
 
   export default {
-    inject:['reload'],
+    inject: ['reload'],
     name: 'tabViews',
     data() {
       return {
@@ -68,6 +69,20 @@
         this.visible = true
         this.selectedTag = tag
       },
+      handleTabsEdit(targetName) {
+        this.$store.dispatch('tabViews/delView', targetName)
+        let toPath = '/home'
+        // 还有tab,则循环列表,路由跳转到当前选中的tab页面
+        if (this.$store.state.tabViews.visitedViews) {
+          for (const item of this.$store.state.tabViews.visitedViews) {
+            if (this.$store.state.tabViews.editableTabsValue == item.index) {
+              toPath = item.fullPath
+            }
+          }
+          this.$router.push({path: toPath})
+        }
+        this.visible = false
+      },
       closeSelectedTag(tag) {
         this.$store.dispatch('tabViews/delView', tag.index)
         let toPath = '/home'
@@ -96,7 +111,7 @@
         this.$router.push({name: 'home'})
         this.visible = false
       },
-      closeMenu(){
+      closeMenu() {
         this.visible = false
       }
     }

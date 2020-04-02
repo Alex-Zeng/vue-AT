@@ -11,8 +11,7 @@
     >
       <el-table-column type="expand">
         <template slot-scope="props">
-          <div v-for=" item in props.row.test_cases"><span> 用例 {{item.title}} 执行中</span> <i class="el-icon-loading"></i>
-          </div>
+          <div v-for=" item in props.row.test_cases"><span> 用例 {{item.title}}</span> </div>
         </template>
       </el-table-column>
       <el-table-column label="执行顺序" width="80">

@@ -231,6 +231,10 @@ export const getLog = (formData) => {
 export const getLogFile = (log_id) => {
   return get(`/runtest/getLogFile/${log_id}`).then(res => res);
 };
+  //获取设备最有一次运行的日志文件
+export const getFinalLogText = (e_id) => {
+  return get(`/runtest/FinalLogText/${e_id}`).then(res => res);
+};
 //删除日志数据
 export const deleteLogData = (log_id) => {
   return remove(`/runtest/clearLogFile/${log_id}`).then(res => res);

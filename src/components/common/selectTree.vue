@@ -3,7 +3,6 @@
       class="filter-tree"
       :data="dataList"
       node-key="id"
-      default-expand-all
       :filter-node-method="filterNode"
       @node-click="addNodeClick"
       :highlight-current="true"

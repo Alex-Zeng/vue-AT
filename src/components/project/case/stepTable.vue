@@ -17,7 +17,7 @@
           <span v-else>{{ row.rank }}</span>
         </template>
       </el-table-column>
-            <el-table-column label="步骤标题" align="center" prop="rank" >
+      <el-table-column label="步骤标题" align="center" prop="rank">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -85,10 +85,10 @@
               <el-option v-for="act in actData" :label="act.title" :value="act.id" :key="act.id"></el-option>
             </el-select>
           </template>
-          <span v-else>{{ row.action_title }}</span>
+          <el-link type="primary" :underline="false" @click="openPage(row)" v-else>{{ row.action_title }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="输入参数" align="center">
+      <el-table-column label="输入参数名" align="center">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.input_key" class="edit-input" size="mini"/>
@@ -96,7 +96,7 @@
           <span v-else>{{ row.input_key }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="输出参数" align="center">
+      <el-table-column label="输出参数名" align="center">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.output_key" class="edit-input" size="mini"/>
@@ -105,11 +105,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="right" label="操作"  width="160px">
+      <el-table-column align="right" label="操作" width="160px">
         <template slot="header" slot-scope="scope">
           <el-button-group>
             <el-button type="primary" @click="addNew" size="mini">新增</el-button>
-            <el-button type="primary" size="mini" @click="debugForm = true">调试</el-button>
+            <el-button type="primary" size="mini" @click="open_debug_form">调试</el-button>
           </el-button-group>
           <el-input
             v-model="search"
@@ -174,7 +174,7 @@
         <el-form-item label="步骤：" :label-width="formLabelWidth">
           <el-input v-model.number="form.rank" placeholder="请输入 正整数且不重复"></el-input>
         </el-form-item>
-                <el-form-item label="标题：" :label-width="formLabelWidth">
+        <el-form-item label="标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" placeholder="请输入标题"></el-input>
         </el-form-item>
         <el-form-item label="操作方法：" :label-width="formLabelWidth">
@@ -216,10 +216,10 @@
         <el-form-item label="延时：" :label-width="formLabelWidth">
           <el-input v-model.number="form.wait_time" placeholder="操作完后延迟几秒截图"></el-input>
         </el-form-item>
-        <el-form-item label="输入参数：" :label-width="formLabelWidth">
+        <el-form-item label="输入参数名：" :label-width="formLabelWidth">
           <el-input v-model="form.input_key" placeholder="输入参数名,每个用例只允许一个输出参数名"></el-input>
         </el-form-item>
-        <el-form-item label="输出参数：" :label-width="formLabelWidth">
+        <el-form-item label="输出参数名：" :label-width="formLabelWidth">
           <el-input v-model="form.output_key" placeholder="输出参数名,每个用例只允许一个输出参数名"></el-input>
         </el-form-item>
       </el-form>
@@ -230,10 +230,9 @@
     </el-dialog>
 
     <!--    调试-->
-    <el-dialog title="调试" :visible.sync="debugForm" style="text-align: center;">
+    <el-dialog title="调试" :visible.sync="debugVisible" style="text-align: center;">
       <div>
-        <el-select v-model="equipmentId" placeholder="请选择设备" size="mini"
-                   @change="form.action_id='';getActionData(form.page_id);">
+        <el-select v-model="equipmentId" placeholder="请选择设备" size="mini">
           <el-option v-for="item in $store.state.tableData.equipmentData" :label="item.title" :value="item.id"
                      :key="item.id"></el-option>
         </el-select>
@@ -262,7 +261,7 @@
         </el-input>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="debugForm = false;">取 消</el-button>
+        <el-button @click="debugVisible = false;">取 消</el-button>
         <el-button type="primary" @click="confirmDebug">确 定</el-button>
       </div>
     </el-dialog>
@@ -273,6 +272,7 @@
 <script>
   import {postStep, getStepList, putStep, deleteStep, getActionList, debugCase} from '@/api/api'
   import selectTree from '@/components/common/selectTree'
+  import {formatArgs} from '@/utils/tableDate'
   import {mapState} from "vuex"
 
   export default {
@@ -289,7 +289,7 @@
         equipmentId: '',
         debugInputArg: '',
         addForm: false,
-        debugForm: false,
+        debugVisible: false,
         form: {
           rank: '',
           title: '',
@@ -342,6 +342,18 @@
           return false;
         }
       },
+      open_debug_form() {
+        this.debugVisible = true
+        let inputKeys = ''
+        let a = []
+        for (let i in this.tableData) {
+          if (this.tableData[i].input_key != '') {
+            a.push(this.tableData[i].input_key)
+          }
+        }
+        this.debugInputArg = formatArgs(a.join(","))
+
+      },
       tableRowClassName({row, rowIndex}) {
         if (rowIndex % 2 === 0) {
           return 'warning-row';
@@ -373,7 +385,7 @@
         this.form.output_key = ''
         this.form.skip = 0
       },
-      copy_data(row){
+      copy_data(row) {
         let newRank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
         let newRow = row
         newRow.rank = newRank
@@ -481,6 +493,7 @@
         })
       },
       confirmDebug() {
+
         let debugForm = {
           e_id: this.equipmentId,
           input_args: this.debugInputArg
@@ -518,7 +531,15 @@
             console.log(err);
           }
         )
-      }
+      },
+      openPage(row) {
+        this.$router.push({
+          name: 'page',
+          params: {id: this.projectId, page_id: row.page_id},
+          query: {eleId: row.ele_id, actionId: row.action_id}
+        })
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + row.page_title})
+      },
     }
     ,
 

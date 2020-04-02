@@ -77,7 +77,7 @@
               <el-button slot="reference">{{row.case_title}}</el-button>
             </el-popover>
           </template>
-          <span v-else>{{  row.case_title  }}</span>
+          <el-link type="primary" :underline="false" @click="toCase(row)" v-else>{{  row.case_title  }}</el-link>
         </template>
       </el-table-column>
       <el-table-column label="输入参数" align="center">
@@ -274,18 +274,21 @@
         if (!value) return true;
         return data.label.indexOf(value) !== -1;
       },
+      toCase(row){
+        this.$router.push({
+          name: 'case',
+          params: {id: this.projectId, page_id: row.id}
+        })
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + row.case_title})
+      },
       addNodeClick(value) {
         let nodeId = value.treeData.id
+        this.inputK = value.treeData.input_keys
+        this.outputK = value.treeData.output_keys
         this.form.case_title = value.treeData.title
         this.form.input_args = ''
         this.form.case_id = nodeId
-        for (let i = 0; i < this.caseData.length; i++) {
-          if (this.caseData[i].id == nodeId) {
-            this.inputK = this.caseData[i].input_keys
-            this.outputK = this.caseData[i].output_keys
-          }
-        }
-        if (this.inputK != '') {
+        if (this.inputK) {
           this.form.input_args = formatArgs(this.inputK)
         }
 
@@ -295,12 +298,8 @@
         value.row.case_title = value.treeData.title
         value.row.case_id = nodeId
 
-        for (let index in this.caseData) {
-          if (this.caseData[index].id == nodeId) {
-            value.row.input_keys = this.caseData[index].input_keys
-            value.row.output_keys = this.caseData[index].output_keys
-          }
-        }
+        value.row.input_keys = value.treeData.input_keys
+        value.row.output_keys = value.treeData.output_keys
         if (value.row.input_keys != '') {
           value.row.input_args = formatArgs(value.row.input_keys)
         }
@@ -332,6 +331,7 @@
           row.originalCaseTitle = row.case_title
           row.originalSkip = row.skip
           row.originalInputArgs = row.input_args
+          row.originalInputKeys = row.input_keys
           row.case_id = row.case_id
           putSuitStep(this.$route.params.id, this.$route.params.suit_id, row.id, row).then(res => {
             if (res.status == 1) {
@@ -350,6 +350,7 @@
         row.rank = row.originalRank
         row.case_title = row.originalCaseTitle
         row.edit = false
+        row.input_keys = row.originalInputKeys
         row.skip = row.originalSkip
         row.input_args = row.originalInputArgs
         this.$message({
