@@ -5,7 +5,6 @@
       :data="tableData.filter(data => !search || data.action_title.toLowerCase().includes(search.toLowerCase())|| data.rank.toLowerCase().includes(search.toLowerCase()))"
       fit highlight-current-row
       size="small"
-      :row-class-name="tableRowClassName"
       :default-sort="{prop: 'rank', order: 'ascending'}"
     >
 
@@ -354,14 +353,7 @@
         this.debugInputArg = formatArgs(a.join(","))
 
       },
-      tableRowClassName({row, rowIndex}) {
-        if (rowIndex % 2 === 0) {
-          return 'warning-row';
-        } else {
-          return 'success-row';
-        }
-        return '';
-      },
+
       editNodeClick(data) {
         if (data.row) {
           data.row.page_title = data.treeData.title
@@ -547,16 +539,6 @@
 </script>
 
 <style>
-  .el-table .warning-row {
-    background: oldlace;
-  }
 
-  .el-table .success-row {
-    background: #f0f9eb;
-  }
-
-  .el-table th {
-    background: #deffe2;
-  }
 
 </style>

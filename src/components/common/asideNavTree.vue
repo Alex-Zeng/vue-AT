@@ -1,8 +1,12 @@
 <template>
   <div>
-    <el-card class="box-card">
-  <div slot="header" class="clearfix">
-      <h5>{{asideTitle}}</h5>
+    <div slot="header" class="clearfix">
+      <el-button-group>
+        <el-button type="info" size="small" @click="showNav('page')">页面对象PO</el-button>
+        <el-button type="info" size="small" @click="showNav('case')">用例</el-button>
+        <el-button type="info" size="small" @click="showNav('suit')">用例集</el-button>
+      </el-button-group>
+      <h3>{{asideTitle}}</h3>
       <el-button-group>
         <el-button size="mini" type="primary" icon="el-icon-plus"
                    @click="addForm=true;form.title='';form.pId=0;addFormSelectTitle='';"></el-button>
@@ -20,32 +24,29 @@
           <el-button slot="reference" size="mini" type="primary" icon="el-icon-delete"></el-button>
         </el-popover>
       </el-button-group>
-  </div>
-  <div class="text item">
-        <el-tree
-      class="filter-tree"
-      :data="dataList"
-      node-key="id"
-      default-expand-all
-      :filter-node-method="filterNode"
-      draggable
-      @node-click="nodeClick"
-      @node-drop="nodeDrop"
-      :expand-on-click-node="false"
-      :highlight-current="true"
-      ref="tree">
-    </el-tree>
-  </div>
-</el-card>
-
+    </div>
+    <div class="text item">
+      <el-tree
+        class="filter-tree"
+        :data="dataList"
+        node-key="id"
+        :filter-node-method="filterNode"
+        draggable
+        @node-click="nodeClick"
+        @node-drop="nodeDrop"
+        :expand-on-click-node="false"
+        :highlight-current="true"
+        ref="tree">
+      </el-tree>
+    </div>
 
 
     <!--    添加-->
 
-    <el-dialog title="添加" :visible.sync="addForm" align="left">
+    <el-dialog title="添加" :visible.sync="addForm" align="left" :modal="false">
       <el-form :model="form">
         <el-form-item label="选择父级：" :label-width="formLabelWidth">
-                              <el-popover
+          <el-popover
             placement="bottom"
             title="选择父级"
             width="200"
@@ -54,10 +55,11 @@
             <div>
               <select-tree :dataList="dataList" @addNodeClick="addNodeClick"></select-tree>
             </div>
-            <el-button slot="reference" size="mini">{{addFormSelectTitle?addFormSelectTitle:'请选择父级,不选择父级则为根节点'}}</el-button>
+            <el-button slot="reference" size="mini">{{addFormSelectTitle?addFormSelectTitle:'请选择父级,不选择父级则为根节点'}}
+            </el-button>
           </el-popover>
         </el-form-item>
-         <el-form-item label="标题：" :label-width="formLabelWidth">
+        <el-form-item label="标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -69,12 +71,12 @@
 
     <!--    编辑-->
 
-    <el-dialog title="编辑" :visible.sync="editFormVisible" align="left">
+    <el-dialog title="编辑" :visible.sync="editFormVisible" align="left" :modal="false">
       <el-form :model="form">
       </el-form>
       <el-form :model="form">
         <el-form-item label="选择父级：" :label-width="formLabelWidth">
-                    <el-popover
+          <el-popover
             placement="bottom"
             title="选择父级"
             width="200"
@@ -83,9 +85,10 @@
             <div>
               <select-tree :dataList="dataList" @addNodeClick="editNodeClick"></select-tree>
             </div>
-            <el-button slot="reference" size="mini">{{editFormSelectTitle?editFormSelectTitle:'请选择父级,不选择父级则为根节点'}}</el-button>
+            <el-button slot="reference" size="mini">{{editFormSelectTitle?editFormSelectTitle:'请选择父级,不选择父级则为根节点'}}
+            </el-button>
           </el-popover>
- </el-form-item>
+        </el-form-item>
         <el-form-item label="标题：" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
         </el-form-item>
@@ -136,6 +139,9 @@
       }
     },
     methods: {
+      showNav(nav) {
+        this.$store.dispatch('tableData/setNavVisible', nav)
+      },
       nodeClick(data) {
 
         this.currentSelectId = data.id
@@ -151,6 +157,7 @@
           this.$router.push({name: 'suit', params: {id: this.proId, suit_id: data.id}})
           this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + data.title})
         }
+
       },
       addNodeClick(data) {
         this.form.pId = data.treeData.id
@@ -187,7 +194,7 @@
             pId = 0
           }
         }
-        this.$store.dispatch('tableData/editSelectData', {"edit_id": edit_id,"parentId": pId})
+        this.$store.dispatch('tableData/editSelectData', {"edit_id": edit_id, "parentId": pId})
       },
       deleteSelect() {
         this.deleteVisible = false
@@ -215,6 +222,7 @@
     display: table;
     content: "";
   }
+
   .clearfix:after {
     clear: both
   }

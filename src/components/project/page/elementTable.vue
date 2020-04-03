@@ -214,17 +214,8 @@
         this.getActionData(data.treeData.id)
       },
       tableRowClassName({row, rowIndex}) {
-
-        if (rowIndex % 2 === 0) {
-          if(this.$route.query.eleId == row.id){
-           return 'danger-row';
-        }
-          return 'warning-row';
-        } else {
-          if(this.$route.query.eleId == row.id){
-           return 'danger-row';
-        }
-          return 'success-row';
+        if (this.$route.query.eleId == row.id) {
+          return 'danger-row';
         }
         return '';
       },
@@ -333,14 +324,8 @@
 </script>
 
 <style>
-  .el-table .warning-row {
-    background: oldlace;
-  }
 
-  .el-table .success-row {
-    background: #f0f9eb;
-  }
-    .el-table .danger-row {
+  .el-table .danger-row {
     background: #ff7a62;
   }
 </style>

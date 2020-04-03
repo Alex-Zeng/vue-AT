@@ -293,16 +293,8 @@
       }
       ,
       tableRowClassName({row, rowIndex}) {
-        if (rowIndex % 2 === 0) {
-          if (this.$route.query.actionId == row.id) {
-            return 'danger-row';
-          }
-          return 'warning-row';
-        } else {
-          if (this.$route.query.actionId == row.id) {
-            return 'danger-row';
-          }
-          return 'success-row';
+        if (this.$route.query.actionId == row.id) {
+          return 'danger-row';
         }
         return '';
       }
@@ -329,13 +321,6 @@
 </script>
 
 <style>
-  .el-table .warning-row {
-    background: oldlace;
-  }
-
-  .el-table .success-row {
-    background: #49f944;
-  }
 
   .el-table .danger-row {
     background: #ff7a62;

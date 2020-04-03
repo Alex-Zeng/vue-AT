@@ -42,6 +42,7 @@ const state = {
   equipmentTestCaseSuitData: [],
   logData: [],
   logCount: [],
+  asideDrawer:false,
   reportBreadcrumbData: {"suit": {}, "case": {}, "step": {}},
 }
 const getters = {}
@@ -135,6 +136,7 @@ const actions = {
     })
   },
   setNavVisible({dispatch, commit, state}, nav) {
+    state.asideDrawer = true
     commit('SET_VISIBLE_NAV', nav)
     switch (nav) {
       case 'page':
@@ -147,6 +149,7 @@ const actions = {
         dispatch('getTestCaseSuitData')
         break;
       default:
+        state.asideDrawer = false
         break;
     }
   },

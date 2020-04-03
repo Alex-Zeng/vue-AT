@@ -34,6 +34,7 @@
         left: 0,
         selectedTag: {},
         affixTags: []
+
       }
     },
     computed: {

@@ -9,7 +9,6 @@
       :row-key="getRowKeys"
       :expand-row-keys="expands"
       @row-click="rowClick"
-      :row-class-name="tableRowClassName"
       :default-sort="{prop: 'rank', order: 'ascending'}"
     >
       <el-table-column type="expand">
@@ -249,14 +248,7 @@
     },
 
     methods: {
-      tableRowClassName({row, rowIndex}) {
-        if (rowIndex % 2 === 0) {
-          return 'warning-row';
-        } else {
-          return 'success-row';
-        }
-        return '';
-      },
+
       addNew() {
         this.addForm = true
         this.form.rank = parseInt(this.tableData[this.tableData.length - 1].rank) + 1
@@ -277,7 +269,7 @@
       toCase(row){
         this.$router.push({
           name: 'case',
-          params: {id: this.projectId, page_id: row.id}
+          params: {id: this.$route.params.id, case_id: row.case_id}
         })
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + row.case_title})
       },
@@ -408,15 +400,5 @@
 </script>
 
 <style>
-  .dialog-add {
-    text-align: left;
-  }
 
-  .el-table .warning-row {
-    background: oldlace;
-  }
-
-  .el-table .success-row {
-    background: #f0f9eb;
-  }
 </style>
