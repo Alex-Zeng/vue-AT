@@ -12,7 +12,7 @@
       <el-submenu index="1">
         <template slot="title">
           <i class="el-icon-picture-outline-round"></i>
-          <span slot="title" >项目:{{curPro.title}}</span>
+          <span slot="title">项目:{{curPro.title}}</span>
         </template>
         <el-menu-item v-for="item in proData" :index="'1-'+item.id" :key="item.id"
                       @click="toProject(item)">
@@ -44,6 +44,10 @@
         <i class="el-icon-s-data"></i>
         <span>测试报告</span>
       </el-menu-item>
+      <el-menu-item index="8" @click="toMinicap()">
+        <i class="el-icon-s-data"></i>
+        <span>Minicap</span>
+      </el-menu-item>
 
     </el-menu>
   </div>
@@ -51,6 +55,7 @@
 
 <script>
   import {mapState} from "vuex"
+
   export default {
     name: 'Header',
     data() {
@@ -61,6 +66,7 @@
     computed: {
       ...mapState({  //这里的...不是省略号了,是对象扩展符
         curPro: state => state.tableData.curreentPro,
+        proData: state => state.tableData.projectData,
         proData: state => state.tableData.projectData,
       })
     },
@@ -83,6 +89,12 @@
         this.$router.push({name: 'equipment'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
         this.showNav('equipment')
+
+      },
+      toMinicap() {
+        this.$router.push({name: 'minicap'})
+        this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
+        this.showNav('minicap')
 
       },
       toReport() {

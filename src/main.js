@@ -8,6 +8,11 @@ import store from '@/store/index.js'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/style/reset.css'
 import { HappyScroll } from 'vue-happy-scroll'
+import VueNativeSock from 'vue-native-websocket'
+
+Vue.use(VueNativeSock, 'ws://localhost:9090', {
+  connectManually: true,
+})
 //自定义组件名
 Vue.component('happy-scroll', HappyScroll)
 // 引入css

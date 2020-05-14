@@ -7,7 +7,7 @@ import Equipment from '@/components/equipment/Equipment'
 import ExecuteTest from '@/components/executeTest/ExecuteTest'
 import Pages from '@/components/project/Pages'
 import Case from '@/components/project/Case'
-import tabViews from '@/components/common/tabViews'
+import MinicapDisplay from '@/components/common/MinicapDisplay'
 import caseSuit from '@/components/project/caseSuit'
 import Report from '@/components/report/Report'
 import SuitLog from '@/components/report/SuitLog'
@@ -123,6 +123,13 @@ export const constantRoutes = [
         name: 'stepLog',
         props: true,
         meta: {title: '测试报告'}
+      },
+      {
+        path: 'minicap',
+        component: MinicapDisplay,
+        name: 'minicap',
+        props: true,
+        meta: {title: 'minicap'}
       },
     ]
   },
