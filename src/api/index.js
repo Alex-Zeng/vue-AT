@@ -34,7 +34,7 @@ axios.interceptors.response.use(
     if (response.data.status == 2) {
       window.location.href = '#/login'
     }if (response.data.status == 0) {
-      alert(response.data.message)
+      console.log(response.data.message)
       return response;
     }else {
       return response;

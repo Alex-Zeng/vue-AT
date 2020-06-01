@@ -239,3 +239,19 @@ export const getFinalLogText = (e_id) => {
 export const deleteLogData = (log_id) => {
   return remove(`/runtest/clearLogFile/${log_id}`).then(res => res);
 };
+
+
+//设备操作
+// 点击滑屏操作
+export const operaPhone = (device_id,formData) => {
+  return post(`/runtest/operateMinitouch/${device_id}`, formData).then(res => res);
+};
+//断开minitouch链接
+export const disconnectMinitouch = (device_id) => {
+  return get(`/runtest/operaDevice/disConnect/${device_id}`).then(res => res);
+};
+
+//连接设备(adb,minitouch)
+export const connectDevice = (device_id) => {
+  return get(`/runtest/operaDevice/connect/${device_id}`).then(res => res);
+};

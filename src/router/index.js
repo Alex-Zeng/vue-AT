@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/views/Login'
+import Devices from '../components/common/Devices'
 import Home from '@/views/Home'
 import Function from '@/components/function/Function'
 import Equipment from '@/components/equipment/Equipment'
@@ -22,11 +23,25 @@ const routerPush = Router.prototype.push
 Router.prototype.push = function push(location) {
   return routerPush.call(this, location).catch(error => error)
 }
+
 export const constantRoutes = [
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    component: Login,
+    meta: {
+      // 页面标题title
+      title: '登录'
+    }
+  },
+  {
+    path: '/devices/:deviceName',
+    name: 'Devices',
+    component: Devices,
+    meta: {
+      // 页面标题title
+      title: '设备控制'
+    }
   },
   {
     path: '/',

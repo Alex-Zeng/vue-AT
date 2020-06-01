@@ -22,7 +22,13 @@
                   v-model="props.row.setting_args">
                 </el-input>
               </template>
-              <span v-else>{{ props.row.setting_args }}</span>
+              <div v-else>
+                <div v-for="value,key in JSON.parse(props.row.setting_args)"><h1>{{key}}: {{value}}</h1></div>
+              </div>
+              <div></div>
+            </el-form-item>
+            <el-form-item label="设备">
+              <devices :deviceName="JSON.parse(props.row.setting_args).deviceName"></devices>
             </el-form-item>
           </el-form>
         </template>
@@ -32,7 +38,6 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-
       <el-table-column label="设备名">
         <template slot-scope="{row}">
           <template v-if="row.edit">
@@ -93,15 +98,16 @@
 
       <el-table-column label="最后一次执行日志" width="180">
         <template slot-scope="{row}">
-              <el-popover
-                placement="right"
-                title="日志查看"
-                width="1000"
-                trigger="click"
-              >
-                <div style="height: 500px" class="cmm-wrapper" v-html="logText"></div>
-                <el-button slot="reference" size="mini" type="info" plain @click="getRunTestLogData(row.id)">查看运行日志</el-button>
-              </el-popover>
+          <el-popover
+            placement="right"
+            title="日志查看"
+            width="1000"
+            trigger="click"
+          >
+            <div style="height: 500px" class="cmm-wrapper" v-html="logText"></div>
+            <el-button slot="reference" size="mini" type="info" plain @click="getRunTestLogData(row.id)">查看运行日志
+            </el-button>
+          </el-popover>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="240" align="center">
@@ -119,6 +125,13 @@
               @click="suitEdit(row)"
             >
               用例集
+            </el-button>
+            <el-button
+              type="success"
+              size="mini"
+              @click="toDevice(row)"
+            >
+              查看设备
             </el-button>
           </div>
         </template>
@@ -257,6 +270,7 @@
   } from '../../api/api'
   import ExecuteTest from '../executeTest/ExecuteTest'
   import ExecuteLog from '../report/ExecuteLog'
+  import Devices from '../common/Devices'
   import {checkJson} from '@/utils/tableDate'
   import {mapState} from "vuex"
 
@@ -265,6 +279,7 @@
     components: {
       ExecuteTest,
       ExecuteLog,
+      Devices,
     },
     data() {
       return {
@@ -349,6 +364,7 @@
           })
         }
       },
+
       cancelEdit(row) {
         row.edit = false
         row.title = row.originalTitle
@@ -437,6 +453,20 @@
             this.$alert(res.message)
           }
         })
+      },
+      checkDevice(row) {
+        console.log(JSON.parse(row.setting_args).deviceName)
+      },
+      toDevice(row) {
+        let deviceName = JSON.parse(row.setting_args).deviceName
+        let strWindowFeatures = "width=380,height=760"
+        let routeUrl = this.$router.resolve({name: 'Devices',params:{"deviceName":deviceName}})
+        window.open(routeUrl.href, "B_page", strWindowFeatures)
+        // window.open(routeUrl.href, '_blank');
+        // this.$router.push({name: 'minicap'})
+        // this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
+        // this.showNav('minicap')
+
       },
     },
   }

@@ -345,6 +345,7 @@ const actions = {
         if (res.status == 1) {
           let datas = res.data.data_list.map(v => {
             v.edit = false
+            v.running = false
             v.originalTitle = v.title
             v.originalSetting_args = v.setting_args
             v.originalRemoteHost = v.remoteHost

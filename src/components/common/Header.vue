@@ -92,6 +92,7 @@
 
       },
       toMinicap() {
+
         this.$router.push({name: 'minicap'})
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ''})
         this.showNav('minicap')
