@@ -255,3 +255,7 @@ export const disconnectMinitouch = (device_id) => {
 export const connectDevice = (device_id) => {
   return get(`/runtest/operaDevice/connect/${device_id}`).then(res => res);
 };
+//连接设备(adb,minitouch)
+export const adbOperaDevice = (formData) => {
+  return post(`/runtest/AdbOperaDevice`, formData).then(res => res);
+};

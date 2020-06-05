@@ -82,7 +82,7 @@ const mutations = {
   },
   SET_PROJECTDATA: (state, argsList) => {
     state.projectData = argsList
-    if (argsList.length > 0) {
+    if (argsList) {
       state.curreentPro = argsList[0]
       state.curreentProId = argsList[0].id
     }

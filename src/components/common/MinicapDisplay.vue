@@ -12,6 +12,7 @@
               <div slot="header" class="clearfix">
                 <span>{{item.title}}</span>
                 <span>下次运行时间: {{item.next_run_time}}</span>
+                <span>设备ID: {{JSON.parse(item.setting_args).deviceName}}</span>
 
                 <el-button style="float: right; padding: 3px 0" type="text" @click="deleteRow(item.id)">删除</el-button>
                 <el-button style="float: right; padding: 3px 0" type="text"
@@ -33,10 +34,10 @@
                         <el-popover
                           placement="right"
                           :title="currentEtitle + ': 最后一次运行测试日志查看'"
-                          width="1000"
+                          width="800"
                           trigger="click"
                         >
-                          <div style="height: 500px" class="cmm-wrapper" v-html="logText"></div>
+                          <div style="height: 500px;" class="cmm-wrapper"  v-html="logText"></div>
                           <el-button slot="reference" size="mini" type="info" plain @click="getRunTestLogData(item)">
                             运行日志
                           </el-button>
@@ -122,7 +123,8 @@
       :title="currentEtitle"
       :visible.sync="logForm"
       direction="rtl"
-      size="80%">
+      size="80%"
+    >
       <ExecuteLog :e_id="currentEid"></ExecuteLog>
     </el-drawer>
 
@@ -371,6 +373,13 @@
   .button_li li {
     padding-bottom: 5px;
     float: right;
+  }
+    .cmm-wrapper {
+    white-space: pre-wrap;
+  line-height: 40 px;
+    color: #000032;
+    font-size: 12px; /*px*/
+    overflow: scroll;
   }
 </style>
 

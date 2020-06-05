@@ -1,25 +1,36 @@
 <template>
   <div>
     <div>
+
+      <el-upload
+        class="upload-demo"
+        action="http://localhost:5002/runtest/AdbOperaDevice"
+        accept="apk"
+        show-file-list
+        ref="upload"
+        :with-credentials="true"
+        :on-success="failUpload"
+        :before-upload="fileCheck"
+        :data="{'opera': 1, 'device_id': deviceName, 'data': 0}"
+      >
+        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">安装apk</el-button>
+      </el-upload>
       <el-button @click="connectAdbAndOpenMiniServer" type="text">连接设备</el-button>
-      <el-button @click="openOperDevice" type="text">开启操作设备</el-button>
-      <!--      <button @click="rece">获取图片</button>-->
       <el-button @click="disconnect" type="text">断开设备</el-button>
-      <el-button @click="" type="text">安装apk</el-button>
-      <el-button @click="" type="text">输入文本</el-button>
+      <el-button @click="sendKeys" type="text">输入文本</el-button>
       <!--      <button @click="diconnect_minitouch">diconnect_minitouch</button>-->
       <!--      <button @click="startMinicapServer">启动MinicapServer</button>-->
       <!--      <button @click="stopMinicapServer">停止MinicapServer</button>-->
     </div>
     <div class="grid-content bg-purple-light">
-      <canvas :id="deviceName" style="border: 1px solid red;" width="445" height="792" @mousedown="MouseClick"
+      <canvas :id="deviceName" style="border: 1px solid red;" width="441" height="713" @mousedown="MouseClick"
               @mouseup="MouseUp"></canvas>
     </div>
     <div>
-      <el-button @click="" type="text">后台</el-button>
-      <el-button @click="" type="text">home</el-button>
+      <el-button @click="adbOperaDevice(5)" icon="el-icon-notebook-2" circle></el-button>
+      <el-button @click="adbOperaDevice(4)" icon="el-icon-house" circle></el-button>
       <!--      <button @click="rece">获取图片</button>-->
-      <el-button @click="" type="text">返回</el-button>
+      <el-button @click="adbOperaDevice(3)" icon="el-icon-arrow-left" circle></el-button>
     </div>
 
     <!-- 手势作用区域demo -->
@@ -28,7 +39,7 @@
 
 <script>
   import axios from 'axios';
-  import {operaPhone, disconnectMinitouch, connectDevice} from '@/api/api'
+  import {operaPhone, disconnectMinitouch, connectDevice, adbOperaDevice} from '@/api/api'
 
   let canvas;
   let ctx;
@@ -37,7 +48,6 @@
     props: ['deviceName'],
     data() {
       return {
-        path: "ws://localhost:9090/getScreen",
         message: '123',
         wsUrl: 'ws://localhost:9090/getScreen',
         websocket: '',
@@ -98,10 +108,8 @@
         var URL = window.URL || window.webkitURL
         var img = new Image()
         img.onload = function () {
-          // canvas.width = img.width
-          // canvas.height = img.height
-          // ctx.scale(x_1,y_1)
-          ctx.drawImage(img, 0, 0 ,canvas.width,canvas.height)
+          canvas.width = (img.width / img.height) * canvas.height
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
           img.onload = null
           img.src = this.BLANK_IMG
           img = null
@@ -172,6 +180,49 @@
             }
           }
         )
+      },
+      adbOperaDevice(op) {
+        let data = '你好吗'
+        let operaForm = {"opera": op, "device_id": this.deviceName, "data": data}
+        adbOperaDevice(operaForm)
+      },
+
+      sendKeys() {
+        this.$prompt('请输入文本', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+        }).then(({value}) => {
+          let operaForm = {"opera": 2, "device_id": this.deviceName, "data": value}
+          adbOperaDevice(operaForm).then(res => {
+            if (res.status == 0) {
+              this.$message({
+                type: 'waring',
+                message: res.message
+              })
+            }
+          })
+        })
+      },
+      submitUpload() {
+        this.$refs.upload.submit();
+      },
+      failUpload(err, file, fileLis){
+        this.$message({
+            type: 'error',
+            message: err.message
+          });
+        this.$refs.upload.clearFiles()
+      },
+      fileCheck(file){
+        if (file.name.endsWith('.apk') ){
+           console.log(file.name)
+        }else {
+          this.$message({
+            type: 'error',
+            message: "请上传apk文件"
+          });
+          return false
+        }
       },
       webSocketLink(deviceName) {
         let _this = this
