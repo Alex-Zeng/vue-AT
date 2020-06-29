@@ -18,7 +18,7 @@
                 <el-button style="float: right; padding: 3px 0" type="text"
                            @click="openEditDialog(item)"> 编辑
                 </el-button>
-                <el-button style="float: right; padding: 3px 0" type="text">置顶</el-button>
+                <el-button style="float: right; padding: 3px 0" type="text" @click="setTop(item)">置顶</el-button>
               </div>
               <div class="text item">
                 <el-row justify="space-around">
@@ -30,31 +30,33 @@
                       <br>
                       <br>
                       <br>
-                      <li>
+                      <div class="test_button">
                         <el-popover
                           placement="right"
                           :title="currentEtitle + ': 最后一次运行测试日志查看'"
                           width="800"
                           trigger="click"
                         >
-                          <div style="height: 500px;" class="cmm-wrapper"  v-html="logText"></div>
+                          <div style="height: 500px;" class="cmm-wrapper" v-html="logText"></div>
                           <el-button slot="reference" size="mini" type="info" plain @click="getRunTestLogData(item)">
                             运行日志
                           </el-button>
                         </el-popover>
-                      </li>
-                      <li>
+                      </div>
+                      <div class="test_button">
                         <el-button type="primary" @click="logForm = true" size="mini">
                           测试报告
                         </el-button>
-                      </li>
-                      <li>
-                        <el-button v-if="item.running == true || item.status == 1"  disabled type="primary" size="mini">执行中</el-button>
+                      </div>
+                      <div class="test_button">
+                        <el-button v-if="item.running == true || item.status == 1" disabled type="primary" size="mini">
+                          执行中
+                        </el-button>
                         <el-button v-else type="primary" @click="runTest(item)" size="mini">执行测试</el-button>
-                      </li>
-                      <li>
+                      </div>
+                      <div class="test_button">
                         <el-button type="primary" @click="suitEdit(item)" size="mini">用例集</el-button>
-                      </li>
+                      </div>
                     </ul>
                   </el-col>
                 </el-row>
@@ -73,7 +75,9 @@
         <el-form-item label="设备名：" :label-width="formLabelWidth">
           <el-input v-model="currentDevice.title" autocomplete="off"></el-input>
         </el-form-item>
-
+        <el-form-item label="排序：" :label-width="formLabelWidth">
+          <el-input v-model="currentDevice.rank" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="remoteHost：" :label-width="formLabelWidth">
           <el-input v-model="currentDevice.remoteHost" autocomplete="off" placeholder="连接的appium地址"></el-input>
         </el-form-item>
@@ -172,6 +176,7 @@
         currentDevice: '',
         dialogTilte: '',
         logText: '',
+        gRank: 999,
         formLabelWidth: '140px',
         textareaWidth: '520px',
         currentEtitle: '管理用例集',
@@ -212,6 +217,8 @@
         startES(row.id).then((res) => {
           alert(res.message)
           row.running = false
+          this.$store.dispatch('tableData/getEquipmentData')
+          console.log(row)
         })
 
       },
@@ -342,6 +349,9 @@
       checkDevice(row) {
         console.log(JSON.parse(row.setting_args).deviceName)
       },
+      setTop(row) {
+        this.$store.dispatch('tableData/setEquipmentTop', {id: row.id})
+      }
 
     }
   }
@@ -374,12 +384,16 @@
     padding-bottom: 5px;
     float: right;
   }
-    .cmm-wrapper {
+
+  .cmm-wrapper {
     white-space: pre-wrap;
-  line-height: 40 px;
+    line-height: 40px;
     color: #000032;
     font-size: 12px; /*px*/
     overflow: scroll;
+  }
+  .test_button{
+    padding-bottom: 10px;
   }
 </style>
 

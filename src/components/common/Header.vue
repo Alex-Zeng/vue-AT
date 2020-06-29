@@ -67,7 +67,6 @@
       ...mapState({  //这里的...不是省略号了,是对象扩展符
         curPro: state => state.tableData.curreentPro,
         proData: state => state.tableData.projectData,
-        proData: state => state.tableData.projectData,
       })
     },
     methods: {
@@ -77,6 +76,17 @@
         this.showNav('home')
       },
       showNav(nav) {
+        switch (nav) {
+          case 'page':
+            this.$router.push({name: 'page', params: {id: this.curPro.id, page_id: "1"}})
+                break;
+          case 'case':
+            this.$router.push({name: 'case', params: {id: this.curPro.id, case_id: "1"}})
+                break;
+          case 'suit':
+            this.$router.push({name: 'suit', params: {id: this.curPro.id, suit_id: "1"}})
+                break;
+        }
         this.$store.dispatch('tableData/setNavVisible', nav)
       },
       toFunction() {

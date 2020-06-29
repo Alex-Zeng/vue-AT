@@ -78,15 +78,12 @@
         let deviceName = this.deviceName
         this.disconnectMinitouchs(deviceName)
         let url = "ws://localhost:9090/stopMiniServer/" + deviceName
-        console.log('断开链接:' + url)
         let stopWebsocket = new WebSocket(url);
-        stopWebsocket.onmessage = (event) => stopWebsocket.close()
+        stopWebsocket.onmessage = (event) => console.log('断开链接:' + event)
+        console.log('断开链接:' + 111)
         if (this.websocket != '') {
           this.websocket.close()
         }
-        let canvas = document.getElementById(this.deviceName);
-        let ctx = canvas.getContext('2d');
-        this.drawImages(canvas, ctx, '123')
       },
       disconnectMinitouchs(deviceName) {
         disconnectMinitouch(deviceName).then(res => {

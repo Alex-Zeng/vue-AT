@@ -2,7 +2,7 @@
   <div>
     <el-table
       ref="multipleTable"
-      :data="tableData.filter(data => !search || data.action_title.toLowerCase().includes(search.toLowerCase())|| data.rank.toLowerCase().includes(search.toLowerCase()))"
+      :data="tableData"
       fit highlight-current-row
       size="small"
       :default-sort="{prop: 'rank', order: 'ascending'}"
@@ -327,7 +327,7 @@
           this.getTableData()
           this.getPageData()
         }
-      }
+      },
     },
     methods: {
       isRealNum(val) {
@@ -432,6 +432,8 @@
         row.originalTakeScreenShot = row.take_screen_shot
         row.originalWaitTime = row.wait_time
         row.originalPageTitle = row.page_title
+        row.originalInputKey = row.input_key
+        row.originalOutputKey = row.output_key
 
         putStep(this.projectId, this.caseId, row.id, row).then(res => {
           if (res.status == 1) {
@@ -457,6 +459,8 @@
         row.wait_time = row.originalWaitTime
         row.page_title = row.originalPageTitle
         row.take_screen_shot = row.originalTakeScreenShot
+        row.input_key =row.originalInputKey
+        row.output_key = row.originalOutputKey
         row.edit = false
         this.$message({
           message: '放弃编辑',
@@ -501,7 +505,7 @@
       getTableData() {
         getStepList(this.projectId, this.caseId).then(
           res => {
-            if (res.data.data_list.length > 0) {
+            if (res.data.data_list) {
               this.tableData = res.data.data_list.map(v => {
                 this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
                 v.originalRank = v.rank //  will be used when user click the cancel botton
@@ -512,6 +516,8 @@
                 v.originalSkip = v.skip
                 v.originalWaitTime = v.wait_time
                 v.originalTakeScreenShot = v.take_screen_shot
+                v.originalInputKey = v.input_key
+                v.originalOutputKey = v.output_key
                 return v
               })
             } else {
@@ -532,6 +538,7 @@
         })
         this.$store.dispatch('tabViews/addView', {"route": this.$route, "title": ': ' + row.page_title})
       },
+
     }
     ,
 

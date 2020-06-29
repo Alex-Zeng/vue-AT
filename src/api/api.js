@@ -22,6 +22,9 @@ export const putPage = (projectId, pageId, formData) => {
 export const deletePage = (projectId, pageId) => {
   return remove(`/uitest/projects/${projectId}/pages/${pageId}`).then(res => res);
 };
+export const copyPage = (projectId, pageId) => {
+  return get(`/uitest/projects/${projectId}/pages/${pageId}/copy`).then(res => res);
+};
 // 获取PageObject操作
 export const getPageList = (projectId) => {
   return get(`/uitest/projects/${projectId}/pages`).then(res => res);
@@ -88,7 +91,7 @@ export const deleteCase = (projectId, caseId) => {
 };
 // 复制用例
 export const copyCase = (projectId, caseId) => {
-  return get(`/uitest/projects/${projectId}/cases/${caseId}`).then(res => res);
+  return get(`/uitest/projects/${projectId}/cases/${caseId}/copy`).then(res => res);
 };
 //调试用例
 export const debugCase = (projectId, caseId, formData) => {
@@ -137,7 +140,10 @@ export const putSuit = (projectId, suitId, formData) => {
 export const deleteSuit = (projectId, suitId) => {
   return remove(`/uitest/projects/${projectId}/case_suit/${suitId}`).then(res => res);
 };
-
+// 复制用例集
+export const copySuit = (projectId, suitId) => {
+  return get(`/uitest/projects/${projectId}/case_suit/${suitId}/copy`).then(res => res);
+};
 // ----------------用例集步骤操作-----------------
 //添加用例集步骤
 
@@ -190,6 +196,7 @@ export const getEquipmentList = () => {
 export const editEquipment = (e_id, formData) => {
   return put(`/runtest/equipment/${e_id}`, formData).then(res => res);
 };
+
 // 删除设备
 export const deleteEquipment = (e_id) => {
   return remove(`/runtest/equipment/${e_id}`).then(res => res);

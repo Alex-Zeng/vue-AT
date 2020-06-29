@@ -40,6 +40,8 @@
     methods: {
 
       addNodeClick(treeData) {
+
+        // expandList.append(treeData.key)
         let data = {
           treeData:treeData,
           row:this.row

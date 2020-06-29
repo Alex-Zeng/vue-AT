@@ -19,16 +19,6 @@
       </el-main>
     </el-container>
 
-    <el-drawer
-      title="我是标题"
-      :with-header="false"
-      :visible.sync="asideDrawer"
-      direction="rtl"
-      :before-close="handleClose"
-      :modal="false"
-      size="20%">
-      <aside-nav-tree></aside-nav-tree>
-    </el-drawer>
   </el-container>
 </template>
 
@@ -47,12 +37,7 @@
       tabViews,
       asideNavTree,
     },
-    computed: {
-      ...mapState({  //这里的...不是省略号了,是对象扩展符
-        asideVisible: state => state.tableData.visible,
-        asideDrawer: state => state.tableData.asideDrawer,
-      })
-    },
+
     provide() {
       return {
         reload: this.reload
@@ -72,9 +57,6 @@
           this.refresh = true;
         })
       },
-      handleClose(done) {
-        this.$store.dispatch('tableData/setNavVisible', 'none')
-      }
     }
   }
 </script>

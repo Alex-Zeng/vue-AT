@@ -8,29 +8,7 @@
       size="small"
       :row-class-name="tableRowClassName"
     >
-      <el-table-column
-        label="所属页面"
-        width="180">
-        <template slot-scope="scope">
-          <template v-if="scope.row.edit">
-            <el-popover
-              placement="left"
-              title="选择页面"
-              width="200"
-              trigger="hover"
-              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
-              <div>
-                <select-tree :dataList="pageData" :row="scope.row" @addNodeClick="editNodeClick"></select-tree>
-              </div>
-              <el-button slot="reference" size="mini">{{scope.row.page_title?scope.row.page_title:'请选择页面'}}</el-button>
-            </el-popover>
-
-          </template>
-          <span v-else>{{ scope.row.page_title }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="150px" label="操作名">
+      <el-table-column width="500px" label="操作名">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -65,6 +43,27 @@
       <el-table-column
         prop="update_datetime"
         label="更新时间">
+      </el-table-column>
+            <el-table-column
+        label="所属页面"
+        width="180">
+        <template slot-scope="scope">
+          <template v-if="scope.row.edit">
+            <el-popover
+              placement="left"
+              title="选择页面"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="pageData" :row="scope.row" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference" size="mini">{{scope.row.page_title?scope.row.page_title:'请选择页面'}}</el-button>
+            </el-popover>
+
+          </template>
+          <span v-else>{{ scope.row.page_title }}</span>
+        </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template slot="header" slot-scope="scope">
@@ -268,7 +267,9 @@
                   message: res.message
                 });
               } else {
-                this.$alert(res.message)
+                this.$message({
+                  type: 'warning',
+                  message: res.message})
               }
             })
           }

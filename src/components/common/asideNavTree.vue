@@ -8,6 +8,9 @@
       </el-button-group>
       <h3>{{asideTitle}}</h3>
       <el-button-group>
+        <el-button size="mini" type="primary"
+                   @click="copyNode">复制
+        </el-button>
         <el-button size="mini" type="primary" icon="el-icon-plus"
                    @click="addForm=true;form.title='';form.pId=0;addFormSelectTitle='';"></el-button>
         <el-button size="mini" type="primary" icon="el-icon-edit"
@@ -34,7 +37,8 @@
         draggable
         @node-click="nodeClick"
         @node-drop="nodeDrop"
-        :expand-on-click-node="false"
+        :expand-on-click-node="true"
+        :auto-expand-parente="true"
         :highlight-current="true"
         ref="tree">
       </el-tree>
@@ -60,7 +64,7 @@
           </el-popover>
         </el-form-item>
         <el-form-item label="标题：" :label-width="formLabelWidth">
-          <el-input v-model="form.title" autocomplete="off"></el-input>
+          <el-input v-model="form.title" autocomplete="off" @keyup.enter.native="addNode"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -90,7 +94,7 @@
           </el-popover>
         </el-form-item>
         <el-form-item label="标题：" :label-width="formLabelWidth">
-          <el-input v-model="form.title" autocomplete="off"></el-input>
+          <el-input v-model="form.title" autocomplete="off" @keyup.enter.native="editNode"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -132,6 +136,7 @@
         editFormSelectTitle: '',
         editFormVisible: false,
         formLabelWidth: '120px',
+        currentNav: '',
         form: {
           pId: 0,
           title: ''
@@ -141,9 +146,10 @@
     methods: {
       showNav(nav) {
         this.$store.dispatch('tableData/setNavVisible', nav)
+        this.currentNav = nav
       },
-      nodeClick(data) {
 
+      nodeClick(data) {
         this.currentSelectId = data.id
         this.currentSelectRow = data
         this.editFormSelectTitle = data.parent_title
@@ -160,6 +166,7 @@
 
       },
       addNodeClick(data) {
+
         this.form.pId = data.treeData.id
         this.addFormSelectTitle = data.treeData.title
       },
@@ -181,6 +188,9 @@
         let editId = this.currentSelectId
         this.$store.dispatch('tableData/editSelectData', {"edit_id": editId, "title": title, "parentId": pId})
         this.editFormVisible = false
+      },
+      copyNode() {
+        this.$store.dispatch('tableData/copySelectData', {"currentSelectId": this.currentSelectId})
       },
       nodeDrop(draggingNode, dropNode, dropType, ev) {
         let edit_id = draggingNode.data.id

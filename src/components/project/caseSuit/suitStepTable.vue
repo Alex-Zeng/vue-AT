@@ -30,7 +30,9 @@
                 </el-input>
               </template>
               <div v-else>
-                <div v-for="(v,k) in JSON.parse(props.row.input_args)">
+
+                <div v-if="props.row.input_args"
+                  v-for="(v,k) in JSON.parse(props.row.input_args)">
                   <h5>{{k}}:</h5>
                   <div v-for="item  in v">{{item}}</div>
                 </div>

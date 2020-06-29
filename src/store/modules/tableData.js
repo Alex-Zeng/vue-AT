@@ -20,11 +20,16 @@ import {
   postSuit,
   getESList,
   getLog,
+  copySuit,
+  copyCase,
+  copyPage
 } from '@/api/api'
 import Vue from 'vue'
+import { Message } from 'element-ui';
 
 const state = {
   visible: 1,
+  rank: 999,
   deafultPageId: '',
   curreentPro: '',
   curreentProId: '',
@@ -42,7 +47,7 @@ const state = {
   equipmentTestCaseSuitData: [],
   logData: [],
   logCount: [],
-  asideDrawer:false,
+  asideDrawer: false,
   reportBreadcrumbData: {"suit": {}, "case": {}, "step": {}},
 }
 const getters = {}
@@ -99,18 +104,24 @@ const mutations = {
       state.asideTreeData = argsList
     }
   },
-  CHANGE_PROJECTDATA: (state, args) => {
-    state.curreentPro = args
-  },
-  SET_EQUIPMENTDATA: (state, argsList) => {
-    state.equipmentData = argsList
-  },
   SET_TESTCASESUITDATA: (state, argsList) => {
     state.testCaseSuitData = argsList
     if (state.visible == 3) {
       state.asideTreeData = argsList
     }
   },
+  CHANGE_PROJECTDATA: (state, args) => {
+    state.curreentPro = args
+  },
+  SET_EQUIPMENTDATA: (state, argsList) => {
+    state.equipmentData = argsList
+  },
+  SET_EQUIPMENTTOP: (state, i) => {
+    let data = state.equipmentData[i]
+    state.equipmentData.splice(i, 1)
+    state.equipmentData.unshift(data)
+  },
+
   SET_TESTCASESUITSTEPDATA: (state, argsList) => {
     state.testCaseSuitStepData = argsList
   },
@@ -136,7 +147,6 @@ const actions = {
     })
   },
   setNavVisible({dispatch, commit, state}, nav) {
-    state.asideDrawer = true
     commit('SET_VISIBLE_NAV', nav)
     switch (nav) {
       case 'page':
@@ -149,7 +159,6 @@ const actions = {
         dispatch('getTestCaseSuitData')
         break;
       default:
-        state.asideDrawer = false
         break;
     }
   },
@@ -159,7 +168,7 @@ const actions = {
         let datas = res.data.page_list
         commit('SET_PAGEDATA', datas)
       } else {
-        Vue.$message({
+        Message({
           message: res.message,
           type: 'error'
         })
@@ -202,6 +211,36 @@ const actions = {
           dispatch('getTestCaseSuitData')
         }
       )
+    }
+  },
+
+  copySelectData({dispatch, state}, args) {
+    let proId = state.curreentProId
+    if (state.visible == 1) {
+      copyPage(proId, args.currentSelectId).then(res => {
+        Message({
+          message: res.message,
+          type: 'success'
+        })
+        dispatch('getPage')
+      })
+    } else if (state.visible == 2) {
+      copyCase(proId, args.currentSelectId).then(res => {
+        Message({
+          message: res.message,
+          type: 'success'
+        })
+        dispatch('getCaseData')
+      })
+
+    } else if (state.visible == 3) {
+      copySuit(proId, args.currentSelectId).then(res => {
+        Message({
+          message: res.message,
+          type: 'success'
+        })
+        dispatch('getTestCaseSuitData')
+      })
     }
   },
   addAsideTreeData({dispatch, state}, args) {
@@ -263,7 +302,7 @@ const actions = {
         })
         commit('SET_ELEMENTDATA', datas)
       } else {
-        Vue.$message({
+        Message({
           message: res.message,
           type: 'error'
         })
@@ -297,7 +336,7 @@ const actions = {
           })
           commit('SET_FUNCTIONDATA', datas)
         } else {
-          Vue.$message({
+          Message({
             message: res.message,
             type: 'error'
           })
@@ -347,6 +386,7 @@ const actions = {
             v.edit = false
             v.running = false
             v.originalTitle = v.title
+            v.originalRank = v.rank
             v.originalSetting_args = v.setting_args
             v.originalRemoteHost = v.remoteHost
             v.originalRemotePort = v.remotePort
@@ -358,6 +398,16 @@ const actions = {
         }
       }
     )
+  },
+  setEquipmentTop({commit, state}, args) {
+    state.rank += 1
+    for (let i in state.equipmentData) {
+      if (state.equipmentData[i].id == args.id) {
+        state.equipmentData[i].rank = state.rank
+        commit('SET_EQUIPMENTTOP', i)
+      }
+    }
+
   },
   getESData({commit}, EId) {
     getESList(EId).then((res) => {
@@ -379,7 +429,7 @@ const actions = {
       commit('SET_LOCOUNT', dataCount)
     })
   },
-  setrb({commit,state}, args) {
+  setrb({commit, state}, args) {
     let name = args.name
     let id = args.id
     switch (name) {
@@ -387,7 +437,7 @@ const actions = {
         state.reportBreadcrumbData.suit.map(v => {
           v.id = id
           return v
-        } )
+        })
     }
 
     commit('SET_RB', data)

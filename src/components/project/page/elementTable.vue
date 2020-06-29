@@ -9,28 +9,8 @@
       :row-class-name="tableRowClassName"
     >
 
-      <el-table-column
-        label="所属页面"
-        width="180">
-        <template slot-scope="scope">
-          <template v-if="scope.row.edit">
-            <el-popover
-              placement="left"
-              title="选择页面"
-              width="200"
-              trigger="hover"
-              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
-              <div>
-                <select-tree :dataList="pageData" :row="scope.row" @addNodeClick="editNodeClick"></select-tree>
-              </div>
-              <el-button slot="reference" size="mini">{{scope.row.page_title?scope.row.page_title:'请选择页面'}}</el-button>
-            </el-popover>
-          </template>
-          <span v-else>{{ scope.row.page_title }}</span>
-        </template>
-      </el-table-column>
 
-      <el-table-column width="150px" label="元素名称">
+      <el-table-column width="250px" label="元素名称">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -52,7 +32,13 @@
       <el-table-column label="Android元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.loc_for_android" class="edit-input" size="mini"/>
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 3, maxRows: 5}"
+              placeholder="请输入Android元素定位公式"
+              v-model="row.loc_for_android">
+            </el-input>
+<!--            <el-input v-model="row.loc_for_android" class="edit-input" size="mini"/>-->
           </template>
           <span v-else>{{ row.loc_for_android }}</span>
         </template>
@@ -71,7 +57,12 @@
       <el-table-column label="IOS元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
-            <el-input v-model="row.loc_for_ios" class="edit-input" size="mini"/>
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 3, maxRows: 5}"
+              placeholder="请输入IOS元素定位公式"
+              v-model="row.loc_for_ios">
+            </el-input>
           </template>
           <span v-else>{{ row.loc_for_ios }}</span>
         </template>
@@ -79,6 +70,27 @@
       <el-table-column
         prop="update_datetime"
         label="更新时间">
+      </el-table-column>
+
+      <el-table-column
+        label="所属页面"
+        width="150">
+        <template slot-scope="scope">
+          <template v-if="scope.row.edit">
+            <el-popover
+              placement="left"
+              title="选择页面"
+              width="200"
+              trigger="hover"
+              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+              <div>
+                <select-tree :dataList="pageData" :row="scope.row" @addNodeClick="editNodeClick"></select-tree>
+              </div>
+              <el-button slot="reference" size="mini">{{scope.row.page_title?scope.row.page_title:'请选择页面'}}</el-button>
+            </el-popover>
+          </template>
+          <span v-else>{{ scope.row.page_title }}</span>
+        </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template slot="header" slot-scope="scope">
@@ -228,9 +240,9 @@
       },
       openAddForm() {
         this.addForm = true
-        form.title = ''
-        form.type = 'id'
-        form.title = ''
+        this.form.title = ''
+        this.form.type = 'id'
+        this.form.title = ''
       },
       addData() {
 
@@ -310,6 +322,11 @@
                   type: 'info',
                   message: res.message
                 });
+              } else {
+                this.$message({
+                  type: 'warning',
+                  message: res.message
+                })
               }
             })
           }

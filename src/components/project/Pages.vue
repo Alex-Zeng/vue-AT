@@ -1,6 +1,11 @@
 <template>
   <el-row class="ta">
-    <el-col :span="24">
+            <el-col :span="4">
+      <div>
+        <aside-nav-tree></aside-nav-tree>
+      </div>
+    </el-col>
+    <el-col :span="20">
       <div>
         <el-tabs  type="border-card" >
 
@@ -29,10 +34,11 @@
 <script>
   import elementTable from "./page/elementTable";
   import actionTable from "./page/actionTable";
+  import asideNavTree from '@/components/common/asideNavTree'
 
   export default {
     name: 'Pages',
-    components: { elementTable, actionTable},
+    components: { elementTable, actionTable,asideNavTree},
     mounted() {
       this.$store.dispatch('tableData/getPage')
     }
