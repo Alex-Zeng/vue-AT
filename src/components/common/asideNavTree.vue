@@ -37,6 +37,7 @@
         draggable
         @node-click="nodeClick"
         @node-drop="nodeDrop"
+        :default-expand-all="true"
         :expand-on-click-node="true"
         :auto-expand-parente="true"
         :highlight-current="true"
