@@ -112,6 +112,7 @@ const mutations = {
   },
   CHANGE_PROJECTDATA: (state, args) => {
     state.curreentPro = args
+    state.curreentProId = args.id
   },
   SET_EQUIPMENTDATA: (state, argsList) => {
     state.equipmentData = argsList

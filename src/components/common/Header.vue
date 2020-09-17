@@ -9,16 +9,15 @@
           <span>{{username}}</span>
         </div>
       </el-menu-item>
-      <el-submenu index="1">
-        <template slot="title">
-          <i class="el-icon-picture-outline-round"></i>
-          <span slot="title">项目:{{curPro.title}}</span>
-        </template>
-        <el-menu-item v-for="item in proData" :index="'1-'+item.id" :key="item.id"
-                      @click="toProject(item)">
-          <h6 slot="title">{{item.title}}</h6>
-        </el-menu-item>
-      </el-submenu>
+      <el-menu-item index="1" >
+        <el-popover
+          width="480"
+          trigger="click">
+          <project-list></project-list>
+          <el-button slot="reference" size="mini">项目:{{curPro.title}}</el-button>
+        </el-popover>
+
+      </el-menu-item>
 
       <el-menu-item index="2" @click="showNav('page')">
         <i class="el-icon-s-help"></i>
@@ -50,14 +49,18 @@
       </el-menu-item>
 
     </el-menu>
+
   </div>
 </template>
 
 <script>
+  import projectList from "@/components/project/projectList"
   import {mapState} from "vuex"
+
 
   export default {
     name: 'Header',
+    components: {projectList},
     data() {
       return {
         username: '',
@@ -71,21 +74,25 @@
     },
     methods: {
 
-      toProject(proObject) {
-        this.$store.dispatch('tableData/changeProjects', proObject)
-        this.showNav('home')
+      // toProject(proObject) {
+      //   this.$store.dispatch('tableData/changeProjects', proObject)
+      //
+      //   this.showNav('home')
+      // },
+      addProject() {
+        addNewProject
       },
       showNav(nav) {
         switch (nav) {
           case 'page':
             this.$router.push({name: 'page', params: {id: this.curPro.id, page_id: "1"}})
-                break;
+            break;
           case 'case':
             this.$router.push({name: 'case', params: {id: this.curPro.id, case_id: "1"}})
-                break;
+            break;
           case 'suit':
             this.$router.push({name: 'suit', params: {id: this.curPro.id, suit_id: "1"}})
-                break;
+            break;
         }
         this.$store.dispatch('tableData/setNavVisible', nav)
       },

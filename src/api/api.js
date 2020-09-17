@@ -8,7 +8,16 @@ export const postLogin = params => {
 export const getProjectList = params => {
   return get(`/admin/projects`).then(res => res);
 };
+export const addNewProject = (formData) => {
+  return post(`/admin/projects`, formData).then(res => res);
+};
+export const delProject = (projectId) => {
+  return remove(`/admin/projects/${projectId}`).then(res => res);
+};
 
+export const putProject = (projectId,formData) => {
+  return put(`/admin/projects/${projectId}`,formData).then(res => res);
+};
 // ----------------PageObject操作-----------------
 //添加PageObject操作
 export const postPage = (projectId, formData) => {
@@ -95,7 +104,7 @@ export const copyCase = (projectId, caseId) => {
 };
 //调试用例
 export const debugCase = (projectId, caseId, formData) => {
-  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`, formData, {timeout: 60*30*1000}).then(res => res);
+  return post(`/runtest/projects/${projectId}/cases/${caseId}/start`, formData, {timeout: 60 * 30 * 1000}).then(res => res);
 };
 
 
@@ -203,7 +212,7 @@ export const deleteEquipment = (e_id) => {
 };
 //启动设备
 export const startEquipment = (e_id) => {
-  return get(`/runtest/equipment/${e_id}/start`,{} ,60*2*1000).then(res => res);
+  return get(`/runtest/equipment/${e_id}/start`, {}, 60 * 2 * 1000).then(res => res);
 };
 //停止设备
 export const stopEquipment = (e_id, formData) => {
@@ -228,7 +237,7 @@ export const deleteES = (e_id, es_id) => {
 };
 //执行测试
 export const startES = (e_id) => {
-  return get(`/runtest/equipment/${e_id}/execute_suit/start`,{},60*60*1000).then(res => res);
+  return get(`/runtest/equipment/${e_id}/execute_suit/start`, {}, 60 * 60 * 1000).then(res => res);
 };
 //获取日志数据
 export const getLog = (formData) => {
@@ -238,7 +247,7 @@ export const getLog = (formData) => {
 export const getLogFile = (log_id) => {
   return get(`/runtest/getLogFile/${log_id}`).then(res => res);
 };
-  //获取设备最有一次运行的日志文件
+//获取设备最有一次运行的日志文件
 export const getFinalLogText = (e_id) => {
   return get(`/runtest/FinalLogText/${e_id}`).then(res => res);
 };
@@ -250,7 +259,7 @@ export const deleteLogData = (log_id) => {
 
 //设备操作
 // 点击滑屏操作
-export const operaPhone = (device_id,formData) => {
+export const operaPhone = (device_id, formData) => {
   return post(`/runtest/operateMinitouch/${device_id}`, formData).then(res => res);
 };
 //断开minitouch链接
