@@ -10,7 +10,7 @@
     >
 
 
-      <el-table-column width="250px" label="元素名称">
+      <el-table-column width="180px" label="元素名称">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -18,7 +18,7 @@
           <span v-else>{{ row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column width="150px" label="Android查找方式">
+      <el-table-column  width="120" label="Android查找方式">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-select v-model="row.type_for_android" placeholder="请选择操作" size="mini">
@@ -29,7 +29,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Android元素位置">
+      <el-table-column width="250" label="Android元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input
@@ -43,7 +43,7 @@
           <span v-else>{{ row.loc_for_android }}</span>
         </template>
       </el-table-column>
-      <el-table-column width="150px" label="IOS查找方式">
+      <el-table-column width="120" label="IOS查找方式">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-select v-model="row.type_for_ios" placeholder="请选择操作" size="mini">
@@ -54,7 +54,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="IOS元素位置">
+      <el-table-column width="250" label="IOS元素位置">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input
@@ -74,7 +74,7 @@
 
       <el-table-column
         label="所属页面"
-        width="150">
+        >
         <template slot-scope="scope">
           <template v-if="scope.row.edit">
             <el-popover
@@ -92,7 +92,7 @@
           <span v-else>{{ scope.row.page_title }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="200">
+      <el-table-column align="center" label="操作" width="200" fixed="right">
         <template slot="header" slot-scope="scope">
 
           <el-button type="primary" @click="openAddForm" size="mini">新增<i class="el-icon-plus el-icon--right"></i>

@@ -8,7 +8,7 @@
       size="small"
       :row-class-name="tableRowClassName"
     >
-      <el-table-column width="500px" label="操作名">
+      <el-table-column width="310px" label="操作名">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.title" class="edit-input" size="mini"/>
@@ -65,7 +65,7 @@
           <span v-else>{{ scope.row.page_title }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="200">
+      <el-table-column align="center" label="操作" width="200" fixed="right">
         <template slot="header" slot-scope="scope">
           <el-button type="primary" @click="addForm=true;getElementData;getFunctionData">新增<i
             class="el-icon-plus el-icon--right"></i>

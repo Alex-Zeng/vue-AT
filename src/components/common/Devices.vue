@@ -119,7 +119,6 @@
       MouseClick(event) {
         this.downX = event.offsetX
         this.downY = event.offsetY
-        console.log('dowm:', event)
 
       },
       MouseUp(event) {

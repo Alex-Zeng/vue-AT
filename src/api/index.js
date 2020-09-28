@@ -3,7 +3,7 @@ import * as api from './api';
 import Vue from 'vue'
 
 axios.defaults.timeout = 5000
-axios.defaults.baseURL = 'http://localhost:5002'
+axios.defaults.baseURL = 'http://192.168.24.159:5002'
 // 解决浏览器无法保存 set-cookies 的问题
 axios.defaults.withCredentials = true
 
